@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "providers": {},
+  "credential_pool": {},
+  "note": "Re-enter credentials via UI or API after restore"
+}

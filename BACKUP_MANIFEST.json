@@ -1,0 +1,17 @@
+{
+  "backupDate": "2026-04-05",
+  "backupTime": "19:13:20",
+  "hostname": "herby-Virtual-Machine",
+  "files": {
+    "hermesConfig": true,
+    "hermesMemory": true,
+    "cronJobs": true,
+    "skills": true,
+    "openclawConfig": true,
+    "userMemory": true
+  },
+  "sanitizationApplied": true,
+  "secretsRemoved": true,
+  "restoreGuide": "RESTORE.md",
+  "note": "Cron job JSON files excluded - recreate from summaries"
+}

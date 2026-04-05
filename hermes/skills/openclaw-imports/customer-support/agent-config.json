@@ -1,0 +1,76 @@
+{
+  "name": "kelly",
+  "displayName": "Kelly",
+  "description": "Kelly is a multi-tenant customer support agent for handling inquiries across Cozie Homes, OptiRFP, TLC Rescue, and Rival Productions",
+  "version": "1.0.0",
+  "type": "subagent",
+  "runtime": "subagent",
+  "agentId": "customer-support",
+  "capabilities": [
+    "multi_tenant_routing",
+    "knowledge_base_query",
+    "issue_triage",
+    "response_generation",
+    "escalation_detection",
+    "interaction_logging"
+  ],
+  "businesses": {
+    "cozie_homes": {
+      "name": "Cozie Homes",
+      "industry": "short_term_rentals",
+      "priority": "high",
+      "auto_response": true,
+      "escalation_contacts": ["andrew@coziehomes.com"],
+      "categories": ["booking", "checkin", "amenities", "issues", "refunds", "reviews"]
+    },
+    "optirfp": {
+      "name": "OptiRFP",
+      "industry": "saas_platform",
+      "priority": "high",
+      "auto_response": true,
+      "escalation_contacts": ["herberttodo@gmail.com"],
+      "categories": ["onboarding", "technical", "billing", "feature_request", "bug_report", "training"]
+    },
+    "tlc_rescue": {
+      "name": "TLC Rescue",
+      "industry": "nonprofit",
+      "priority": "medium",
+      "auto_response": true,
+      "escalation_contacts": ["fundraising@tlcrescue.org"],
+      "categories": ["donations", "events", "volunteer", "adoption", "sponsorship"]
+    },
+    "rival_productions": {
+      "name": "Rival Productions",
+      "industry": "video_production",
+      "priority": "medium",
+      "auto_response": false,
+      "escalation_contacts": ["andrew@rivalproductions.com"],
+      "categories": ["inquiry", "quote", "scheduling", "delivery", "revision", "billing"]
+    }
+  },
+  "escalation_rules": {
+    "immediate": [
+      "legal_threat",
+      "data_breach",
+      "payment_fraud",
+      "safety_emergency"
+    ],
+    "priority": [
+      "refund_over_500",
+      "vip_customer",
+      "negative_review_threat",
+      "platform_outage"
+    ],
+    "standard": [
+      "complex_technical",
+      "custom_pricing",
+      "contract_negotiation"
+    ]
+  },
+  "response_tone": {
+    "cozie_homes": "warm, helpful, hospitality-focused",
+    "optirfp": "professional, technical, solution-oriented",
+    "tlc_rescue": "heartfelt, mission-driven, community-focused",
+    "rival_productions": "creative, professional, detail-oriented"
+  }
+}
