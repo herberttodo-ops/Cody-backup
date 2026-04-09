@@ -6,7 +6,9 @@
         "openrouter/auto": {
           "alias": "OpenRouter"
         },
-        "openrouter/moonshotai/kimi-k2.5": {}
+        "openrouter/moonshotai/kimi-k2.5": {},
+        "openrouter/anthropic/claude-opus-4": {},
+        "openrouter/anthropic/claude-opus-4.6": {}
       },
       "model": {
         "primary": "openrouter/moonshotai/kimi-k2.5"
