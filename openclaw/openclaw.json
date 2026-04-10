@@ -11,7 +11,7 @@
         "openrouter/anthropic/claude-opus-4.6": {}
       },
       "model": {
-        "primary": "openrouter/moonshotai/kimi-k2.5"
+        "primary": "openrouter/anthropic/claude-haiku-3"
       }
     }
   },
