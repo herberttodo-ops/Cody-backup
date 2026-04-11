@@ -11,7 +11,7 @@
         "openrouter/anthropic/claude-opus-4.6": {}
       },
       "model": {
-        "primary": "openrouter/anthropic/claude-haiku-3"
+        "primary": "openrouter/anthropic/claude-haiku-4.5"
       }
     }
   },
@@ -95,6 +95,6 @@
   },
   "meta": {
     "lastTouchedVersion": "2026.4.2",
-    "lastTouchedAt": "2026-04-05T14:50:37.283Z"
+    "lastTouchedAt": "2026-04-10T23:35:56.230Z"
   }
 }
