@@ -7,12 +7,17 @@
           "alias": "OpenRouter"
         },
         "openrouter/moonshotai/kimi-k2.5": {},
-        "openrouter/anthropic/claude-opus-4": {},
-        "openrouter/anthropic/claude-opus-4.6": {},
-        "openrouter/anthropic/claude-sonnet-4.6": {}
+        "anthropic/claude-opus-4": {},
+        "anthropic/claude-opus-4.6": {},
+        "anthropic/claude-sonnet-4.6": {},
+        "anthropic/claude-haiku-4.5": {}
       },
       "model": {
-        "primary": "openrouter/anthropic/claude-haiku-4.5"
+        "primary": "anthropic/claude-opus-4.6",
+        "fallbacks": [
+          "anthropic/claude-sonnet-4.6",
+          "anthropic/claude-haiku-4.5"
+        ]
       }
     }
   },
@@ -60,6 +65,10 @@
     "profiles": {
       "openrouter:default": {
         "provider": "openrouter",
+        "mode": "api_key"
+      },
+      "anthropic:default": {
+        "provider": "anthropic",
         "mode": "api_key"
       }
     }
