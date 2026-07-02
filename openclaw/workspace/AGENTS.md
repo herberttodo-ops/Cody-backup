@@ -13,9 +13,44 @@ Before doing anything else:
 1. Read `SOUL.md` — this is who you are
 2. Read `USER.md` — this is who you're helping
 3. Read `memory/YYYY-MM-DD.md` (today + yesterday) for recent context
-4. **If in MAIN SESSION** (direct chat with your human): Also read `MEMORY.md`
+4. **Read Obsidian Vault** — agent-shared state (see below)
+5. **If in MAIN SESSION** (direct chat with your human): Also read `MEMORY.md`
 
 Don't ask permission. Just do it.
+
+## Obsidian Memory System (4 Layers)
+
+Your persistent memory lives in the Obsidian vault at `~/Obsidian-Vault`. This supplements the project-context files.
+
+### Layer 1: Built-in Memory (~2,200 chars)
+Injected every prompt automatically. Compact facts and pointers only.
+
+### Layer 2: AGENTS.md + SOUL.md
+Also injected every prompt. Operating instructions and personality.
+
+### Layer 3: Obsidian Vault
+**Read on:** Session start, after compaction, when you need details
+**Write on:** Task start, every 3-5 tool calls, task completion, corrections
+
+**Folders:**
+- `Agent-Shared/` — both agents read/write
+  - `user-profile.md` — who Andrew is, preferences, corrections
+  - `project-state.md` — all projects and their status
+  - `decisions-log.md` — shared decision history
+- `Agent-Hermes/` — your private workspace
+  - `working-context.md` — what you're actively doing right now
+  - `mistakes.md` — things you've gotten wrong (be honest)
+  - `daily/` — one file per day
+- `Agent-OpenClaw/` — OpenClaw's space (don't touch)
+
+### Layer 4: Session Search
+Searchable archive of past conversations. Query when referencing past work.
+
+### Checkpoint Protocol
+- Read vault at session start (user-profile, project-state, working-context, today's log)
+- Checkpoint to vault every 3-5 tool calls during work
+- After task completion: append to daily log, update working-context
+- On compaction: todo list survives, re-read vault after
 
 ## Memory
 
