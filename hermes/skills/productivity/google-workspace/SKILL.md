@@ -240,7 +240,74 @@ All commands return JSON. Parse with `jq` or read directly. Key fields:
 | `HttpError 403: Insufficient Permission` | Missing API scope — `$GSETUP --revoke` then redo Steps 3-5 |
 | `HttpError 403: Access Not Configured` | API not enabled — user needs to enable it in Google Cloud Console |
 | `ModuleNotFoundError` | Run `$GSETUP --install-deps` |
+| `No module named pip` (in Hermes venv) | The venv lacks pip. Use system Python or `uv` instead (see Fallback Setup below) |
+| `externally-managed-environment` (PEP 668) | System Python blocks user installs. Use `uv` or create a separate venv (see Fallback Setup) |
+| `ModuleNotFoundError: No module named 'hermes_constants'` | The setup script imports Hermes internals not in your Python path. Use the Fallback Setup script instead |
 | Advanced Protection blocks auth | Workspace admin must allowlist the OAuth client ID |
+
+## Fallback Setup (When setup.py Fails)
+
+If the standard `setup.py` fails because the Hermes venv lacks pip, the system Python is locked down (PEP 668), or `hermes_constants` is missing from the path, use this manual approach:
+
+### Step A: Create a Separate Venv with `uv`
+
+```bash
+# Check if uv is available
+which uv
+
+# Create isolated venv
+uv venv ~/.hermes/google_venv
+
+# Install dependencies
+uv pip install --python ~/.hermes/google_venv/bin/python \
+  google-api-python-client google-auth-oauthlib google-auth-httplib2
+```
+
+If `uv` is not available, check for system pip: `/usr/bin/python3 -m pip --version`
+
+### Step B: Save the Client Secret
+
+Save the user's `client_secret.json` to `~/.hermes/google_client_secret.json`.
+
+### Step C: Run the Standalone OAuth Script
+
+Use the Hermes `execute_code` tool with a standalone Python script that:
+1. Adds the new venv's site-packages to `sys.path`
+2. Uses `google_auth_oauthlib` directly to build the auth URL
+3. Saves a pending OAuth state file for later code exchange
+4. Exchanges the user's pasted auth code for a token
+
+Example standalone script structure:
+```python
+import sys, json, pickle
+sys.path.insert(0, '/home/herby/.hermes/google_venv/lib/python3.11/site-packages')
+
+from google_auth_oauthlib.flow import InstalledAppFlow
+
+SCOPES = [
+    'https://www.googleapis.com/auth/gmail.modify',
+    'https://www.googleapis.com/auth/drive.readonly',
+    'https://www.googleapis.com/auth/calendar',
+    'https://www.googleapis.com/auth/spreadsheets',
+    'https://www.googleapis.com/auth/documents.readonly',
+]
+
+# Generate auth URL
+flow = InstalledAppFlow.from_client_secrets_file(
+    '/home/herby/.hermes/google_client_secret.json', SCOPES)
+auth_url, state = flow.authorization_url(
+    access_type='offline', include_granted_scopes='true', prompt='consent')
+print(auth_url)
+# Save flow.state and client_config for later exchange
+```
+
+### Step D: User Authorizes and Pastes Code Back
+
+Same as standard Step 3-4: user clicks URL, authorizes, copies the redirected URL (localhost error is expected), and the agent extracts the `code=` parameter for exchange.
+
+### Step E: Use the Token
+
+Save the exchanged token to `~/.hermes/google_token.json` so the official `google_api.py` script can find it during normal operation.
 
 ## Revoking Access
 
