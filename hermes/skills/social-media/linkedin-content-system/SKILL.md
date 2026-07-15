@@ -53,14 +53,18 @@ Every post needs TWO versions:
 - "We" or company perspective
 - Safe for brand representation
 
-### Version B: Personal Repost (Andrew)
-- More conversational
-- Can include personal stories/opinions
-- "I" perspective
-- Hot takes allowed
-- "I learned this the hard way" energy
+### Version B: Personal Repost (Founder Voice)
+- Do NOT pretend you "just saw" the business post
+- Your followers know you own/joined the company
+- Be authentic: "I've seen this firsthand..." "Here's what I learned..."
+- Share real wins, losses, or lessons from experience
+- Connect to the company's mission naturally (not as a plug)
+- First person "I/I've", reflective, opinionated
+- Can be a hot take, a war story, or a behind-the-scenes insight
+- **Never:** "Saw this from [Company] and had to share" 
+- **Instead:** "I've been thinking about this problem lately..."
 
-**The personal version should paraphrase, not just repost.** Add your own angle.
+**The personal version should paraphrase, not just repost.** Add your own authentic angle as someone who was actually there.
 
 ---
 

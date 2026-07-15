@@ -1,6 +1,6 @@
 > **Pattern:** This file is a routing index, not a knowledge dump. Keep it under 50 lines. Load detail files on demand via `memory_search()`.
 §
-Current Priorities: **OptiRFP** - AI-powered RFP response platform (sales optimization, UX improvements)
+Current Priorities: **OptiRFP** - AI-powered RFP response platform. Brand: Exact logo required (no AI recreation), logo at ~/.hermes/assets/optirfp_logo.jpg, colors mint #40D395 + navy #0F172A. LinkedIn automation with 9/10 quality threshold.
 §
 Current Priorities: **TLC Rescue** - Bingo Unleashed fundraiser (sponsor outreach ready)
 §
@@ -26,13 +26,7 @@ See Also: ---
 §
 See Also: *Last updated: 2026-03-04 | Memory system v2 (routing index pattern)*
 §
-2026-02-08: Andrew introduced himself (name: Andrew).
-§
 2026-02-08: Andrew set assistant name to Herby; prefers calm/professional with some snark; no emojis.
-§
-2026-02-08: Andrew wants to test WhatsApp messaging.
-§
-2026-02-08: WhatsApp outbound test delivered (arrived with slight delay).
 §
 2026-02-08: WhatsApp gateway connected; user said hello.
 §
@@ -45,3 +39,5 @@ Telegram config: [memory/telegram_config.md](memory/telegram_config.md)
 Memory Digest — 2026-03-28
 §
 Decisions
+§
+OBSIDIAN: Vault at ~/Documents/Obsidian Vault. Files: Index.md, OptiRFP.md, TLC Rescue.md, Rival Productions.md, Daily notes, Brand Guidelines.md. Use obsidian skill to access.
