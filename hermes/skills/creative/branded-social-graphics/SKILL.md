@@ -219,6 +219,7 @@ visual_description = TOPIC_VISUALS.get(topic, "abstract professional pattern")
 7. **Logo duplication** → AI generates brand name as text → Add "NO [Brand] text", "NO watermarks", "NO signatures"
 8. **API billing limits** → OpenRouter as primary (`openai/gpt-image-1`), OpenAI as fallback
 9. **Layout imbalance** → Test multiple variations, use vision analysis to evaluate
+10. **Missing API keys in subprocess/execute_code** → When running outside main Hermes context, `.env` files aren't auto-loaded. Use `load_env_file()` helper (see API Keys section)
 
 ## Iteration Learnings (OptiRFP Case Study)
 
@@ -282,6 +283,29 @@ OptiRFP example:
 - Tool: `tools/openrouter_image_tool.py`
 
 ## API Keys & Implementation
+
+**Loading API Keys from .env**
+
+When running scripts via `execute_code` or subprocess, environment variables from `~/.hermes/.env` aren't automatically loaded. Add this helper:
+
+```python
+def load_env_file(path):
+    """Load environment variables from .env file."""
+    if not os.path.exists(path):
+        return
+    with open(path) as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith('#') or '=' not in line:
+                continue
+            key, val = line.split('=', 1)
+            if key not in os.environ:
+                os.environ[key] = val
+
+# Load from .env files before accessing API keys
+load_env_file(Path.home() / ".hermes/.env")
+load_env_file(Path.home() / ".env")
+```
 
 **OpenRouter (Recommended)**
 - Returns base64 JSON (not URL)

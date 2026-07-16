@@ -78,8 +78,16 @@ Always draft 2+ follow-up comments:
 3. **Story/Example** — Real case study or failure from experience
 4. **Hot Take** — Contrarian follow-up that sparks debate
 5. **Resource Drop** — Link, template, or tool recommendation
+6. **Soft CTA** — Gentle mention of your product/service naturally connected to the topic
 
 **Purpose:** Algorithm boost + comment section value + conversation starter
+
+**Storage Format:** When saving to spreadsheets or databases, combine comments with clear labels:
+```
+ENGAGEMENT: What is the most overused word you see in RFP responses?
+
+CTA: We built OptiRFP to catch exactly this kind of thing before you submit.
+```
 
 ---
 
