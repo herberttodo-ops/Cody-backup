@@ -220,6 +220,7 @@ visual_description = TOPIC_VISUALS.get(topic, "abstract professional pattern")
 8. **API billing limits** → OpenRouter as primary (`openai/gpt-image-1`), OpenAI as fallback
 9. **Layout imbalance** → Test multiple variations, use vision analysis to evaluate
 10. **Missing API keys in subprocess/execute_code** → When running outside main Hermes context, `.env` files aren't auto-loaded. Use `load_env_file()` helper (see API Keys section)
+11. **Text clipped at edges** → Font size too large for headline with padding. Use `font_size = int(height * 0.07)` max (not 0.09). Add boundary constraints: `bar_x1 = max(0, x - padding)` and `bar_x2 = min(width, x + text_width + padding)`
 
 ## Iteration Learnings (OptiRFP Case Study)
 
@@ -259,6 +260,64 @@ image.paste(logo, (x, y), logo)
 
 # 5. Save
 image.convert('RGB').save(output_path)
+```
+
+## Complete Working Implementation
+
+```python
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
+
+def add_text_with_effects(image, text, y_percent=0.14):
+    """Add headline text with glow and shadow effects - PRODUCTION VERSION.
+    
+    FIXED: Uses smaller font size (0.07 vs 0.09) to prevent edge clipping.
+    FIXED: Adds boundary constraints to keep bar within image bounds.
+    """
+    width, height = image.size
+    draw = ImageDraw.Draw(image)
+    
+    # Font size: 0.07 of height prevents edge clipping (was 0.09)
+    try:
+        font_size = int(height * 0.07)
+        font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", font_size)
+    except:
+        font = ImageFont.load_default()
+    
+    # Calculate text position
+    bbox = draw.textbbox((0, 0), text, font=font)
+    text_width = bbox[2] - bbox[0]
+    text_height = bbox[3] - bbox[1]
+    
+    x = (width - text_width) // 2
+    y = int(height * y_percent)
+    
+    # Semi-transparent dark bar with BOUNDARY CONSTRAINTS
+    padding = int(height * 0.025)
+    bar_x1 = max(0, x - padding * 2)  # Prevent negative
+    bar_y1 = y - padding
+    bar_x2 = min(width, x + text_width + padding * 2)  # Prevent exceeding width
+    bar_y2 = y + text_height + padding
+    
+    overlay = Image.new('RGBA', image.size, (0, 0, 0, 0))
+    overlay_draw = ImageDraw.Draw(overlay)
+    overlay_draw.rectangle([bar_x1, bar_y1, bar_x2, bar_y2], fill=(15, 23, 42, 200))
+    image = Image.alpha_composite(image, overlay)
+    
+    # Glow effect
+    draw = ImageDraw.Draw(image)
+    glow_color = (64, 211, 149, 80)  # Brand mint with alpha
+    for offset in range(6, 0, -2):
+        glow_overlay = Image.new('RGBA', image.size, (0, 0, 0, 0))
+        glow_draw = ImageDraw.Draw(glow_overlay)
+        glow_draw.text((x, y), text, font=font, fill=glow_color)
+        glow_blur = glow_overlay.filter(ImageFilter.GaussianBlur(radius=offset))
+        image = Image.alpha_composite(image, glow_blur)
+    
+    # Main text
+    draw = ImageDraw.Draw(image)
+    draw.text((x, y), text, font=font, fill=(255, 255, 255, 255))
+    
+    return image
 ```
 
 ## Tools in this Repo
