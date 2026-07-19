@@ -54,16 +54,23 @@ Use `gog` for Gmail/Calendar/Drive/Contacts/Sheets/Docs. Requires OAuth setup.
 
 ### Drive
 - Search: `gog drive search "query" --max 10`
+  - Note: `search` takes a simple name query. Do NOT try to add `mimeType=...` filters to it — combine search with `ls --query` or filter results client-side.
+- Create folder: `gog drive mkdir "Folder Name" --parent <folderId> -j --results-only`
+- Upload to folder: `gog drive upload <localPath> --parent <folderId> -j --results-only`
+- Get file metadata: `gog drive get <fileId> -j --results-only`
 
 ### Contacts
 - List: `gog contacts list --max 20`
 
 ### Sheets
 - Get data: `gog sheets get <sheetId> "Tab!A1:D10" --json`
-- Update: `gog sheets update <sheetId> "Tab!A1:B2" --values-json '[["A","B"],["1","2"]]' --input USER_ENTERED`
+- Update single cell: `gog sheets update <sheetId> "E4" "value" -j --results-only`
+  - If the sheet has only one tab (or the last-accessed tab), just pass the cell reference — gog auto-resolves the tab.
+- Update range: `gog sheets update <sheetId> "Tab!A1:B2" --values-json '[["A","B"],["1","2"]]' --input USER_ENTERED`
 - Append: `gog sheets append <sheetId> "Tab!A:C" --values-json '[["x","y","z"]]' --insert INSERT_ROWS`
 - Clear: `gog sheets clear <sheetId> "Tab!A2:Z"`
 - Metadata: `gog sheets metadata <sheetId> --json`
+- Note: When reading, tab names with spaces appear single-quoted in responses (e.g., `'Content Calendar'!E4`). You don't need to include the quotes when writing.
 
 ### Docs
 - Export: `gog docs export <docId> --format txt --out /tmp/doc.txt`
