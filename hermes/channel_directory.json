@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-19T04:28:44.029248",
+  "updated_at": "2026-08-04T14:07:04.982063",
   "platforms": {
     "telegram": [
       {
@@ -8,10 +8,6 @@
         "type": "dm",
         "thread_id": null
       }
-    ],
-    "whatsapp": [],
-    "signal": [],
-    "email": [],
-    "sms": []
+    ]
   }
 }

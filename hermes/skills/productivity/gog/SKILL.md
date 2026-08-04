@@ -72,6 +72,79 @@ Use `gog` for Gmail/Calendar/Drive/Contacts/Sheets/Docs. Requires OAuth setup.
 - Metadata: `gog sheets metadata <sheetId> --json`
 - Note: When reading, tab names with spaces appear single-quoted in responses (e.g., `'Content Calendar'!E4`). You don't need to include the quotes when writing.
 
+#### Cleaning and Restructuring Messy Sheets
+
+When a sheet has fragmented data, duplicates, or wrong structure, use this workflow:
+
+**Step 1: Read and analyze the existing data**
+```bash
+# Get current state (may need multiple ranges)
+gog sheets get <sheetId> "A1:E50" -j --results-only
+
+# Check for empty cells, fragments, or data in wrong columns
+```
+
+**Step 2: Extract and clean data programmatically**
+```python
+import json
+
+# Parse the messy data, extract valid rows, remove duplicates
+# Ensure every row has exactly the expected number of columns
+clean_rows = [
+    ["2026-07-15", "Business post content...", "Personal copy...", "Comments...", "https://drive.google.com/..."],
+    ["2026-07-16", "Another post...", "Personal...", "Engagement...", ""],
+    # ... more rows
+]
+
+# CRITICAL: Validate all rows have same column count
+expected_cols = 5
+for i, row in enumerate(clean_rows):
+    if len(row) != expected_cols:
+        print(f"Row {i}: Expected {expected_cols} cols, got {len(row)}")
+        # Trim or pad as needed
+        clean_rows[i] = row[:expected_cols]  # trim excess
+
+# Write to temp file to avoid shell escaping issues
+with open('/tmp/clean_data.json', 'w') as f:
+    json.dump(clean_rows, f)
+```
+
+**Step 3: Clear old data before writing**
+```bash
+# Clear the range where you'll write (prevents stale data)
+gog sheets clear <sheetId> "A2:E50"
+```
+
+**Step 4: Bulk write with --values-json**
+```bash
+# Use --input=RAW to preserve formatting, newlines, etc.
+gog sheets update <sheetId> "A2:E14" \
+  --input="RAW" \
+  --values-json="$(cat /tmp/clean_data.json)"
+```
+
+**Key pitfalls to avoid:**
+- **Column count mismatch**: If any row has a different number of columns, the entire update fails with "tried writing to column [F]"
+- **JSON escaping**: Large text blocks with quotes/newlines can break shell interpolation — write to file first
+- **Tab names with spaces**: Don't quote them in the range (use `A2:E14` not `'Sheet 1'!A2:E14`)
+- **Date/number formatting**: Use `--input=RAW` to prevent Google from auto-formatting dates/numbers
+
+**Complete example workflow:**
+```bash
+# 1. Read existing
+original=$(gog sheets get SHEET_ID "A1:E30" -j --results-only)
+
+# 2. Process with Python to extract clean rows, save to /tmp/clean.json
+# 3. Clear target range
+gog sheets clear SHEET_ID "A2:E30"
+
+# 4. Write clean data
+gog sheets update SHEET_ID "A2:E15" --input="RAW" --values-json="$(cat /tmp/clean.json)"
+
+# 5. Verify
+gog sheets get SHEET_ID "A1:E15" -j --results-only
+```
+
 ### Docs
 - Export: `gog docs export <docId> --format txt --out /tmp/doc.txt`
 - View: `gog docs cat <docId>`
