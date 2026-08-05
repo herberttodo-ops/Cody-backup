@@ -9,14 +9,17 @@ author: Andrew (via Hermes)
 
 A quality-gated workflow for writing LinkedIn posts that don't sound like AI wrote them.
 
-## Core Workflow
+## Core Workflows
 
-### Step 1: Define the Goal
+### Workflow A: Iterative Drafting (Up to 10 Passes)
+Best when: Exploring a topic freely, finding the strongest angle through iteration.
+
+**Step 1:** Define the Goal
 - One useful idea only
 - Under 200 words
 - Target: Teach something new to a smart reader
 
-### Step 2: Iterative Drafting (Up to 10 Passes)
+**Step 2:** Draft and Score
 
 For each draft, **score 1-10** on:
 1. **Hook Quality:** Does the first line earn the "see more" click?
@@ -28,8 +31,39 @@ For each draft, **score 1-10** on:
 - **9 or 10:** Keep as finalist
 - Stop at 10 drafts max
 
-### Step 3: Select Top 3
-Present only the 3 highest-scoring drafts.
+### Workflow B: 5 Angles Approach
+Best when: User wants variety and has a specific topic area (e.g., RFP writing, sales, leadership).
+
+Instead of iterating on one angle, generate **5 distinct variations** with different psychological angles:
+
+| Angle | Frame | Example Opening |
+|-------|-------|-----------------|
+| **Curiosity Hook** | Counter-intuitive or surprising | "Stop reading RFPs in order." |
+| **Specificity** | Concrete over vague | "80% of losing RFPs start with copy-pasted content." |
+| **Mirror Language** | Client-centric language | "Your evaluator decides if you're credible in 90 seconds." |
+| **The Trap** | Warning about common mistake | "The copy-paste trap costs more than you think." |
+| **So What Test** | Outcome-focused | "Add 'which means that...' after every claim." |
+
+**Process:**
+1. Generate all 5 drafts (one per angle)
+2. Score each 1-10 on Hook, Single Idea, Value
+3. Iterate once on any scoring below 9
+4. Select the #1 winner based on highest average score
+5. Create the three output versions from the winner
+
+**Advantage:** Forces exploration of different persuasive frames instead of local optimization of one angle.
+
+### Step 3: Select Winner and Create Output Versions
+
+**Select the #1 winner** based on highest average score across Hook, Single Idea, and Value.
+
+**Create THREE versions for storage:**
+
+1. **BUSINESS PAGE version** — Formal, "we" focused, company perspective
+2. **PERSONAL REPOST** — Authentic founder voice (see Dual-Version Output section)
+3. **TWO COMMENTS** — One engagement question (short, casual), one soft CTA
+
+**Storage destination:** Typically a Google Sheet with columns: Date, Business Post, Personal Repost, Comments, Image
 
 ---
 
