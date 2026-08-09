@@ -4,38 +4,38 @@
     "created_at": "2026-08-04T18:12:58.375094+00:00",
     "created_by": null,
     "last_patched_at": null,
-    "last_used_at": "2026-08-04T18:12:58.993865+00:00",
-    "last_viewed_at": "2026-08-04T18:12:58.375108+00:00",
+    "last_used_at": "2026-08-08T12:00:55.038458+00:00",
+    "last_viewed_at": "2026-08-08T12:00:54.925492+00:00",
     "patch_count": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 1,
-    "view_count": 1
+    "use_count": 2,
+    "view_count": 2
   },
   "google-workspace": {
     "archived_at": null,
     "created_at": "2026-08-04T18:09:31.179623+00:00",
     "created_by": null,
     "last_patched_at": null,
-    "last_used_at": "2026-08-05T12:02:46.581344+00:00",
-    "last_viewed_at": "2026-08-05T12:02:46.517878+00:00",
+    "last_used_at": "2026-08-08T12:03:05.492571+00:00",
+    "last_viewed_at": "2026-08-08T12:03:05.430369+00:00",
     "patch_count": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 4,
-    "view_count": 4
+    "use_count": 5,
+    "view_count": 5
   },
   "linkedin-content-system": {
     "archived_at": null,
     "created_at": "2026-08-04T18:12:49.306961+00:00",
     "created_by": null,
     "last_patched_at": "2026-08-04T18:13:51.372698+00:00",
-    "last_used_at": "2026-08-07T12:00:57.558919+00:00",
-    "last_viewed_at": "2026-08-07T12:00:57.506458+00:00",
+    "last_used_at": "2026-08-08T12:00:55.087984+00:00",
+    "last_viewed_at": "2026-08-08T12:00:54.979357+00:00",
     "patch_count": 3,
     "pinned": false,
     "state": "active",
-    "use_count": 5,
-    "view_count": 5
+    "use_count": 6,
+    "view_count": 6
   }
 }
