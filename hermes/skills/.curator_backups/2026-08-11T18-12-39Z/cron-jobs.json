@@ -1,0 +1,83 @@
+{
+  "jobs": [
+    {
+      "id": "36a5568db076",
+      "name": "herby-daily-backup",
+      "prompt": "Run the daily backup script to backup all Herby configuration to GitHub.\n\nThe GitHub token is: ___GITHUB_TOKEN___\n\nSet the environment variable and run the backup:\n\n```bash\nexport GITHUB_BACKUP_TOKEN=\"___GITHUB_TOKEN___\"\nexport TELEGRAM_BOT_TOKEN=\"___ID_NUMBER___:AAHnlSk6BnkKw360Mgt3KdK8h2rI8n-JRHc\"\nexport TELEGRAM_CHAT_ID=\"___ID_NUMBER___\"\n\n# Run backup\n~/.hermes/bin/daily-backup.sh\n```\n\nReport success or any errors.",
+      "skills": [],
+      "skill": null,
+      "model": null,
+      "provider": null,
+      "base_url": null,
+      "script": null,
+      "schedule": {
+        "kind": "cron",
+        "expr": "30 4 * * *",
+        "display": "30 4 * * *"
+      },
+      "schedule_display": "30 4 * * *",
+      "repeat": {
+        "times": null,
+        "completed": 67
+      },
+      "enabled": true,
+      "state": "scheduled",
+      "paused_at": null,
+      "paused_reason": null,
+      "created_at": "2026-04-05T17:06:06.321746-04:00",
+      "next_run_at": "2026-08-12T04:30:00-04:00",
+      "last_run_at": "2026-08-11T04:31:20.816469-04:00",
+      "last_status": "ok",
+      "last_error": null,
+      "deliver": "telegram:___ID_NUMBER___",
+      "origin": {
+        "platform": "telegram",
+        "chat_id": "___ID_NUMBER___",
+        "chat_name": "Andrew",
+        "thread_id": null
+      },
+      "last_delivery_error": null,
+      "fire_claim": null
+    },
+    {
+      "id": "d0ba9894a668",
+      "name": "optirfp-linkedin-daily",
+      "prompt": "Generate a new LinkedIn post for OptiRFP about successful RFP proposals. The objective: teach one useful idea in under 200 words.\n\nEach draft must:\n- Open with a curiosity hook (question, stat, or \"mistake\" frame)\n- Teach exactly ONE concrete idea\n- Include a specific, memorable proof point\n- Close with an actionable takeaway\n\nGenerate 5 variations with different angles:\n1. The 'So What' Test (adding \"which means that...\")\n2. Mirror Language (using client's exact words)\n3. The Copy-Paste Trap (costs of recycled content)\n4. Page One Decisions (evaluators decide early)\n5. Specificity Wins (vague claims lose)\n\nScore each 1-10 based on:\n- Hook: Does first line earn \"see more\" click?\n- Single Idea: Is there exactly one focused concept?\n- Value: Would a smart RFP writer learn something new?\n\nIf any score below 9, iterate once to improve.\n\nSelect the #1 winner. Create THREE versions for the Google Sheet:\n\n1. BUSINESS PAGE version (formal, \"we\" focused)\n\n2. PERSONAL REPOST - Authentic founder voice. Don't pretend you \"just saw\" the post. Your followers know you own OptiRFP. Instead, write genuine insight/opinion on the topic. Open with your experience (\"I've reviewed...\" \"I keep seeing...\" \"Here's what I learned...\"). Share a real failure or lesson. Connect to OptiRFP naturally, not as a plug. First person \"I\", authentic, reflective.\n\n3. TWO COMMENTS: One engagement question (short, casual). One soft CTA about OptiRFP.\n\nThen generate a SOCIAL MEDIA GRAPHIC using create_branded_social_graphic tool:\n\n**LAYOUT SPECIFICATION (VERSION 3 - LOCKED IN):**\n- Text area: Top 0-35% of image (headline positioned here, vertically centered in this zone)\n- Visual elements: Middle 35-75% (documents, circuits, glow effects)\n- Logo: Bottom 75-100% (clean, no overlap)\n- Result: Clean separation between all elements, no text/visual overlap\n\n**CRITICAL INSTRUCTIONS FOR BACKGROUND GENERATION:**\n- Top 35%: Keep CLEAN with only subtle gradient/pattern - NO visual elements, NO documents, NO circuits here\n- Middle 40%: Place all visual elements (documents, circuits, glows) in this zone\n- Bottom 25%: Clean dark navy for logo\n\n**Topic mapping:**\n- copy-paste \u2192 Overlapping documents showing duplication\n- mirror-language \u2192 Matching highlights, aligned documents\n- specificity \u2192 Detail focus, clarity visualization\n- page-one \u2192 Spotlight on first document\n- workflow \u2192 Circuit lines connecting documents\n- ai-automation \u2192 Neural networks, processing visualization\n- winning \u2192 Achievement, upward trends\n- so-what \u2192 Value transformation\n\n**API:** Uses OpenRouter (openai/gpt-image-1) with fallback to OpenAI direct\n\nAdd to Google Sheet \"OptiRFP Social Media Content\":\n- Date (today)\n- Business Post\n- Personal Repost Copy  \n- Comments to Make\n- Image (file path from create_branded_social_graphic)\n\nConfirm when complete.",
+      "skills": [],
+      "skill": null,
+      "model": null,
+      "provider": null,
+      "base_url": null,
+      "script": null,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 8 * * *",
+        "display": "0 8 * * *"
+      },
+      "schedule_display": "0 8 * * *",
+      "repeat": {
+        "times": null,
+        "completed": 13
+      },
+      "enabled": true,
+      "state": "scheduled",
+      "paused_at": null,
+      "paused_reason": null,
+      "created_at": "2026-07-14T09:53:18.644425-04:00",
+      "next_run_at": "2026-08-12T08:00:00-04:00",
+      "last_run_at": "2026-08-11T08:05:48.306246-04:00",
+      "last_status": "ok",
+      "last_error": null,
+      "deliver": "telegram",
+      "origin": {
+        "platform": "telegram",
+        "chat_id": "___ID_NUMBER___",
+        "chat_name": "Andrew",
+        "thread_id": null
+      },
+      "last_delivery_error": null,
+      "fire_claim": null
+    }
+  ],
+  "updated_at": "2026-08-11T08:05:48.306619-04:00"
+}
