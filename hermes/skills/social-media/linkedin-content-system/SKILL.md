@@ -176,10 +176,15 @@ CTA: We built OptiRFP to catch exactly this kind of thing before you submit.
 
 ---
 
+## Reference Files
+
+- `references/five-angle-framework.md` — The 5-angle variation system (So What Test, Mirror Language, Copy-Paste Trap, Page One Decisions, Specificity Wins) with scoring methodology
+
 ## Related Skills
 
 - `xitter` — For Twitter/X cross-posting
 - `social-media` — General scheduling and analytics
+- `branded-social-graphics` — Create matching social media graphics with brand logos
 
 ---
 
