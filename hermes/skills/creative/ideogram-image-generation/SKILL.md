@@ -6,6 +6,10 @@ triggers:
   - generate images with Ideogram
   - test Ideogram API
   - create graphics with AI-rendered text
+  - composite logo on generated image
+  - verify image quality before posting
+  - generate LinkedIn post image
+  - OptiRFP branded graphics
 ---
 
 # Ideogram Image Generation Skill
@@ -15,9 +19,10 @@ Generate social media graphics using Ideogram's API, which excels at rendering t
 ## API Details
 
 - **Endpoint**: `POST https://api.ideogram.ai/v1/ideogram-v4/generate` (multipart/form-data)
-- **Auth Header**: `Api-Key: <your_key>` (NOT Bearer token)
-- **Models**: `V_4` (latest), `V_2A`, `V_2`, `V_1`
+- **Auth Header**: `Api-Key: <your_key>` (NOT `Authorization: Bearer`)
+- **Models**: `V_4` (recommended), `V_2A`, `V_2`, `V_1`
 - **Pricing**: ~$0.04/image (50%+ cheaper than OpenAI)
+- **Request Format**: multipart/form-data (NOT JSON)
 
 ## Request Format (V4)
 
@@ -25,18 +30,24 @@ Generate social media graphics using Ideogram's API, which excels at rendering t
 import requests
 
 url = "https://api.ideogram.ai/v1/ideogram-v4/generate"
-headers = {"Api-Key": IDEOGRAM_API_KEY}
+headers = {"Api-Key": IDEOGRAM_API_KEY}  # No Content-Type header needed
 files = {
     "text_prompt": (None, prompt),
     "aspect_ratio": (None, "ASPECT_1_1"),
     "model": (None, "V_4"),
-    "magic_prompt_option": (None, "OFF")  # Disable auto-enhance
+    "magic_prompt_option": (None, "OFF")  # Disable auto-enhance for control
 }
 
 response = requests.post(url, headers=headers, files=files, timeout=120)
 data = response.json()
 image_url = data["data"][0]["url"]
 ```
+
+**Critical differences from V2:**
+- Uses `files=` parameter (multipart) not `json=` 
+- Endpoint is `/v1/ideogram-v4/generate` not `/generate`
+- `text_prompt` field name (not `prompt`)
+- `magic_prompt_option: OFF` prevents unwanted prompt enhancement
 
 ## Cost Comparison
 
@@ -255,6 +266,87 @@ Ideogram often adds its own text/watermarks even when instructed not to. To mini
    "magic_prompt_option": "OFF"
    ```
 
+## Logo Compositing Workflow
+
+For branded graphics with exact logo reproduction, use the compositor script:
+
+```python
+# Generate base image with Ideogram V4
+result = generate_ideogram_image(
+    prompt=build_optirfp_prompt("Your headline here", topic="winning"),
+    aspect_ratio="ASPECT_1_1",
+    model="V_4"
+)
+
+# Composite exact logo at bottom
+from PIL import Image
+import io
+
+img = Image.open(io.BytesIO(result["image_data"]))
+logo = Image.open("/path/to/logo.png").convert("RGBA")
+
+# Make white background transparent (crucial for dark backgrounds)
+data = logo.getdata()
+newData = []
+for item in data:
+    if item[0] > 240 and item[1] > 240 and item[2] > 240:
+        newData.append((255, 255, 255, 0))
+    else:
+        newData.append(item)
+logo.putdata(newData)
+
+# Resize and position
+logo_height = 55
+aspect = logo.width / logo.height
+logo = logo.resize((int(logo_height * aspect), logo_height), Image.Resampling.LANCZOS)
+img.paste(logo, ((img.width - logo.width) // 2, img.height - logo.height - 40), logo)
+```
+
+**See:** `scripts/ideogram_logo_compositor.py` for complete implementation.
+
+## Quality Verification Workflow
+
+Before posting, verify image quality using vision analysis:
+
+1. **Text Clarity Check**: Is the headline perfectly legible?
+2. **Watermark Scan**: Look for fake watermarks like "LinkedIFP", "Thekecs", "Cxeottics", numbers in corners
+3. **Brand Colors**: Confirm dark navy (#0F172A) background with mint (#40D395) accents
+4. **Logo Area**: Ensure bottom area is clean for logo compositing
+5. **Score**: Rate 1-10. Regenerate if below 9/10.
+
+## Prompt Engineering for Clean Results (Updated)
+
+Ideogram V4 often adds fake watermarks and branding. Aggressive exclusions required:
+
+```python
+prompt = """...
+ABSOLUTELY FORBIDDEN - NO EXCEPTIONS:
+- NO watermarks of any kind
+- NO "LinkedIFP", "Thekecs", "Cxeottics", or similar fake branding
+- NO numbers in corners or edges
+- NO fake logos or branding
+- NO additional text beyond the exact headline provided
+- NO decorative text, UI elements, or icons
+- NO timestamps, NO counters, NO progress indicators
+- Bottom area must be completely clean dark navy ONLY
+..."""
+```
+
+**Key settings:**
+- `magic_prompt_option: "OFF"` - Disables Ideogram's prompt enhancement
+- Explicit "NO" list with examples of fake watermarks that commonly appear
+- Reserve clean zones at bottom for logo placement
+
+## Pitfalls
+
+| Pitfall | Why It Happens | Fix |
+|---------|---------------|-----|
+| Logo has white box on dark background | JPEG logo loaded without transparency processing | Convert to RGBA and make white pixels transparent before compositing |
+| Watermarks like "LinkedIFP" appear | Ideogram V4 adds fake branding by default | Use aggressive "NO" exclusions in prompt; regenerate if they appear |
+| Logo path wrong | Logo file is `.jpg` not `.png` | Check actual file extension in `~/.hermes/assets/` |
+| Quality below 9/10 | AI artifacts, garbled text, wrong colors | Regenerate with adjusted prompt; Ideogram is non-deterministic |
+| Text too small or blurry | AI didn't prioritize text rendering | Add "large prominent headline" and "crystal clear text" to prompt |
+
 ## Troubleshooting
 
 | Issue | Solution |
@@ -266,12 +358,36 @@ Ideogram often adds its own text/watermarks even when instructed not to. To mini
 | Text too small | Add "large text" or "prominent headline" to prompt |
 | Wrong colors | Be explicit with hex codes in prompt |
 | Poor composition | Add layout instructions (centered, top-aligned) |
+| Logo background shows white | Process logo to make white transparent before compositing |
 
 ## Files
 
 - Output: `~/.hermes/generated_images/ideogram_*.png`
+- Compositor script: `scripts/ideogram_logo_compositor.py`
+- Reference: `references/watermark-patterns.md`
 
 ## API Documentation
 
 - Official docs: https://ideogram.ai/api
 - Pricing: https://ideogram.ai/pricing
+
+## Related Patterns
+
+### Vision-Based Quality Verification
+
+This skill demonstrates a reusable pattern for AI-generated image workflows:
+
+1. **Generate** image with AI (Ideogram, DALL-E, etc.)
+2. **Verify** with vision analysis before using
+3. **Score** quality 1-10 based on specific criteria
+4. **Regenerate** if below threshold (typically 9/10 for production)
+5. **Composite** brand assets (logos) only after clean base confirmed
+
+This pattern prevents posting low-quality or artifact-ridden images to social media.
+
+### Logo Compositing Best Practices
+
+1. **Transparency**: Always make white backgrounds transparent for dark themes
+2. **Sizing**: Logo should be 15-20% of image width, positioned at bottom
+3. **Margins**: Keep 40-60px padding from edges
+4. **Format**: Accept both PNG and JPG logos, auto-detect in `~/.hermes/assets/`

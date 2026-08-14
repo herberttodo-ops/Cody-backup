@@ -355,13 +355,13 @@
     "created_at": "2026-08-04T18:09:31.179623+00:00",
     "created_by": null,
     "last_patched_at": null,
-    "last_used_at": "2026-08-12T12:02:19.489072+00:00",
-    "last_viewed_at": "2026-08-12T12:02:19.416979+00:00",
+    "last_used_at": "2026-08-14T02:31:22.068927+00:00",
+    "last_viewed_at": "2026-08-14T02:31:21.991670+00:00",
     "patch_count": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 7,
-    "view_count": 7
+    "use_count": 8,
+    "view_count": 8
   },
   "heartmula": {
     "archived_at": null,
@@ -445,14 +445,14 @@
     "archived_at": null,
     "created_at": "2026-08-12T23:19:57.566415+00:00",
     "created_by": null,
-    "last_patched_at": "2026-08-13T00:09:04.154665+00:00",
-    "last_used_at": "2026-08-13T00:08:07.104772+00:00",
-    "last_viewed_at": "2026-08-13T00:08:07.026299+00:00",
-    "patch_count": 4,
+    "last_patched_at": "2026-08-14T02:37:59.694660+00:00",
+    "last_used_at": "2026-08-14T02:37:12.098637+00:00",
+    "last_viewed_at": "2026-08-14T02:37:12.028476+00:00",
+    "patch_count": 11,
     "pinned": false,
     "state": "active",
-    "use_count": 2,
-    "view_count": 2
+    "use_count": 6,
+    "view_count": 5
   },
   "imessage": {
     "archived_at": null,
@@ -485,13 +485,13 @@
     "created_at": "2026-08-04T18:12:49.306961+00:00",
     "created_by": null,
     "last_patched_at": "2026-08-12T12:04:42.354996+00:00",
-    "last_used_at": "2026-08-12T12:03:52.733411+00:00",
-    "last_viewed_at": "2026-08-12T12:03:52.676138+00:00",
+    "last_used_at": "2026-08-13T12:10:15.558141+00:00",
+    "last_viewed_at": "2026-08-13T12:10:15.503086+00:00",
     "patch_count": 5,
     "pinned": false,
     "state": "active",
-    "use_count": 10,
-    "view_count": 10
+    "use_count": 11,
+    "view_count": 11
   },
   "llama-cpp": {
     "archived_at": null,
@@ -901,13 +901,13 @@
     "created_at": "2026-08-11T18:12:45.201583+00:00",
     "created_by": null,
     "last_patched_at": null,
-    "last_used_at": null,
-    "last_viewed_at": null,
+    "last_used_at": "2026-08-13T12:10:46.059423+00:00",
+    "last_viewed_at": "2026-08-13T12:10:46.000332+00:00",
     "patch_count": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 0,
-    "view_count": 0
+    "use_count": 1,
+    "view_count": 1
   },
   "youtube-content": {
     "archived_at": null,
