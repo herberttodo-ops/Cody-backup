@@ -166,6 +166,41 @@ CTA: We built OptiRFP to catch exactly this kind of thing before you submit.
 
 ---
 
+## Multi-Channel Publishing
+
+When posting to multiple platforms (LinkedIn, Facebook, etc.), create platform-appropriate versions while keeping the core message consistent.
+
+**Workflow:**
+1. Use this skill to create the **LinkedIn version** (business page style)
+2. Adapt for **Facebook** if needed:
+   - Same hook usually works
+   - Can be slightly more casual
+   - Keep the same image
+3. Post to both via Buffer MCP:
+   - LinkedIn: channel ID + `metadata.linkedin.type: "post"`
+   - Facebook: channel ID + `metadata.facebook.type: "post"` (REQUIRED)
+
+**Image requirements for social tools:**
+- Google Drive images: Use `uc?export=view&id=ID` format
+- Facebook requires explicit post type metadata
+- Schedule with `mode: "customScheduled"` and ISO 8601 datetime
+
+See `buffer-api` skill for platform-specific metadata requirements.
+
+---
+
+## User Preference: Business Copy Only (OptiRFP)
+
+When creating content for OptiRFP social accounts:
+
+- **Business page copy ONLY** — Do not generate personal repost versions
+- **Do NOT paraphrase** — Use generated copy exactly as written
+- **Post to Buffer MCP** for LinkedIn and Facebook simultaneously  
+- **Schedule for 8:00 AM EST** daily
+- **Queue limit awareness**: Buffer has 10 scheduled post limit on current plan
+
+---
+
 ## Special Instructions
 
 - **Score honestly.** A 7 is a 7. Rewrite it.

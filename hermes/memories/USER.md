@@ -27,3 +27,5 @@ Communication Preferences: **Tone:** Professional, calm, occasionally snarky
 Communication Preferences: **Format:** Checklists, frameworks, step-by-step guidance
 §
 Telegram handle: @aherbert13
+§
+**OptiRFP Social Media:** Prefers BUSINESS PAGE COPY ONLY (not personal reposts), daily posting at 8 AM EST, original skill-generated copy without paraphrasing. Uses Buffer MCP (limit: 10 scheduled posts).

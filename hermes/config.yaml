@@ -304,3 +304,9 @@ TELEGRAM_HOME_CHANNEL: '-___ID_NUMBER___'
 onboarding:
   seen:
     openclaw_residue_cleanup: true
+
+mcp_servers:
+  buffer:
+    url: "https://mcp.buffer.com/mcp"
+    headers:
+      Authorization: "bearer ___TOKEN___"
