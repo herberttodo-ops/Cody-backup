@@ -77,6 +77,53 @@ For N days × M channels:
 | `Facebook posts require a type` | Missing metadata.facebook.type | Add `"facebook": {"type": "post"}` |
 | `Invalid image URL` | Drive URL format wrong | Use `uc?export=view&id=` format |
 | `Channel not found` | Wrong channel ID | Re-fetch via list_channels |
+| `MCP server unreachable` | Server overload after failures | Wait ~50s cooldown; save content locally for manual retry |
+| `Invalid Bearer token` | Wrong header format | Use `Api-Key:` not `Authorization: Bearer` |
+| `Invalid arguments: schedulingType` | Wrong value used | Use `"automatic"` or `"notification"`, not `"addToQueue"` |
+| `Image could not be read` | Local file:// URL or placeholder | Must use publicly accessible HTTPS URL |
+
+### Buffer MCP Server Reliability
+
+**Pattern:** After 3-4 failed post attempts, server becomes unreachable.
+
+**Symptoms:**
+```
+MCP server 'buffer' is unreachable after 3 consecutive failures.
+Auto-retry available in ~50s.
+```
+
+**Workaround:**
+1. Always save generated content locally first
+2. Design workflows with graceful degradation
+3. If Buffer fails, provide user with:
+   - Image file path
+   - Post copy text
+   - Recommended hashtags
+   - Instructions for manual upload
+
+**Cron Environment Issues:**
+- Third-party image upload services (transfer.sh, catbox.moe, imgur) often fail
+- Save images locally to `~/.hermes/generated_images/`
+- Use `file://` URLs only for local verification, not for Buffer posts
+- Buffer requires publicly accessible HTTPS URLs for images
+
+### Image Upload Alternatives
+
+**Option 1: Google Drive (Recommended)**
+```
+https://drive.google.com/uc?export=view&id=YOUR_IMAGE_ID
+```
+
+**Option 2: Save locally + manual upload**
+- Generate image
+- Save to `~/.hermes/generated_images/`
+- User uploads via Buffer web UI
+- More reliable than automated upload services
+
+**Option 3: Buffer native image upload**
+- Use Buffer's built-in image upload via web interface
+- Reference uploaded image by ID in API calls
+- Most reliable but requires manual step
 
 ## First Comments
 
