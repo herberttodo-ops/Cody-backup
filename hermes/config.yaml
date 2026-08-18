@@ -3,7 +3,6 @@ model:
   provider: openrouter
   base_url: https://openrouter.ai/api/v1
   api_mode: chat_completions
-providers: {}
 fallback_providers: []
 credential_pool_strategies:
   openrouter: round_robin
@@ -59,7 +58,6 @@ terminal:
   env_passthrough: []
   docker_image: nikolaik/python-nodejs:python3.11-nodejs20
   docker_forward_env: []
-  docker_env: {}
   singularity_image: docker://nikolaik/python-nodejs:python3.11-nodejs20
   modal_image: nikolaik/python-nodejs:python3.11-nodejs20
   daytona_image: nikolaik/python-nodejs:python3.11-nodejs20
@@ -90,12 +88,6 @@ compression:
   protect_last_n: 20
   summary_model: google/gemini-3-flash-preview
   summary_provider: auto
-  summary_base_url: null
-smart_model_routing:
-  enabled: false
-  max_simple_chars: 160
-  max_simple_words: 28
-  cheap_model: {}
 auxiliary:
   vision:
     provider: auto
@@ -116,12 +108,6 @@ auxiliary:
     base_url: ''
     api_key: ''
     timeout: 120
-  session_search:
-    provider: auto
-    model: ''
-    base_url: ''
-    api_key: ''
-    timeout: 30
   skills_hub:
     provider: auto
     model: ''
@@ -135,6 +121,12 @@ auxiliary:
     api_key: ''
     timeout: 30
   mcp:
+    provider: auto
+    model: ''
+    base_url: ''
+    api_key: ''
+    timeout: 30
+  session_search:
     provider: auto
     model: ''
     base_url: ''
@@ -218,20 +210,17 @@ prefill_messages_file: ''
 skills:
   external_dirs: []
   creation_nudge_interval: 15
-honcho: {}
 timezone: ''
 discord:
   require_mention: true
   free_response_channels: ''
   auto_thread: true
   reactions: true
-whatsapp: {}
 approvals:
   mode: manual
   timeout: 60
-command_allowlist: []
-quick_commands: {}
-personalities: {}
+command_allowlist:
+  - script execution via -e/-c flag
 security:
   redact_secrets: true
   tirith_enabled: true
@@ -244,14 +233,25 @@ security:
     shared_files: []
 cron:
   wrap_response: true
+code_execution:
+  timeout: 300
+  max_tool_calls: 50
+streaming:
+  enabled: false
+onboarding:
+  seen:
+    openclaw_residue_cleanup: true
 _config_version: 12
+smart_model_routing:
+  enabled: false
+  max_simple_chars: 160
+  max_simple_words: 28
+  cheap_model: {}
 session_reset:
   mode: both
   idle_minutes: 1440
   at_hour: 4
 group_sessions_per_user: true
-streaming:
-  enabled: false
 platform_toolsets:
   cli:
     - browser
@@ -297,16 +297,31 @@ platform_toolsets:
     - hermes-signal
   homeassistant:
     - hermes-homeassistant
-code_execution:
-  timeout: 300
-  max_tool_calls: 50
 TELEGRAM_HOME_CHANNEL: '-___ID_NUMBER___'
-onboarding:
-  seen:
-    openclaw_residue_cleanup: true
-
 mcp_servers:
   buffer:
-    url: "https://mcp.buffer.com/mcp"
+    url: https://mcp.buffer.com/mcp
     headers:
-      Authorization: "bearer ___TOKEN___"
+      Authorization: bearer ___TOKEN___
+
+# ── Fallback Model ────────────────────────────────────────────────────
+# Automatic provider failover when primary is unavailable.
+# Uncomment and configure to enable. Triggers on rate limits (429),
+# overload (529), service errors (503), or connection failures.
+#
+# Supported providers:
+#   openrouter   (OPENROUTER_API_KEY)  — routes to any model
+#   openai-codex (OAuth — hermes auth) — OpenAI Codex
+#   nous         (OAuth — hermes auth) — Nous Portal
+#   zai          (ZAI_API_KEY)         — Z.AI / GLM
+#   kimi-coding  (KIMI_API_KEY)        — Kimi / Moonshot
+#   kimi-coding-cn (KIMI_CN_API_KEY)   — Kimi / Moonshot (China)
+#   minimax      (MINIMAX_API_KEY)     — MiniMax
+#   minimax-cn   (MINIMAX_CN_API_KEY)  — MiniMax (China)
+#   bedrock      (AWS IAM / boto3)     — AWS Bedrock (Converse API)
+#
+# For custom OpenAI-compatible endpoints, add base_url and key_env.
+#
+# fallback_model:
+#   provider: openrouter
+#   model: anthropic/claude-sonnet-4

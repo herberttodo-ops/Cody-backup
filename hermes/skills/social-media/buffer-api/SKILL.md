@@ -30,6 +30,11 @@ See [references/mcp-setup.md](references/mcp-setup.md) for:
 - Scheduling format
 - Error patterns and fixes
 
+See [references/cron-mcp-limitations.md](references/cron-mcp-limitations.md) for:
+- Why MCP tools don't work in cron jobs
+- Workarounds for automated posting
+- Content guidelines
+
 ### Buffer Plan Limits
 
 **Scheduled posts limit:** Most Buffer plans have a 10 scheduled post limit. If you hit this:
@@ -106,6 +111,34 @@ curl -s -X POST "https://api.bufferapp.com/1/updates/create.json" \
   -d "profile_ids[]=PROFILE_ID" \
   -d "text=Scheduled post" \
   -d "scheduled_at=___ID_NUMBER___"
+```
+
+## MCP JSON Structure Pitfall
+
+The most common error is misplacing parameters inside the assets array.
+
+**❌ WRONG:**
+```json
+{
+  "assets": [{
+    "image": { "url": "..." },
+    "channelId": "...",  // WRONG - inside assets
+    "dueAt": "..."       // WRONG - inside assets
+  }]
+}
+```
+
+**✅ CORRECT:**
+```json
+{
+  "assets": [{
+    "image": { "url": "..." }
+  }],
+  "channelId": "...",  // CORRECT - top level
+  "dueAt": "...",
+  "text": "...",
+  "mode": "customScheduled"
+}
 ```
 
 ## Rate Limits

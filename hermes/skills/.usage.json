@@ -146,14 +146,14 @@
     "archived_at": null,
     "created_at": "2026-08-14T21:04:32.358116+00:00",
     "created_by": null,
-    "last_patched_at": "2026-08-14T21:29:47.316832+00:00",
-    "last_used_at": "2026-08-14T21:28:56.967548+00:00",
-    "last_viewed_at": "2026-08-14T21:28:56.900464+00:00",
-    "patch_count": 4,
+    "last_patched_at": "2026-08-18T02:57:51.607399+00:00",
+    "last_used_at": "2026-08-18T02:57:33.822110+00:00",
+    "last_viewed_at": "2026-08-18T02:57:33.762364+00:00",
+    "patch_count": 8,
     "pinned": false,
     "state": "active",
-    "use_count": 4,
-    "view_count": 4
+    "use_count": 7,
+    "view_count": 7
   },
   "claude-code": {
     "archived_at": null,
@@ -459,12 +459,12 @@
     "created_at": "2026-08-12T23:19:57.566415+00:00",
     "created_by": null,
     "last_patched_at": "2026-08-15T12:11:18.908152+00:00",
-    "last_used_at": "2026-08-16T12:00:35.136741+00:00",
+    "last_used_at": "2026-08-17T12:00:59.779157+00:00",
     "last_viewed_at": "2026-08-15T12:09:26.376138+00:00",
     "patch_count": 16,
     "pinned": false,
     "state": "active",
-    "use_count": 13,
+    "use_count": 14,
     "view_count": 9
   },
   "imessage": {
@@ -922,6 +922,19 @@
     "use_count": 0,
     "view_count": 0
   },
+  "video-clips-for-social": {
+    "archived_at": null,
+    "created_at": "2026-08-18T02:29:16.566557+00:00",
+    "created_by": "agent",
+    "last_patched_at": "2026-08-18T02:58:43.415348+00:00",
+    "last_used_at": "2026-08-18T02:58:32.615735+00:00",
+    "last_viewed_at": "2026-08-18T02:58:32.555071+00:00",
+    "patch_count": 2,
+    "pinned": false,
+    "state": "active",
+    "use_count": 1,
+    "view_count": 1
+  },
   "weights-and-biases": {
     "archived_at": null,
     "created_at": "2026-08-11T18:12:45.149553+00:00",
@@ -966,13 +979,13 @@
     "created_at": "2026-08-11T18:12:45.268198+00:00",
     "created_by": null,
     "last_patched_at": null,
-    "last_used_at": null,
-    "last_viewed_at": null,
+    "last_used_at": "2026-08-18T02:30:15.569273+00:00",
+    "last_viewed_at": "2026-08-18T02:30:15.515762+00:00",
     "patch_count": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 0,
-    "view_count": 0
+    "use_count": 3,
+    "view_count": 3
   },
   "yuanbao": {
     "archived_at": null,

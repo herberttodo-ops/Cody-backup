@@ -27,3 +27,7 @@ See Also: *Last updated: 2026-03-04 | Memory system v2 (routing index pattern)*
 Telegram config: [memory/telegram_config.md](memory/telegram_config.md)
 §
 OBSIDIAN: Vault at ~/Documents/Obsidian Vault. Files: Index.md, OptiRFP.md, TLC Rescue.md, Rival Productions.md, Daily notes, Brand Guidelines.md. Use obsidian skill to access.
+§
+Andrew has a film and TV reaction YouTube channel and wants automated clip creation for TikTok/Instagram Reels/YouTube Shorts with smart reframing and captions.
+§
+Prefers API-based automation solutions over manual workflows when available. Values researching options and understanding trade-offs before implementation.
