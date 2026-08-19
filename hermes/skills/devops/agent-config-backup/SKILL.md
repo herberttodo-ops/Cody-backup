@@ -49,7 +49,8 @@ Generate a GitHub Personal Access Token:
 ### 2. Run Initial Backup
 
 ```bash
-export GITHUB_BACKUP_TOKEN=$(grep GITHUB_BACKUP_TOKEN ~/.hermes/.env | cut -d= -f2)
+# IMPORTANT: Use tr -d '"' to strip quotes if token is stored with them in .env
+export GITHUB_BACKUP_TOKEN="$(grep GITHUB_BACKUP_TOKEN ~/.hermes/.env | cut -d= -f2- | tr -d '"')"
 ~/.hermes/bin/daily-backup.sh
 ```
 
@@ -108,6 +109,19 @@ HERMES_GATEWAY_TOKEN=...    → HERMES_GATEWAY_TOKEN=[GATEWAY_TOKEN]
 2. Test manually: `export GITHUB_BACKUP_TOKEN=... && ~/.hermes/bin/daily-backup.sh`
 3. Check token has `repo` scope on GitHub
 
+### Push Fails with "No Such Device or Address"
+
+**Symptom:** `fatal: could not read Password for 'https://%22git...%22@github.com'` — note the URL-encoded `%22` (quote characters) in the error.
+
+**Root Cause:** The `GITHUB_BACKUP_TOKEN` in `~/.hermes/.env` is stored with surrounding quotes (e.g., `GITHUB_BACKUP_TOKEN="ghp_..."`), and the extraction command included the quotes in the token value. Git then URL-encodes them into the remote URL, causing authentication failure.
+
+**Fix:** Strip quotes when sourcing from `.env`:
+```bash
+export GITHUB_BACKUP_TOKEN="$(grep GITHUB_BACKUP_TOKEN ~/.hermes/.env | cut -d= -f2- | tr -d '"')"
+```
+
+**Prevention:** When documenting or scripting token extraction from `.env`, always include `| tr -d '"'` to handle both quoted and unquoted values safely.
+
 ### Missing Files in Backup
 
 Check the backup log:
@@ -133,6 +147,10 @@ See `RESTORE.md` in your backup repository for complete restoration steps.
 - ⚠️ Keep your GitHub token secure
 - ✅ Use a private repository for backups
 - ✅ The backup script creates templates for credential files
+
+## References
+
+- [`references/token-quote-extraction.md`](references/token-quote-extraction.md) — Pitfall: quoted tokens in `.env` causing git auth failures
 
 ## Customization
 
