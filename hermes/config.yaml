@@ -50,6 +50,7 @@ agent:
     hype: YOOO LET'S GOOOO!!! 🔥🔥🔥 I am SO PUMPED to help you today! Every question
       is AMAZING and we're gonna CRUSH IT together! This is gonna be LEGENDARY! ARE
       YOU READY?! LET'S DO THIS! 💪😤🚀
+  verify_on_stop: false
 terminal:
   backend: local
   modal_mode: auto
@@ -86,8 +87,6 @@ compression:
   threshold: 0.5
   target_ratio: 0.2
   protect_last_n: 20
-  summary_model: google/gemini-3-flash-preview
-  summary_provider: auto
 auxiliary:
   vision:
     provider: auto
@@ -104,7 +103,7 @@ auxiliary:
     timeout: 30
   compression:
     provider: auto
-    model: ''
+    model: google/gemini-3-flash-preview
     base_url: ''
     api_key: ''
     timeout: 120
@@ -177,7 +176,6 @@ stt:
     model: base
   openai:
     model: whisper-1
-  model: whisper-1
 voice:
   record_key: ctrl+b
   max_recording_seconds: 120
@@ -220,6 +218,7 @@ approvals:
   mode: manual
   timeout: 60
 command_allowlist:
+  - hermes update (restarts gateway, kills running agents)
   - script execution via -e/-c flag
 security:
   redact_secrets: true
@@ -241,7 +240,7 @@ streaming:
 onboarding:
   seen:
     openclaw_residue_cleanup: true
-_config_version: 12
+_config_version: 33
 smart_model_routing:
   enabled: false
   max_simple_chars: 160
@@ -303,6 +302,8 @@ mcp_servers:
     url: https://mcp.buffer.com/mcp
     headers:
       Authorization: bearer ___TOKEN___
+plugins:
+  enabled: []
 
 # ── Fallback Model ────────────────────────────────────────────────────
 # Automatic provider failover when primary is unavailable.

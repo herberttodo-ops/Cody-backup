@@ -194,10 +194,10 @@ See `buffer-api` skill for platform-specific metadata requirements.
 When creating content for OptiRFP social accounts:
 
 - **Business page copy ONLY** — Do not generate personal repost versions
-- **Do NOT paraphrase** — Use generated copy exactly as written
+- **Do NOT paraphrase** — Use generated copy exactly as written (critical: user explicitly rejected paraphrased versions)
 - **Post to Buffer MCP** for LinkedIn and Facebook simultaneously  
 - **Schedule for 8:00 AM EST** daily
-- **Queue limit awareness**: Buffer has 10 scheduled post limit on current plan
+- **Queue limit awareness**: Buffer has 10 scheduled post limit on current plan; when full, wait for posts to publish before adding more
 
 ---
 

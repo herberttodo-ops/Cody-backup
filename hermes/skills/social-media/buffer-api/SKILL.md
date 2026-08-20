@@ -115,7 +115,7 @@ curl -s -X POST "https://api.bufferapp.com/1/updates/create.json" \
 
 ## MCP JSON Structure Pitfall
 
-The most common error is misplacing parameters inside the assets array.
+The most common error is misplacing parameters inside the assets array. **I made this exact error in August 2026 session** — putting `channelId` and `dueAt` inside `assets` instead of top-level.
 
 **❌ WRONG:**
 ```json
@@ -132,12 +132,47 @@ The most common error is misplacing parameters inside the assets array.
 ```json
 {
   "assets": [{
-    "image": { "url": "..." }
+    "image": { "url": "...", "metadata": {"altText": "..."} }
   }],
   "channelId": "...",  // CORRECT - top level
   "dueAt": "...",
   "text": "...",
-  "mode": "customScheduled"
+  "mode": "customScheduled",
+  "schedulingType": "automatic"
+}
+```
+
+**Critical for Facebook:** Must include explicit post type metadata:
+```json
+{
+  "metadata": {"facebook": {"type": "post"}},
+  "channelId": "FACEBOOK_CHANNEL_ID",
+  ...
+}
+```
+
+**Full working example (LinkedIn + Facebook dual-post):**
+```json
+// LinkedIn post
+{
+  "assets": [{"image": {"url": "DRIVE_URL", "metadata": {"altText": "..."}}}],
+  "channelId": "6a7f74bcb2d9d577437af9a4",
+  "dueAt": "2026-08-15T08:00:00-04:00",
+  "metadata": {"linkedin": {"type": "post"}},
+  "mode": "customScheduled",
+  "schedulingType": "automatic",
+  "text": "BUSINESS COPY HERE"
+}
+
+// Facebook post (same content, different channel + metadata)
+{
+  "assets": [{"image": {"url": "DRIVE_URL", "metadata": {"altText": "..."}}}],
+  "channelId": "6a7f7476b2d9d577437af67f",
+  "dueAt": "2026-08-15T08:00:00-04:00",
+  "metadata": {"facebook": {"type": "post"}},  // REQUIRED for Facebook
+  "mode": "customScheduled",
+  "schedulingType": "automatic",
+  "text": "BUSINESS COPY HERE"
 }
 ```
 
@@ -145,5 +180,11 @@ The most common error is misplacing parameters inside the assets array.
 - 100 requests per 60 seconds for most endpoints
 - 10 media uploads per 60 seconds
 
-## Response Format
-All responses are JSON.
+## Related Session Logs
+
+- [references/august-2026-buffer-setup.md](references/august-2026-buffer-setup.md) - Complete Buffer MCP workflow with verified channel IDs, JSON patterns, and scheduling setup for August 2026 batch  
+- [references/hermes-update-august-2026.md](references/hermes-update-august-2026.md) - Hermes update process, merge conflict resolution, and post-update verification (August 2026 session)
+
+## User Platform Preference
+
+**Buffer vs Vista Social**: Per MEMORY.md context, user may prefer Vista Social for final scheduling workflow. Buffer MCP is used for queue management and immediate posting, but Vista Social may be preferred for actual content distribution. Always clarify which platform to use when scheduling posts.

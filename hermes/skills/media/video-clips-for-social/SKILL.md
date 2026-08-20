@@ -41,17 +41,28 @@ YouTube frequently blocks downloads with **403 Forbidden** errors, even with coo
 1. Ask user to download the video themselves (4K Video Downloader, browser extensions)
 2. Have user share the file path to a local copy
 3. Check if user already has the video saved locally
+4. **Use transcript-only analysis** — See Step 2 below
 
-**Alternative: Analyze transcript first**
-You can often analyze the video via transcript without downloading:
+**Alternative: Analyze transcript only**
+You can analyze the video via transcript without downloading the video file (works even when download is blocked):
+
 ```python
 from youtube_transcript_api import YouTubeTranscriptApi
 api = YouTubeTranscriptApi()
 result = api.fetch('VIDEO_ID')
+
 # Find hook moments from transcript
+segments = [{"text": seg.text, "start": seg.start, "duration": seg.duration} for seg in result]
+
+# Look for engagement signals
+hooks = []
+for seg in segments:
+    text = seg['text'].upper()
+    if any(word in text for word in ['OH MY', 'WOW', 'HOLY', 'WHAT', 'NO WAY', 'GOD', 'INSANE']):
+        hooks.append((seg['start'], seg['text']))
 ```
 
-This lets you identify clip timestamps before dealing with the video file.
+This lets you identify clip timestamps before dealing with the video file. The transcript is available even when download is blocked.
 
 ## Step 2: Extract Transcript
 
