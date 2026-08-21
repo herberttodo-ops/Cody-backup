@@ -16,6 +16,20 @@ Create engaging vertical clips from long-form YouTube videos for short-form plat
 4. **Reframe** to vertical (9:16)
 5. **Add captions** (burned-in or SRT)
 
+## Continuing from Previous Session
+
+If video was downloaded previously and saved to a known path:
+
+```bash
+# Check video exists and get duration
+ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 /path/to/video.mp4
+
+# Create output directory
+mkdir -p ~/.hermes/generated_clips
+```
+
+Then proceed directly to **Step 3: Create Vertical Clips**.
+
 ## Prerequisites
 
 ```bash
@@ -71,21 +85,48 @@ This lets you identify clip timestamps before dealing with the video file. The t
 pip install youtube-transcript-api
 ```
 
+For extracting transcripts from local video files with Whisper, see [references/whisper-transcription.md](references/whisper-transcription.md).
+
 See [references/video-analysis.md](references/video-analysis.md) for analyzing transcripts and finding clip-worthy moments.
 
 ## Step 3: Create Vertical Clips with FFmpeg
 
 ### Center Crop to Vertical (9:16)
 
+Full command including scaling to 1080x1920:
+
 ```bash
-ffmpeg -i input.mp4 -vf "crop=in_h*9/16:in_h" -c:a copy output_vertical.mp4
+ffmpeg -i input.mp4 -vf "crop=in_h*9/16:in_h,scale=1080:1920,setsar=1" \
+  -c:v libx264 -crf 23 -preset fast -c:a aac -b:a 128k output_vertical.mp4
 ```
 
-### Add Captions (Burned-in)
+### Extract Clip + Reframe + Scale (One Command)
+
+Extract segment and convert to vertical in one step:
+
+```bash
+ffmpeg -ss 00:03:30 -t 30 -i input.mp4 \
+  -vf "crop=in_h*9/16:in_h,scale=1080:1920,setsar=1" \
+  -c:v libx264 -crf 23 -preset fast -c:a aac -b:a 128k clip.mp4
+```
+
+### Add Captions (Burned-in with SRT)
 
 ```bash
 ffmpeg -i input.mp4 -vf "subtitles=captions.srt:force_style='FontSize=24,PrimaryColour=&H00FFFFFF'" output.mp4
 ```
+
+### Add Simple Burned-in Captions (No SRT file needed)
+
+Use drawtext for quick captions without creating SRT files:
+
+```bash
+ffmpeg -i input.mp4 -vf "drawtext=text='[Caption text]':fontcolor=white:fontsize=48:box=1:boxcolor=black@0.5:boxborderw=5:x=(w-text_w)/2:y=h*0.7" -c:v libx264 -c:a copy output.mp4
+```
+
+Position at bottom 30%: `y=h*0.7`
+Position at top: `y=h*0.1`
+Position centered: `y=(h-text_h)/2`
 
 ### Extract Clip Segment
 

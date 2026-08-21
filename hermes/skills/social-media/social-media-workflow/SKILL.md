@@ -80,7 +80,43 @@ For N days × M channels:
 | `MCP server unreachable` | Server overload after failures | Wait ~50s cooldown; save content locally for manual retry |
 | `Invalid Bearer token` | Wrong header format | Use `Api-Key:` not `Authorization: Bearer` |
 | `Invalid arguments: schedulingType` | Wrong value used | Use `"automatic"` or `"notification"`, not `"addToQueue"` |
-| `Image could not be read` | Local file:// URL or placeholder | Must use publicly accessible HTTPS URL |
+### Image could not be read
+Local file:// URL or placeholder | Must use publicly accessible HTTPS URL |
+| `Duplicate posts created` | Not tracking post creation state | See "Preventing Duplicates" section below |
+
+### Preventing Duplicates
+
+**Problem:** When retrying failed posts or resuming batch jobs, multiple copies of the same content get created.
+
+**Prevention Strategy:**
+1. **Always list existing posts first:**
+   ```python
+   existing = mcp__buffer__list_posts(status=["scheduled"])
+   existing_dates = set([post["dueAt"][:10] for post in existing])
+   ```
+
+2. **Check before creating:**
+   ```python
+   if target_date in existing_dates:
+       print(f"Skipping {target_date} - already scheduled")
+       continue
+   ```
+
+3. **Track created post IDs in session:**
+   ```python
+   created_posts = []  # Track what you create
+   # After each successful create_post:
+   created_posts.append(result["id"])
+   ```
+
+4. **If duplicates happen - delete by pattern:**
+   ```python
+   # Find duplicates (same date, same text)
+   duplicates = [p for p in posts if p["text"] == target_text]
+   # Keep first, delete rest
+   for dup in duplicates[1:]:
+       mcp__buffer__delete_post(postId=dup["id"])
+   ```
 
 ### Buffer MCP Server Reliability
 

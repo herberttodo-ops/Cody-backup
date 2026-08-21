@@ -37,15 +37,47 @@ See [references/cron-mcp-limitations.md](references/cron-mcp-limitations.md) for
 
 ### Buffer Plan Limits
 
-**Scheduled posts limit:** Most Buffer plans have a 10 scheduled post limit. If you hit this:
+**CRITICAL:** Base Buffer plans allow only **10 scheduled posts** at any time. This is a hard limit that cannot be bypassed.
+
+**Error when limit reached:**
 ```
-"Limit reached: Scheduled posts limit reached. You have 10 scheduled posts out of 10 allowed"
+{"error":"Limit reached: Scheduled posts limit reached. You have 10 scheduled posts out of 10 allowed."}
 ```
 
-**Workarounds:**
-1. Wait for posts to publish, then add more
-2. Upgrade Buffer plan for higher limits
-3. Post immediately (`shareNow` mode) instead of scheduling
+**Workarounds (in order of preference):**
+
+1. **Plan Scheduling Waves**
+   - Schedule first 10 posts (e.g., Days 1-10)
+   - As posts publish daily, slots open up
+   - Add next batch immediately after slots free
+
+2. **Use drafts instead of scheduled posts**
+   - Create posts as drafts (`saveToDraft: true`)
+   - Manually review/schedule in Buffer dashboard
+   - Bypasses 10-post limit
+
+3. **Sequential daily creation**
+   - Create each day's post the morning before
+   - Never exceed 10 future scheduled posts
+   - Requires consistent daily action
+
+4. **Upgrade Buffer plan**
+   - Paid plans have higher limits
+   - Check buffer.com/pricing for current tiers
+
+**Real-world batch workflow:**
+```
+Week 1: Schedule Days 1-10 (10 posts)
+Day 5: Post Days 1-5 publish, slots open
+Day 5: Add Days 11-15 (back to 10 posts)
+Day 10: Post Days 6-10 publish
+Day 10: Add Days 16-20
+```
+
+**Preferred approach for large campaigns:**
+- Schedule 10 posts ahead (current week + next)
+- Leave 2-3 slots open for daily flexibility
+- Add new posts as old ones publish
 
 ## Legacy REST API Documentation
 - https://buffer.com/developers/api
