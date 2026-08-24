@@ -302,7 +302,7 @@ logo = logo.resize((int(logo_height * aspect), logo_height), Image.Resampling.LA
 img.paste(logo, ((img.width - logo.width) // 2, img.height - logo.height - 40), logo)
 ```
 
-**See:** `scripts/ideogram_logo_compositor.py` for complete implementation.
+**See:** `scripts/ideogram_logo_compositor.py` for complete implementation (uses `generate_optirfp_post_with_logo()` function).
 
 ## Quality Verification Workflow
 
@@ -350,14 +350,14 @@ ABSOLUTELY FORBIDDEN - NO EXCEPTIONS:
 | Logo path wrong | Logo file is `.jpg` not `.png` | Check actual file extension in `~/.hermes/assets/` |
 | Quality below 9/10 | AI artifacts, garbled text, wrong colors | Regenerate with adjusted prompt; Ideogram is non-deterministic |
 | Text too small or blurry | AI didn't prioritize text rendering | Add "large prominent headline" and "crystal clear text" to prompt |
-| Python execution blocked in cron | `execute_code` with `-c` or heredoc triggers approval requirements | Use direct `terminal` with script files instead (see `templates/optirfp_logo_compositor.py`) |
-| Image uploads fail repeatedly | Third-party services (transfer.sh, catbox.moe, imgur, 0x0.st, file.io) are unreliable or blocked | Save images locally; use `create_branded_social_graphic` tool for direct Buffer integration |
+| Python execution blocked in cron | `execute_code` with `-c` or heredoc triggers approval requirements | Use direct `terminal` with script files instead (see `scripts/ideogram_logo_compositor.py`) |
+| Image uploads fail repeatedly | Third-party services (transfer.sh, catbox.moe, imgur, 0x0.st, file.io) are unreliable or blocked | Save images locally; use `create_branded_social_graphic` tool for direct Buffer integration, or prepare manual upload package with local path, post text, and hashtags |
 | Buffer MCP unreachable | Server connectivity issues after multiple failures | Retry after 50s cooldown; save images for manual upload later |
 | OpenAI rate limiting | Too many requests to `create_branded_graphic` | Use Ideogram instead when OpenAI quota exhausted; add delays between calls |
 
 **See also:**
 - `references/fake-watermark-patterns.md` - Documented fake branding patterns and exclusions
-- `templates/optirfp_logo_compositor.py` - Complete working compositor script
+- `scripts/ideogram_logo_compositor.py` - Complete working compositor script (main implementation)
 
 ## Troubleshooting
 
@@ -375,7 +375,7 @@ ABSOLUTELY FORBIDDEN - NO EXCEPTIONS:
 ## Files
 
 - Output: `~/.hermes/generated_images/ideogram_*.png`
-- Compositor script: `templates/optirfp_logo_compositor.py` - Complete working implementation
+- Compositor script: `scripts/ideogram_logo_compositor.py` - Complete working implementation
 - Reference: `references/fake-watermark-patterns.md` - Documented fake branding patterns
 - Reference: `references/cost-comparison.md`
 - Reference: `references/v4-migration-notes.md`
@@ -417,8 +417,8 @@ In cron environments, these services failed during testing:
 - `transfer.sh` - Connection refused
 - `catbox.moe` - 413 Request Entity Too Large
 - `0x0.st` - Uploads disabled due to spam
-- `imgur` API - Requires authentication
-- `file.io` - Intermittent failures
+- `imgur` API - 503 backend errors, requires authentication
+- `file.io` - Intermittent failures, 301 redirects
 
 **Recommendation**: Save images locally to `~/.hermes/generated_images/` and either:
 1. Use `create_branded_social_graphic` tool which handles Buffer integration directly
