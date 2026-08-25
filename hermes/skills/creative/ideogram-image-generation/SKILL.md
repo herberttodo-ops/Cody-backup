@@ -346,7 +346,8 @@ ABSOLUTELY FORBIDDEN - NO EXCEPTIONS:
 | Logo has white box on dark background | JPEG logo loaded without transparency processing | Convert to RGBA and make white pixels transparent before compositing |
 | Watermarks like "LinkedIFP" appear | Ideogram V4 adds fake branding by default | Use aggressive "NO" exclusions in prompt (see `references/fake-watermark-patterns.md`); regenerate if they appear |
 | Fake "OptiIFP" or "IptiRFp" branding | AI corruption of requested branding | Add specific exclusions for these patterns |
-| LinkedIn icons appear at bottom | AI misinterprets "LinkedIn graphic" instruction | Explicitly forbid social media icons |
+| LinkedIn icons appear at bottom | AI misinterprets "LinkedIn graphic" instruction; adds blue "in" icon | Explicitly forbid social media icons: `NO LinkedIn icons, NO "in" logos, NO social media icons` |
+| Combined fake branding "OptiRFP in" | AI combines brand name with fake icon | Add both `NO "OptiRFP in"` and `NO "in"` to exclusions |
 | Logo path wrong | Logo file is `.jpg` not `.png` | Check actual file extension in `~/.hermes/assets/` |
 | Quality below 9/10 | AI artifacts, garbled text, wrong colors | Regenerate with adjusted prompt; Ideogram is non-deterministic |
 | Text too small or blurry | AI didn't prioritize text rendering | Add "large prominent headline" and "crystal clear text" to prompt |
