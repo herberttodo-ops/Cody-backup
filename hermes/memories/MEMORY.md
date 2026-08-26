@@ -1,6 +1,8 @@
 > **Pattern:** This file is a routing index, not a knowledge dump. Keep it under 50 lines. Load detail files on demand via `memory_search()`.
 §
-Current Priorities: **OptiRFP** - AI-powered RFP response platform. Brand: Exact logo at ~/.hermes/assets/optirfp_logo.jpg, colors mint #40D395 + navy #0F172A. Image layout locked: Headline centered in upper 40%, smooth gradients (no navy blocks), middle 40% for visuals, clean bottom for logo. Ideogram V4 preferred generator. User uses Vista Social for scheduling (not Buffer).
+Current Priorities: **OptiRFP** (RFP platform, Vista Social scheduling), **TLC Rescue** (Bingo fundraiser), **Rival Productions** (webinar pipeline), **LotSignal** (25 dealer outreach, ask me for LinkedIn alternatives reference)
+
+**Responses:** Use cost-benefit tables ($0/$49/$199 tiers) when user asks for free/cheap alternatives to paid tools. Structured comparison preferred over simple lists.
 §
 Current Priorities: **TLC Rescue** - Bingo Unleashed fundraiser (sponsor outreach ready)
 §
@@ -30,4 +32,4 @@ OBSIDIAN: Vault at ~/Documents/Obsidian Vault. Files: Index.md, OptiRFP.md, TLC 
 §
 Andrew has a film and TV reaction YouTube channel and wants automated clip creation for TikTok/Instagram Reels/YouTube Shorts with smart reframing and captions.
 §
-Prefers API-based automation solutions over manual workflows when available. Values researching options and understanding trade-offs before implementation.
+Prefers deployed, working solutions over static files. Values action/implementation over research-only. Active: LotSignal Early Access (25 dealers, LinkedIn outreach pipeline).

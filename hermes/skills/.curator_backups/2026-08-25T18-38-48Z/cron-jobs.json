@@ -1,0 +1,85 @@
+{
+  "jobs": [
+    {
+      "id": "36a5568db076",
+      "name": "herby-daily-backup",
+      "prompt": "Run the daily backup script to backup all Herby configuration to GitHub.\n\nThe GitHub token is: ___GITHUB_TOKEN___\n\nSet the environment variable and run the backup:\n\n```bash\nexport GITHUB_BACKUP_TOKEN=\"___GITHUB_TOKEN___\"\nexport TELEGRAM_BOT_TOKEN=\"___ID_NUMBER___:AAHnlSk6BnkKw360Mgt3KdK8h2rI8n-JRHc\"\nexport TELEGRAM_CHAT_ID=\"___ID_NUMBER___\"\n\n# Run backup\n~/.hermes/bin/daily-backup.sh\n```\n\nReport success or any errors.",
+      "skills": [],
+      "skill": null,
+      "model": null,
+      "provider": null,
+      "base_url": null,
+      "script": null,
+      "schedule": {
+        "kind": "cron",
+        "expr": "30 4 * * *",
+        "display": "30 4 * * *"
+      },
+      "schedule_display": "30 4 * * *",
+      "repeat": {
+        "times": null,
+        "completed": 81
+      },
+      "enabled": true,
+      "state": "scheduled",
+      "paused_at": null,
+      "paused_reason": null,
+      "created_at": "2026-04-05T17:06:06.321746-04:00",
+      "next_run_at": "2026-08-26T04:30:00-04:00",
+      "last_run_at": "2026-08-25T04:31:43.742312-04:00",
+      "last_status": "ok",
+      "last_error": null,
+      "deliver": "telegram:___ID_NUMBER___",
+      "origin": {
+        "platform": "telegram",
+        "chat_id": "___ID_NUMBER___",
+        "chat_name": "Andrew",
+        "thread_id": null
+      },
+      "last_delivery_error": null,
+      "fire_claim": null
+    },
+    {
+      "id": "d0ba9894a668",
+      "name": "optirfp-linkedin-daily",
+      "prompt": "Generate a new LinkedIn post for OptiRFP about successful RFP proposals. \n\nThe objective: teach one useful RFP tip in a concise, punchy headline.\n\nUse the ideogram-image-generation skill to:\n1. Generate the image using Ideogram V4 with the headline baked into the graphic\n2. Composite the exact OptiRFP logo at the bottom\n\nProcess:\n- Pick a relevant topic from: copy-paste, mirror-language, specificity, page-one, workflow, ai-automation, winning\n- Generate a punchy headline (5-8 words max)\n- Use generate_optirfp_post_with_logo() from scripts/ideogram_logo_compositor.py\n- This creates the final image with text + exact logo\n\nBefore posting:\n1. Verify the generated image is high quality (text readable, no artifacts, logo clean)\n2. If quality is 9/10 or above, proceed to post\n3. If below 9/10, regenerate with adjusted prompt\n\nThe final post should include:\n- The generated image\n- The headline as the post text\n- 3-5 relevant hashtags (#RFP #B2B #ProposalWriting, etc.)\n\nAPI Key is already configured in the skill script.",
+      "skills": [
+        "ideogram-image-generation"
+      ],
+      "skill": "ideogram-image-generation",
+      "model": null,
+      "provider": null,
+      "base_url": null,
+      "script": null,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 8 * * *",
+        "display": "0 8 * * *"
+      },
+      "schedule_display": "0 8 * * *",
+      "repeat": {
+        "times": null,
+        "completed": 27
+      },
+      "enabled": true,
+      "state": "scheduled",
+      "paused_at": null,
+      "paused_reason": null,
+      "created_at": "2026-07-14T09:53:18.644425-04:00",
+      "next_run_at": "2026-08-26T08:00:00-04:00",
+      "last_run_at": "2026-08-25T08:05:14.790021-04:00",
+      "last_status": "ok",
+      "last_error": null,
+      "deliver": "telegram",
+      "origin": {
+        "platform": "telegram",
+        "chat_id": "___ID_NUMBER___",
+        "chat_name": "Andrew",
+        "thread_id": null
+      },
+      "last_delivery_error": null,
+      "fire_claim": null
+    }
+  ],
+  "updated_at": "2026-08-25T08:05:14.790404-04:00"
+}

@@ -209,6 +209,7 @@ Worth a [time] call to see if it fits your workflow?
 - `references/icp-example-franchise-dealers.md` - Complete ICP example from LotSignal project
 - `references/beta-tester-scorecard.md` - Scoring system for prioritizing targets
 - `references/cannot-execute-research-workaround.md` - When agent cannot access LinkedIn/Sales Navigator directly, use hybrid research pattern
+- `references/free-alternatives-to-paid-tools.md` - LinkedIn/paid tools: Apollo, Hunter, dealer websites, state associations — with integration options and cost breakdown
 
 ## Pitfalls
 
