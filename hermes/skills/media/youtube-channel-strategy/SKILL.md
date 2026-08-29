@@ -219,6 +219,7 @@ Sunday:     Planning/batching for next week
 ## Support Files
 
 See `references/` directory for:
+- `reaction-channel-intelligence.md` - Content intelligence system for reaction channels (dashboard integration, research workflows, mobile UX)
 - `reaction-channel-template.md` - Full reaction channel strategy (inspired by First Watch Society)
 - `title-formulas.md` - Copy-paste title templates by niche
 - `thumbnail-checklist.md` - Design principles and tools

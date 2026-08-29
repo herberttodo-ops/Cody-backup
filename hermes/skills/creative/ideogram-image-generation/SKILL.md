@@ -314,6 +314,34 @@ Before posting, verify image quality using vision analysis:
 4. **Logo Area**: Ensure bottom area is clean for logo compositing
 5. **Score**: Rate 1-10. Regenerate if below 9/10.
 
+### Automated Quality Check
+
+Use `vision_analyze` to programmatically verify quality:
+
+```python
+# After generating image
+vision_analyze(
+    image_url="/path/to/generated_image.png",
+    question="Rate quality 1-10. Check: 1) Text readability, 2) Watermarks/fake branding, 3) Colors, 4) Artifacts"
+)
+
+# Score 9+ = proceed to post
+# Score < 9 = regenerate with adjusted prompt
+```
+
+**Quality Criteria:**
+- **9-10/10**: Crystal clear text, no artifacts, clean logo, perfect colors → Proceed
+- **7-8/10**: Minor issues (slight blur, color slightly off) → Regenerate if time permits
+- **< 7/10**: Significant issues → Must regenerate
+
+### Regeneration Strategy
+
+When quality is below threshold:
+1. **Simplify headline** - Shorter text renders more reliably
+2. **Remove punctuation** - Commas and quotes can confuse the AI
+3. **Adjust visual theme** - Try a different topic if artifacts persist
+4. **Regenerate with same seed** - Only if partial success (rarely works)
+
 ## Prompt Engineering for Clean Results (Updated)
 
 Ideogram V4 often adds fake watermarks and branding. Aggressive exclusions required:
@@ -334,6 +362,8 @@ ABSOLUTELY FORBIDDEN - NO EXCEPTIONS:
 ..."""
 ```
 
+**Headline Length**: See `references/headline-optimization.md` for the 5-8 word rule and punctuation guidelines.
+
 **Key settings:**
 - `magic_prompt_option: "OFF"` - Disables Ideogram's prompt enhancement
 - Explicit "NO" list with examples of fake watermarks that commonly appear
@@ -351,9 +381,11 @@ ABSOLUTELY FORBIDDEN - NO EXCEPTIONS:
 | Logo path wrong | Logo file is `.jpg` not `.png` | Check actual file extension in `~/.hermes/assets/` |
 | Quality below 9/10 | AI artifacts, garbled text, wrong colors | Regenerate with adjusted prompt; Ideogram is non-deterministic |
 | Text too small or blurry | AI didn't prioritize text rendering | Add "large prominent headline" and "crystal clear text" to prompt |
+| **Text duplication/repetition** | Ideogram V4 struggles with longer headlines or complex punctuation | Keep headlines to 5-8 words max; use punchy, concise phrases; avoid commas in headline if possible |
 | Python execution blocked in cron | `execute_code` with `-c` or heredoc triggers approval requirements | Use direct `terminal` with script files instead (see `scripts/ideogram_logo_compositor.py`) |
 | Image uploads fail repeatedly | Third-party services (transfer.sh, catbox.moe, imgur, 0x0.st, file.io) are unreliable or blocked | Save images locally; use `create_branded_social_graphic` tool for direct Buffer integration, or prepare manual upload package with local path, post text, and hashtags |
 | Buffer MCP unreachable | Server connectivity issues after multiple failures | Retry after 50s cooldown; save images for manual upload later |
+| Buffer rejects local file URLs | MCP `create_post` with `file://` URLs fails in cron | Use `create_branded_social_graphic` tool instead, then prepare manual upload package |
 | OpenAI rate limiting | Too many requests to `create_branded_graphic` | Use Ideogram instead when OpenAI quota exhausted; add delays between calls |
 
 **See also:**
@@ -378,6 +410,7 @@ ABSOLUTELY FORBIDDEN - NO EXCEPTIONS:
 - Output: `~/.hermes/generated_images/ideogram_*.png`
 - Compositor script: `scripts/ideogram_logo_compositor.py` - Complete working implementation
 - Reference: `references/fake-watermark-patterns.md` - Documented fake branding patterns
+- Reference: `references/headline-optimization.md` - Headline length and punctuation best practices
 - Reference: `references/cost-comparison.md`
 - Reference: `references/v4-migration-notes.md`
 - Reference: `references/cron-environment-issues.md` - Essential reading for scheduled jobs
@@ -436,28 +469,63 @@ In cron environments, these services failed during testing:
 
 When full automation is blocked, use this fallback:
 
-1. **Generate image** using `create_branded_social_graphic` or script
-2. **Save locally** to `~/.hermes/generated_images/`
-3. **Verify quality** with `vision_analyze`
-4. **Prepare post text** with headline and hashtags
-5. **Attempt Buffer post**:
-   - If successful: Done
-   - If failed: Log content for manual posting
-6. **Output**: Provide user with:
-   - Local image path
-   - Post copy
-   - Recommended hashtags
-   - Instructions for manual upload
+### Primary Fallback: Use create_branded_social_graphic Tool
 
-## Complete Example: Cron-Safe Workflow
+When `mcp__buffer__create_post` fails with local file URLs:
+
+```python
+# Step 1: Generate using the branded graphic tool (handles Buffer integration)
+create_branded_social_graphic(
+    headline="Your headline here",
+    topic="winning",
+    aspect_ratio="square"
+)
+# Returns: local_path, url (file://)
+
+# Step 2: Verify quality
+vision_analyze(
+    image_url="{local_path}",
+    question="Rate quality 1-10, check for watermarks"
+)
+
+# Step 3: If quality >= 9/10, prepare manual upload package
+```
+
+### Manual Upload Package Format
+
+When automated posting fails, provide the user with:
+
+```markdown
+## 📁 Image Location
+`/home/herby/.hermes/generated_images/optirfp_social_*.png`
+
+## 📝 POST COPY
+[Headline as first line - punchy and concise]
+
+[Body text expanding on the tip]
+
+[Call to action or insight]
+
+## 🏷️ HASHTAGS
+#RFP #B2BSales #ProposalWriting #SalesTips #WinRate
+```
+
+### Upload Instructions for User
+
+1. Go to [Buffer](https://buffer.com) → OptiRFP LinkedIn channel
+2. Upload the image from the local path provided
+3. Copy the post text
+4. Add hashtags
+5. Schedule or add to queue
+
+### Complete Cron-Safe Workflow
 
 ```yaml
-# Workflow for scheduled posts
-steps:
+workflow:
   1. generate:
      tool: create_branded_social_graphic
      args:
-       headline: "Your headline here"
+       headline: "5-8 word punchy headline"
        topic: "winning"
        aspect_ratio: "square"
   
@@ -465,19 +533,23 @@ steps:
      tool: vision_analyze
      args:
        image_url: "{output.local_path}"
-       question: "Rate quality 1-10, check for watermarks"
+       question: "Rate quality 1-10, check for watermarks, text duplication"
   
   3. attempt_post:
      tool: mcp__buffer__create_post
-     if_fails: save_for_manual
+     # Only works if image URL is publicly accessible
+     if_fails: prepare_manual_package
   
   4. fallback:
      action: report_local_path_and_copy
      output:
        - image_path
-       - post_text
-       - hashtags
-```
+       ### Logo Compositing Best Practices
+
+       1. **Transparency**: Always make white backgrounds transparent for dark themes
+       2. **Sizing**: Logo should be 15-20% of image width, positioned at bottom
+       3. **Margins**: Keep 40-60px padding from edges
+       4. **Format**: Accept both PNG and JPG logos, auto-detect in `~/.hermes/assets/`
 
 This skill demonstrates a reusable pattern for AI-generated image workflows:
 
@@ -488,6 +560,8 @@ This skill demonstrates a reusable pattern for AI-generated image workflows:
 5. **Composite** brand assets (logos) only after clean base confirmed
 
 This pattern prevents posting low-quality or artifact-ridden images to social media.
+
+**For cron/scheduled posting workflows, see [Posting Workflow in Restricted Environments](#___LONG_STRING___)**
 
 ### Logo Compositing Best Practices
 
