@@ -386,6 +386,7 @@ ABSOLUTELY FORBIDDEN - NO EXCEPTIONS:
 | Image uploads fail repeatedly | Third-party services (transfer.sh, catbox.moe, imgur, 0x0.st, file.io) are unreliable or blocked | Save images locally; use `create_branded_social_graphic` tool for direct Buffer integration, or prepare manual upload package with local path, post text, and hashtags |
 | Buffer MCP unreachable | Server connectivity issues after multiple failures | Retry after 50s cooldown; save images for manual upload later |
 | Buffer rejects local file URLs | MCP `create_post` with `file://` URLs fails in cron | Use `create_branded_social_graphic` tool instead, then prepare manual upload package |
+| **Buffer `schedulingType` validation error** | Using `"addToQueue"` as `schedulingType` value fails validation | `schedulingType` must be `"notification"` or `"automatic"`; use `mode: "addToQueue"` to control queue behavior |
 | OpenAI rate limiting | Too many requests to `create_branded_graphic` | Use Ideogram instead when OpenAI quota exhausted; add delays between calls |
 
 **See also:**
@@ -446,18 +447,31 @@ openai_image_generate: {...}
 create_branded_social_graphic: {...}
 ```
 
-### Upload Service Reliability
-In cron environments, these services failed during testing:
-- `transfer.sh` - Connection refused
-- `catbox.moe` - 413 Request Entity Too Large
-- `0x0.st` - Uploads disabled due to spam
-- `imgur` API - 503 backend errors, requires authentication
-- `file.io` - Intermittent failures, 301 redirects
+### Upload Service Reliability (Updated August 2026)
+
+Image upload services for temporary hosting (needed for Buffer MCP with public URLs):
+
+| Service | Status | Notes |
+|---------|--------|-------|
+| `transfer.sh` | ❌ Failing | Connection refused |
+| `0x0.st` | ❌ Disabled | Uploads disabled due to spam |
+| `catbox.moe` | ✅ Working | Requires `time` parameter (e.g., `time=1h`) |
+| `imgur` API | ❌ Unreliable | 503 errors, requires auth |
+| `file.io` | ❌ Failing | 301 redirects, intermittent |
+
+**Working catbox.moe example:**
+```bash
+curl -s -F "reqtype=fileupload" -F "time=1h" \
+  -F "fileToUpload=@/path/to/image.png" \
+  https://litterbox.catbox.moe/resources/internals/api.php
+# Returns: https://litter.catbox.moe/xxxxx.png
+```
 
 **Recommendation**: Save images locally to `~/.hermes/generated_images/` and either:
 1. Use `create_branded_social_graphic` tool which handles Buffer integration directly
 2. Queue posts without images and upload manually via Buffer web UI
 3. Use Buffer's native image upload via MCP when server is healthy
+4. Use catbox.moe with `time` parameter for temporary public URLs
 
 ### Buffer MCP Server Reliability
 - Server may become unreachable after consecutive failures
@@ -490,6 +504,30 @@ vision_analyze(
 
 # Step 3: If quality >= 9/10, prepare manual upload package
 ```
+
+### Buffer MCP Posting (with Public Image URL)
+
+When you have a publicly accessible image URL (e.g., from catbox.moe):
+
+```python
+# Correct parameter usage
+mcp__buffer__create_post(
+    channelId="your_linkedin_channel_id",
+    assets=[{
+        "image": {
+            "url": "https://litter.catbox.moe/xxxxx.png",
+            "metadata": {"altText": "Your alt text"}
+        }
+    }],
+    text="Your post text here\n\n#hashtags",
+    schedulingType="automatic",  # "automatic" or "notification" (required)
+    mode="addToQueue"            # "addToQueue", "shareNow", "shareNext", "customScheduled"
+)
+```
+
+**Critical:** `schedulingType` and `mode` are separate parameters:
+- `schedulingType`: Controls publishing method (`"automatic"` = auto-publish, `"notification"` = manual approval)
+- `mode`: Controls timing (`"addToQueue"`, `"shareNow"`, `"shareNext"`, `"customScheduled"`)
 
 ### Manual Upload Package Format
 

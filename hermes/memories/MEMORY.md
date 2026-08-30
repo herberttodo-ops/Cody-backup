@@ -8,8 +8,6 @@ Current Priorities: **TLC Rescue** - Bingo Unleashed fundraiser (sponsor outreac
 §
 Current Priorities: **Rival Productions** - Webinar automation pipeline (deployed & running)
 §
-See Also: [memory/README.md](memory/README.md) - Full memory system documentation
-§
 See Also: [AGENTS.md](AGENTS.md) - Agent operating procedures
 §
 See Also: [HEARTBEAT.md](HEARTBEAT.md) - Periodic check reminders
