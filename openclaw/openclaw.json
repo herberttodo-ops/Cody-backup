@@ -58,8 +58,16 @@
           "anthropic/claude-haiku-3-5"
         ]
       },
-      "memorySearch": {
-        "enabled": false
+      "modelPolicy": {
+        "allow": [
+          "openrouter/auto",
+          "openrouter/moonshotai/kimi-k2.5",
+          "openrouter/moonshotai/kimi-k2.6",
+          "anthropic/claude-opus-4-6",
+          "anthropic/claude-sonnet-4-6",
+          "anthropic/claude-haiku-3-5",
+          "anthropic/claude-opus-4-7"
+        ]
       }
     }
   },
@@ -72,23 +80,21 @@
     "port": 18789,
     "bind": "loopback",
     "tailscale": {
-      "mode": "off",
-      "resetOnExit": false
-    },
-    "controlUi": {
-      "allowInsecureAuth": true
+      "mode": "off"
     },
     "nodes": {
-      "denyCommands": [
-        "camera.snap",
-        "camera.clip",
-        "screen.record",
-        "contacts.add",
-        "calendar.add",
-        "reminders.add",
-        "sms.send",
-        "sms.search"
-      ]
+      "commands": {
+        "deny": [
+          "camera.snap",
+          "camera.clip",
+          "screen.record",
+          "contacts.add",
+          "calendar.add",
+          "reminders.add",
+          "sms.send",
+          "sms.search"
+        ]
+      }
     }
   },
   "session": {
@@ -150,6 +156,9 @@
       },
       "ollama": {
         "enabled": true
+      },
+      "brave": {
+        "enabled": true
       }
     }
   },
@@ -160,8 +169,10 @@
     "lastRunMode": "local"
   },
   "meta": {
-    "lastTouchedVersion": "2026.7.1-2",
-    "lastTouchedAt": "2026-08-04T19:05:26.136Z"
+    "lastTouchedVersion": "2026.8.1",
+    "migrations": {
+      "modelPolicyAllowlist": true
+    }
   },
   "skills": {
     "entries": {
@@ -282,6 +293,11 @@
       "xurl": {
         "enabled": false
       }
+    }
+  },
+  "memory": {
+    "search": {
+      "enabled": false
     }
   }
 }
