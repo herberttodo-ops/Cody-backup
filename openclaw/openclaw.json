@@ -69,6 +69,9 @@
           "anthropic/claude-opus-4-7"
         ]
       }
+    },
+    "entries": {
+      "main": {}
     }
   },
   "gateway": {
@@ -124,6 +127,11 @@
   "channels": {
     "telegram": {
       "enabled": true,
+      "accounts": {
+        "default": {
+          "botToken": "___BOT_TOKEN___"
+        }
+      },
       "dmPolicy": "allowlist",
       "allowFrom": [
         "___ID_NUMBER___"
@@ -133,7 +141,6 @@
           "requireMention": true
         }
       },
-      "botToken": "___BOT_TOKEN___",
       "streaming": {
         "mode": "partial"
       },
@@ -163,8 +170,8 @@
     }
   },
   "wizard": {
-    "lastRunAt": "2026-05-30T14:10:38.240Z",
-    "lastRunVersion": "2026.5.27",
+    "lastRunAt": "2026-09-01T18:29:04.693Z",
+    "lastRunVersion": "2026.8.1",
     "lastRunCommand": "doctor",
     "lastRunMode": "local"
   },

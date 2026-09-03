@@ -418,6 +418,7 @@ ABSOLUTELY FORBIDDEN - NO EXCEPTIONS:
 - Reference: `references/layout-prompting-guide.md`
 - Reference: `references/v4-api-spec.md`
 - Reference: `references/social-media-workflow.md`
+- Reference: `references/buffer-mcp-image-upload.md` - Working pattern for Buffer MCP posting with catbox.moe uploads
 
 ## API Documentation
 

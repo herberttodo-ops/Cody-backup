@@ -167,3 +167,13 @@ When user says "research [topic]":
 
 - Firecrawl skill: `skills/openclaw-imports/firecrawl-search/`
 - Example scripts: `~/.hermes/scripts/fws-auto-intel.*`
+- Title cleaning: `skills/research/web-scraping-content-intelligence/` — critical pitfall when scraping movie titles with trailer numbers
+
+## B2B Building in Public Pattern
+
+For B2B SaaS products (like OptiRFP, LotSignal), combine professional business authority with authentic personal storytelling:
+
+**Business Page**: Industry stats, customer wins, product features
+**Personal Profile**: Dealer conversations, feature failures, honest struggles
+
+See `skills/social-media/linkedin-content-system/references/building-in-public-b2b-pattern.md` for full implementation.
