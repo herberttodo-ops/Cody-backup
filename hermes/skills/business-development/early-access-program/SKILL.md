@@ -1,7 +1,7 @@
 ---
 name: early-access-program
 description: Build systematic early access programs for software product launches. Includes ICP discovery, target research, outreach sequencing, and beta tester onboarding.
-version: 1.0.0
+version: 1.1.0
 author: Andrew (Hermes session)
 ---
 
@@ -205,11 +205,13 @@ Worth a [time] call to see if it fits your workflow?
 ## References
 
 - `references/target-research-template.md` - Step-by-step research methodology
+- `references/tiered-outreach-priority-system.md` - Three-tier classification (immediate/warm/strategic) with scoring matrix and state-by-state priority rankings
 - `references/outreach-message-templates.md` - 4-message sequences by segment
 - `references/icp-example-franchise-dealers.md` - Complete ICP example from LotSignal project
 - `references/beta-tester-scorecard.md` - Scoring system for prioritizing targets
 - `references/cannot-execute-research-workaround.md` - When agent cannot access LinkedIn/Sales Navigator directly, use hybrid research pattern
 - `references/free-alternatives-to-paid-tools.md` - LinkedIn/paid tools: Apollo, Hunter, dealer websites, state associations — with integration options and cost breakdown
+- `references/___LONG_STRING___.md` - How to find GM/owner contact info via dealership websites when LinkedIn/paid tools are unavailable
 
 ## Pitfalls
 

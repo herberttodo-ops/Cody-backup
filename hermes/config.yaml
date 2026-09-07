@@ -218,6 +218,7 @@ approvals:
   mode: manual
   timeout: 60
 command_allowlist:
+  - recursive delete
   - force kill processes
   - script execution via heredoc
   - stop/restart system service

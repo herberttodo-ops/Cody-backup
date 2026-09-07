@@ -149,16 +149,39 @@ scripts/vercel_env.sh --project bountylock --list
 - Check token is set correctly
 - Verify token hasn't expired
 
+**"Not authorized: Trying to access resource under scope"**
+- The token belongs to a different team/scope than the project
+- Common when project was created under personal account but token is for a team
+- **Fix:** Use `npx vercel login` to authenticate with the correct scope, then deploy
+- Or create a new token scoped to the specific team that owns the project
+- Check which teams you have access to: `curl -s -H "Authorization: Bearer $TOKEN" https://api.vercel.com/v1/user`
+- **Quick fix:** Remove stale `.vercel/` directory and re-deploy: `rm -rf .vercel/ && npx vercel --prod`
+- See `references/token-scope-mismatch-fix.md` for complete diagnosis and 4 solutions
+
 **"Project not found"**
 - Verify project name matches Vercel project
 - Check account has access to project
+- The project ID in `.vercel/project.json` may be stale if project was recreated
 
 **"Deployment failed"**
 - Check build logs: `scripts/vercel_logs.sh --deployment dpl_xxx`
 - Verify environment variables are set correctly
 - Check for build errors in code
 
+**"No Next.js version detected" (API deployment error)**
+- Occurs when deploying via API without proper source files
+- **Fix:** Use CLI deployment (`npx vercel --prod`) instead of API for Next.js projects
+- Or ensure `package.json` with `next` dependency is included in the deployment files
+
+**Token works for API but CLI still asks for login**
+- CLI stores auth separately from API tokens
+- **Fix:** Run `npx vercel login` once, or write token to `~/.vercel/auth.json`:
+  ```bash
+  mkdir -p ~/.vercel && echo '{"token": "___TOKEN___"}' > ~/.vercel/auth.json
+  ```
+
 ## Reference Files
 
 - **Vercel API Reference:** See [vercel-api.md](references/vercel-api.md) for complete API documentation
 - **Deployment Patterns:** See [deployment-patterns.md](references/deployment-patterns.md) for common deployment workflows
+- **Token Scope Mismatch:** See [token-scope-mismatch-fix.md](references/token-scope-mismatch-fix.md) when `npx vercel` fails with "Not authorized" despite valid token

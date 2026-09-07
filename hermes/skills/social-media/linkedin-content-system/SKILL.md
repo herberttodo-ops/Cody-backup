@@ -100,6 +100,35 @@ Every post needs TWO versions:
 
 **The personal version should paraphrase, not just repost.** Add your own authentic angle as someone who was actually there.
 
+### Version C: Building in Public (Early-Stage)
+**When:** The brand is pre-launch or early beta and the founder wants to build trust through vulnerability.
+
+**Tone characteristics:**
+- Acknowledge what you DON'T know: "I thought X. I was wrong."
+- Share specific mistakes, not generic lessons: "My first 5 calls went like this..."
+- Use "we're learning" not "we've figured out": "Still don't have a clean answer. But at least I'm asking the right question now."
+- Focus on the process, not the product: "Month 1: built dashboards. Month 2: realized they didn't need dashboards."
+- Numbers and specifics matter more than claims: "8 units. $32K loss. One strategy shift."
+
+**Anti-patterns for Building in Public:**
+- ❌ "Here's how we solved it" (implies you're done learning)
+- ❌ "Dealers need X" (speaks for the customer)
+- ❌ "We're disrupting the industry" (arrogant for early-stage)
+- ✅ "I assumed dealers needed X. Here's what I found when I asked."
+- ✅ "Three months talking to dealers. Three things I got wrong."
+- ✅ "The problem isn't awareness. It's bandwidth. Still digging into why."
+
+**Structure that works:**
+1. **The assumption** (what I thought)
+2. **The reality** (what I found)
+3. **The lesson** (what I'm changing)
+4. **The open question** (what I still don't know)
+
+**Examples of strong Building in Public hooks:**
+- "I built the wrong thing for 3 months. Here's what I actually learned."
+- "The problem with my first 5 dealer calls."
+- "I don't know what I don't know. But at least I'm asking now."
+
 ---
 
 ## Follow-Up Comments (Minimum 2 Per Post)

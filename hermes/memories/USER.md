@@ -10,15 +10,11 @@ _Learn about the person you're helping. Update this as you go._
 §
 **Notes:** Entrepreneur and creative operator across biz dev, marketing, video production, real estate, fundraising, education, and AI-powered digital products. Prefers clarity, efficiency, practical outcomes. Likes structured, actionable outputs (checklists, frameworks, step-by-step). Professional calm tone with some snark ok. Avoid em dashes in written content.
 §
-Current Active Lanes: **Full-time role**: video producer for an educational department.
-§
-Current Active Lanes: **Rival Productions**: own video production company.
+L5: Rival Prod (video). Workflow: Distinct visual design per brand. Comm: Exact locations when asked "where is X".
 §
 Current Active Lanes: **Short-term rentals**: properties in the Poconos (PA).
 §
 Communication Preferences: **Primary channel:** Telegram
-§
-**Backup:** Web chat
 §
 Communication Preferences: **Tone:** Professional, calm, occasionally snarky
 §

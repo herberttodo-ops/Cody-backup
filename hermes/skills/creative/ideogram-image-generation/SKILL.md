@@ -419,6 +419,7 @@ ABSOLUTELY FORBIDDEN - NO EXCEPTIONS:
 - Reference: `references/v4-api-spec.md`
 - Reference: `references/social-media-workflow.md`
 - Reference: `references/buffer-mcp-image-upload.md` - Working pattern for Buffer MCP posting with catbox.moe uploads
+- Reference: `references/successful-cron-workflow.md` - **Complete working end-to-end cron job workflow** (Sept 2026)
 
 ## API Documentation
 
@@ -448,7 +449,7 @@ openai_image_generate: {...}
 create_branded_social_graphic: {...}
 ```
 
-### Upload Service Reliability (Updated August 2026)
+### Upload Service Reliability (Updated Sept 2026)
 
 Image upload services for temporary hosting (needed for Buffer MCP with public URLs):
 
@@ -456,17 +457,19 @@ Image upload services for temporary hosting (needed for Buffer MCP with public U
 |---------|--------|-------|
 | `transfer.sh` | ❌ Failing | Connection refused |
 | `0x0.st` | ❌ Disabled | Uploads disabled due to spam |
-| `catbox.moe` | ✅ Working | Requires `time` parameter (e.g., `time=1h`) |
+| **catbox.moe** | ✅ **WORKING** | **Requires `time=1h` parameter** |
 | `imgur` API | ❌ Unreliable | 503 errors, requires auth |
 | `file.io` | ❌ Failing | 301 redirects, intermittent |
 
-**Working catbox.moe example:**
+**Working catbox.moe example (verified Sept 2026):**
 ```bash
 curl -s -F "reqtype=fileupload" -F "time=1h" \
   -F "fileToUpload=@/path/to/image.png" \
   https://litterbox.catbox.moe/resources/internals/api.php
 # Returns: https://litter.catbox.moe/xxxxx.png
 ```
+
+**Critical:** The `time=1h` parameter is REQUIRED. Without it, uploads may fail.
 
 **Recommendation**: Save images locally to `~/.hermes/generated_images/` and either:
 1. Use `create_branded_social_graphic` tool which handles Buffer integration directly
