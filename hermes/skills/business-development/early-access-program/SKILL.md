@@ -220,4 +220,5 @@ Worth a [time] call to see if it fits your workflow?
 3. **Don't write generic messages**: "I'd love to connect" gets ignored. Lead with insight specific to their world.
 4. **Don't give up too soon**: 10-20% LinkedIn acceptance is normal. 5-10% reply rate is good. Follow up 3-4 times.
 5. **Don't assume agent can execute research directly**: LinkedIn Sales Navigator, ZoomInfo require user credentials. The agent can BUILD the framework (target lists, search queries, message templates) but the user must EXECUTE the actual lookups. Set this expectation clearly upfront. See `references/cannot-execute-research-workaround.md` for the hybrid pattern.
-6. **Don't forget deployment step**: When building dashboards (Vercel/Notion) to support outreach, remember the user needs to actually deploy/publish it before they can use it.
+6. **When LinkedIn/Google search is blocked, use alternative research paths**: Google/LinkedIn may block bot traffic. Fall back to DuckDuckGo, direct website scraping (check /meetourstaff, /aboutus, /team pages), email pattern analysis (jrosser@ = Rosser likely owner), testimonial mining, and state business registries. See `references/___LONG_STRING___.md`.
+7. **Don't forget deployment step**: When building dashboards (Vercel/Notion) to support outreach, remember the user needs to actually deploy/publish it before they can use it.

@@ -151,7 +151,9 @@ def send_telegram(self, message: str):
 2. **Build Failures**: Fix ALL TypeScript errors before deployment
 3. **Telegram Auth**: 401 errors mean TELEGRAM_BOT_TOKEN isn't set
 4. **Rate Limits**: Firecrawl free tier = 500 credits/month
-5. **Vercel Token**: Must be passed to deploy command or set in env
+5. **Vercel Token Scope Mismatch**: If deploy fails with "Not authorized: Trying to access resource under scope X", the cached `.vercel/project.json` points to a different team than the token. Fix: `rm -rf .vercel` then redeploy — the CLI will re-link to the token's team.
+6. **Modern SPA Scraping**: Many sites (dealer websites, React apps) render via JS and return empty/JS-only HTML to curl. Use `browser_navigate` + `browser_snapshot` instead of curl for these targets.
+7. **Google Sheets API Cannot Read .xlsx Files**: The Sheets API only reads native Google Sheets. For uploaded Excel files, download via Drive API (`files().get_media()`) then parse locally with `openpyxl`.
 
 ## Research Command Pattern
 

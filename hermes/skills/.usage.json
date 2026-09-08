@@ -276,14 +276,14 @@
     "archived_at": null,
     "created_at": "2026-08-29T13:22:55.819284+00:00",
     "created_by": "agent",
-    "last_patched_at": "2026-09-01T18:22:27.201381+00:00",
-    "last_used_at": "2026-09-01T18:19:51.052225+00:00",
-    "last_viewed_at": "2026-09-01T18:19:50.983489+00:00",
-    "patch_count": 2,
+    "last_patched_at": "2026-09-07T15:49:19.997132+00:00",
+    "last_used_at": "2026-09-07T15:48:14.100988+00:00",
+    "last_viewed_at": "2026-09-07T15:48:13.994809+00:00",
+    "patch_count": 4,
     "pinned": false,
     "state": "active",
-    "use_count": 1,
-    "view_count": 1
+    "use_count": 2,
+    "view_count": 2
   },
   "design-md": {
     "archived_at": null,
@@ -341,14 +341,14 @@
     "archived_at": null,
     "created_at": "2026-08-25T00:10:16.988485+00:00",
     "created_by": "agent",
-    "last_patched_at": "2026-09-06T21:34:16.102447+00:00",
-    "last_used_at": "2026-09-06T21:10:04.858795+00:00",
-    "last_viewed_at": "2026-09-06T21:10:04.683381+00:00",
-    "patch_count": 12,
+    "last_patched_at": "2026-09-07T18:48:44.038792+00:00",
+    "last_used_at": "2026-09-07T18:43:28.453377+00:00",
+    "last_viewed_at": "2026-09-07T18:43:28.337156+00:00",
+    "patch_count": 15,
     "pinned": false,
     "state": "active",
-    "use_count": 18,
-    "view_count": 18
+    "use_count": 20,
+    "view_count": 20
   },
   "email-inbox-triage": {
     "archived_at": null,
@@ -537,13 +537,13 @@
     "created_at": "2026-08-04T18:09:31.179623+00:00",
     "created_by": null,
     "last_patched_at": null,
-    "last_used_at": "2026-09-06T20:58:15.540458+00:00",
-    "last_viewed_at": "2026-09-06T20:58:15.481828+00:00",
+    "last_used_at": "2026-09-07T18:45:59.566986+00:00",
+    "last_viewed_at": "2026-09-07T18:45:59.378306+00:00",
     "patch_count": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 15,
-    "view_count": 15
+    "use_count": 18,
+    "view_count": 18
   },
   "grounded-citations": {
     "archived_at": null,
@@ -641,12 +641,12 @@
     "created_at": "2026-08-12T23:19:57.566415+00:00",
     "created_by": null,
     "last_patched_at": "2026-09-06T12:09:34.230158+00:00",
-    "last_used_at": "2026-09-06T12:07:44.940790+00:00",
+    "last_used_at": "2026-09-07T12:00:03.283029+00:00",
     "last_viewed_at": "2026-09-06T12:07:44.713999+00:00",
     "patch_count": 50,
     "pinned": false,
     "state": "active",
-    "use_count": 52,
+    "use_count": 53,
     "view_count": 27
   },
   "imessage": {
