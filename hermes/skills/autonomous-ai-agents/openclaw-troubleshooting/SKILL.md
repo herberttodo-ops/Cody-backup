@@ -113,7 +113,7 @@ openclaw
 
 ---
 
-### 5. Telegram Bot Token Format Change (v2026.8.1+)
+### 5. Telegram Bot Token Issues
 
 **Symptom:** Gateway starts but Telegram channel exits immediately with:
 ```
@@ -129,7 +129,15 @@ The `doctor --fix` migration updates the structure but **cannot unmask tokens** 
 
 **Fix:**
 
-**Step 1: Find the real token**
+**Step 1: Verify the token directly with Telegram API**
+```bash
+# Test the token before updating config — saves a restart cycle
+curl -s "https://api.telegram.org/botYOUR_TOKEN_HERE/getMe"
+# Must return: {"ok":true,"result":{"id":...,"is_bot":true,...}}
+# If it returns 404, the token is invalid or the bot was deleted
+```
+
+**Step 2: Find the real token (if masked)**
 ```bash
 # Check backup configs for unmasked token
 python3 -c "
@@ -145,20 +153,37 @@ for backup in sorted(glob.glob('/home/herby/.openclaw/openclaw.json.bak*'), reve
 "
 ```
 
-**Step 2: Update config with correct format**
+**Step 3: Update config with correct format**
 ```bash
 openclaw config set channels.telegram.accounts.default.botToken "YOUR_REAL_TOKEN_HERE"
 ```
 
-**Step 3: Restart gateway**
+**Step 4: Restart gateway**
 ```bash
+# The gateway MUST be restarted for token changes to take effect
+# Option A: if running via systemd
 systemctl --user restart openclaw-gateway.service
+
+# Option B: if running manually
+pkill -9 -f "openclaw" gateway
+sleep 3
+openclaw gateway
+
+# Option C: kill old PID specifically
+kill <PID>  # from ps aux | grep openclaw
+sleep 3
+openclaw gateway
 ```
 
-**Verification:**
+**Step 5: Verify with probe (not just health endpoint)**
 ```bash
-journalctl --user -u openclaw-gateway.service --since "1 minute ago" | grep telegram
-# Should show: [telegram] [default] channel started
+# The /health endpoint only checks the gateway process, NOT channel connectivity
+curl -s http://localhost:18789/health
+# → {"ok":true}  (gateway is running — does NOT mean Telegram works)
+
+# Use --probe to actually test the Telegram channel
+openclaw channels status --probe
+# Should show: running, connected, transport:just now, bot:@YourBotName
 ```
 
 ---
@@ -249,6 +274,12 @@ cat ~/.openclaw/logs/stability/openclaw-stability-*.json
 ```bash
 ls -la ~/.openclaw/agents/main/sessions/
 ```
+
+### Check channel health (gateway can be up but channels broken):
+```bash
+openclaw channels status --probe
+```
+Shows per-channel errors (e.g., Telegram token unauthorized) even when gateway reports `{"ok":true}`.
 
 ### Check who holds the database lock:
 ```bash

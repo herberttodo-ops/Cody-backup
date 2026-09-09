@@ -147,7 +147,8 @@
       "mediaMaxMb": 50,
       "groupAllowFrom": [
         "___ID_NUMBER___"
-      ]
+      ],
+      "botToken": "___BOT_TOKEN___"
     }
   },
   "plugins": {

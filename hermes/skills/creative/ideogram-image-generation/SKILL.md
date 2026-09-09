@@ -373,6 +373,7 @@ ABSOLUTELY FORBIDDEN - NO EXCEPTIONS:
 
 | Pitfall | Why It Happens | Fix |
 |---------|---------------|-----|
+| **ALL upload services fail** (catbox.moe 500, transfer.sh connection refused, etc.) | Third-party image hosting services have become unreliable in late 2026 | **Use manual upload fallback by default**. Generate image → verify quality → output manual upload package. Do not attempt automated uploads in cron jobs. |
 | Logo has white box on dark background | JPEG logo loaded without transparency processing | Convert to RGBA and make white pixels transparent before compositing |
 | Watermarks like "LinkedIFP" appear | Ideogram V4 adds fake branding by default | Use aggressive "NO" exclusions in prompt (see `references/fake-watermark-patterns.md`); regenerate if they appear |
 | Fake "OptiIFP" or "IptiRFp" branding | AI corruption of requested branding | Add specific exclusions for these patterns |
@@ -451,25 +452,47 @@ create_branded_social_graphic: {...}
 
 ### Upload Service Reliability (Updated Sept 2026)
 
+**⚠️ CURRENT STATUS: ALL upload services are failing as of late 2026**
+
 Image upload services for temporary hosting (needed for Buffer MCP with public URLs):
 
 | Service | Status | Notes |
 |---------|--------|-------|
 | `transfer.sh` | ❌ Failing | Connection refused |
 | `0x0.st` | ❌ Disabled | Uploads disabled due to spam |
-| **catbox.moe** | ✅ **WORKING** | **Requires `time=1h` parameter** |
+| **catbox.moe** | ❌ **FAILING** | 500 Internal Server Error |
 | `imgur` API | ❌ Unreliable | 503 errors, requires auth |
 | `file.io` | ❌ Failing | 301 redirects, intermittent |
 
-**Working catbox.moe example (verified Sept 2026):**
-```bash
-curl -s -F "reqtype=fileupload" -F "time=1h" \
-  -F "fileToUpload=@/path/to/image.png" \
-  https://litterbox.catbox.moe/resources/internals/api.php
-# Returns: https://litter.catbox.moe/xxxxx.png
+**Reality:** Temporary upload services are no longer reliable for automated workflows. **Use the manual upload fallback by default for cron jobs.**
+
+### Cron Job Quick Fallback (When Uploads Fail)
+
+```python
+# 1. Generate image with logo composited
+terminal: {"command": "python3 ~/.hermes/skills/creative/ideogram-image-generation/scripts/ideogram_logo_compositor.py"}
+
+# 2. Verify quality with vision_analyze
+vision_analyze:
+  image_url: "/home/herby/.hermes/generated_images/optirfp_ideogram_*.png"
+  question: "Rate quality 1-10. Check: text readable? watermarks?"
+
+# 3. If quality >= 9/10, output manual upload package (do NOT attempt uploads)
 ```
 
-**Critical:** The `time=1h` parameter is REQUIRED. Without it, uploads may fail.
+**Expected Output:**
+- Image saved to: `~/.hermes/generated_images/optirfp_ideogram_*.png`
+- Manual upload instructions for Buffer web UI
+- Post copy with hashtags
+
+This is the reliable pattern. Automated uploads via temporary services will likely fail.
+
+### Upload Service History
+
+These previously worked but now fail:
+- **catbox.moe**: Was working with `time=1h` parameter (Sept 2026), now returns 500 errors
+- **transfer.sh**: Connection refused
+- **0x0.st**: Uploads disabled due to spam
 
 **Recommendation**: Save images locally to `~/.hermes/generated_images/` and either:
 1. Use `create_branded_social_graphic` tool which handles Buffer integration directly

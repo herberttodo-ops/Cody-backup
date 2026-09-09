@@ -219,11 +219,14 @@ approvals:
   timeout: 60
 command_allowlist:
   - recursive delete
+  - delete in root path
+  - shell command via -c/-lc flag
   - force kill processes
   - script execution via heredoc
   - stop/restart system service
   - script execution via -e/-c flag
   - hermes update (restarts gateway, kills running agents)
+  - overwrite system file via redirection
 security:
   redact_secrets: true
   tirith_enabled: true
