@@ -1,0 +1,19 @@
+#!/bin/bash
+# Google Workspace skill launcher - uses google_venv Python
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+GOOGLE_VENV="/home/herby/.hermes/google_venv"
+HERMES_HOME="/home/herby/.hermes"
+
+# Check if google_venv exists
+if [[ ! -d "$GOOGLE_VENV" ]]; then
+    echo "ERROR: google_venv not found at $GOOGLE_VENV"
+    echo "Run: uv venv ~/.hermes/google_venv && uv pip install --python ~/.hermes/google_venv/bin/python google-api-python-client google-auth-oauthlib google-auth-httplib2"
+    exit 1
+fi
+
+# Set up Python path so scripts can find hermes_constants
+export PYTHONPATH="$HERMES_HOME/hermes-agent:$PYTHONPATH"
+
+# Run the script with google_venv Python
+exec "$GOOGLE_VENV/bin/python" "$SCRIPT_DIR/google_api.py" "$@"

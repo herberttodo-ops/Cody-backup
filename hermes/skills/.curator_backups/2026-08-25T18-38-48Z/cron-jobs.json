@@ -3,7 +3,7 @@
     {
       "id": "36a5568db076",
       "name": "herby-daily-backup",
-      "prompt": "Run the daily backup script to backup all Herby configuration to GitHub.\n\nThe GitHub token is: ___GITHUB_TOKEN___\n\nSet the environment variable and run the backup:\n\n```bash\nexport GITHUB_BACKUP_TOKEN=\"___GITHUB_TOKEN___\"\nexport TELEGRAM_BOT_TOKEN=\"___ID_NUMBER___:AAHnlSk6BnkKw360Mgt3KdK8h2rI8n-JRHc\"\nexport TELEGRAM_CHAT_ID=\"___ID_NUMBER___\"\n\n# Run backup\n~/.hermes/bin/daily-backup.sh\n```\n\nReport success or any errors.",
+      "prompt": "Run the daily backup script to backup all Herby configuration to GitHub.\n\nThe GitHub token is: ___GITHUB_TOKEN___\n\nSet the environment variable and run the backup:\n\n```bash\nexport GITHUB_BACKUP_TOKEN=\"___GITHUB_TOKEN___\"\nexport TELEGRAM_BOT_TOKEN=\"___ID___:AAHnlSk6BnkKw360Mgt3KdK8h2rI8n-JRHc\"\nexport TELEGRAM_CHAT_ID=\"___ID___\"\n\n# Run backup\n~/.hermes/bin/daily-backup.sh\n```\n\nReport success or any errors.",
       "skills": [],
       "skill": null,
       "model": null,
@@ -29,10 +29,10 @@
       "last_run_at": "2026-08-25T04:31:43.742312-04:00",
       "last_status": "ok",
       "last_error": null,
-      "deliver": "telegram:___ID_NUMBER___",
+      "deliver": "telegram:___ID___",
       "origin": {
         "platform": "telegram",
-        "chat_id": "___ID_NUMBER___",
+        "chat_id": "___ID___",
         "chat_name": "Andrew",
         "thread_id": null
       },
@@ -73,7 +73,7 @@
       "deliver": "telegram",
       "origin": {
         "platform": "telegram",
-        "chat_id": "___ID_NUMBER___",
+        "chat_id": "___ID___",
         "chat_name": "Andrew",
         "thread_id": null
       },

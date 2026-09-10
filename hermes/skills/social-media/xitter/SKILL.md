@@ -129,12 +129,12 @@ If reads work but writes fail, regenerate the access token after confirming `Rea
 
 ```bash
 x-cli tweet post "hello world"
-x-cli tweet get https://x.com/user/status/___ID_NUMBER___
-x-cli tweet delete ___ID_NUMBER___
-x-cli tweet reply ___ID_NUMBER___ "nice post"
-x-cli tweet quote ___ID_NUMBER___ "worth reading"
+x-cli tweet get https://x.com/user/status/___ID___
+x-cli tweet delete ___ID___
+x-cli tweet reply ___ID___ "nice post"
+x-cli tweet quote ___ID___ "worth reading"
 x-cli tweet search "AI agents" --max 20
-x-cli tweet metrics ___ID_NUMBER___
+x-cli tweet metrics ___ID___
 ```
 
 ### Users
@@ -151,15 +151,15 @@ x-cli user following openai --max 50
 ```bash
 x-cli me mentions --max 20
 x-cli me bookmarks --max 20
-x-cli me bookmark ___ID_NUMBER___
-x-cli me unbookmark ___ID_NUMBER___
+x-cli me bookmark ___ID___
+x-cli me unbookmark ___ID___
 ```
 
 ### Quick Actions
 
 ```bash
-x-cli like ___ID_NUMBER___
-x-cli retweet ___ID_NUMBER___
+x-cli like ___ID___
+x-cli retweet ___ID___
 ```
 
 ## Output Modes
@@ -169,8 +169,8 @@ Use structured output when the agent needs to inspect fields programmatically:
 ```bash
 x-cli -j tweet search "AI agents" --max 5
 x-cli -p user get openai
-x-cli -md tweet get ___ID_NUMBER___
-x-cli -v -j tweet get ___ID_NUMBER___
+x-cli -md tweet get ___ID___
+x-cli -v -j tweet get ___ID___
 ```
 
 Recommended defaults:

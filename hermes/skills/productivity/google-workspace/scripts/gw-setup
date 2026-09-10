@@ -1,0 +1,25 @@
+#!/bin/bash
+# Google Workspace setup launcher - uses google_venv Python
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+GOOGLE_VENV="/home/herby/.hermes/google_venv"
+HERMES_HOME="/home/herby/.hermes"
+
+# Check if google_venv exists
+if [[ ! -d "$GOOGLE_VENV" ]]; then
+    echo "ERROR: google_venv not found at $GOOGLE_VENV"
+    echo "Creating it now..."
+    if command -v uv &> /dev/null; then
+        uv venv "$GOOGLE_VENV"
+        uv pip install --python "$GOOGLE_VENV/bin/python" google-api-python-client google-auth-oauthlib google-auth-httplib2
+    else
+        echo "Please install uv first: curl -LsSf https://astral.sh/uv/install.sh | sh"
+        exit 1
+    fi
+fi
+
+# Set up Python path so scripts can find hermes_constants
+export PYTHONPATH="$HERMES_HOME/hermes-agent:$PYTHONPATH"
+
+# Run the setup script with google_venv Python
+exec "$GOOGLE_VENV/bin/python" "$SCRIPT_DIR/setup.py" "$@"

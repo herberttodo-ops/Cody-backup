@@ -142,7 +142,7 @@ curl -s -X POST "https://api.bufferapp.com/1/updates/create.json" \
   -d "access_token=$BUFFER_API_TOKEN" \
   -d "profile_ids[]=PROFILE_ID" \
   -d "text=Scheduled post" \
-  -d "scheduled_at=___ID_NUMBER___"
+  -d "scheduled_at=___ID___"
 ```
 
 ## MCP JSON Structure Pitfall

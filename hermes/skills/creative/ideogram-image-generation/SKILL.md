@@ -421,6 +421,7 @@ ABSOLUTELY FORBIDDEN - NO EXCEPTIONS:
 - Reference: `references/social-media-workflow.md`
 - Reference: `references/buffer-mcp-image-upload.md` - Working pattern for Buffer MCP posting with catbox.moe uploads
 - Reference: `references/successful-cron-workflow.md` - **Complete working end-to-end cron job workflow** (Sept 2026)
+- Reference: `references/successful-topic-executions.md` - Log of headline/topic combinations that produced 10/10 results
 
 ## API Documentation
 

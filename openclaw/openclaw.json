@@ -129,12 +129,12 @@
       "enabled": true,
       "accounts": {
         "default": {
-          "botToken": "___BOT_TOKEN___"
+          "botToken": "___TOKEN___"
         }
       },
       "dmPolicy": "allowlist",
       "allowFrom": [
-        "___ID_NUMBER___"
+        "___ID___"
       ],
       "groups": {
         "*": {
@@ -146,9 +146,9 @@
       },
       "mediaMaxMb": 50,
       "groupAllowFrom": [
-        "___ID_NUMBER___"
+        "___ID___"
       ],
-      "botToken": "___BOT_TOKEN___"
+      "botToken": "___TOKEN___"
     }
   },
   "plugins": {

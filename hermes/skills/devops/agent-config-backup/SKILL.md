@@ -87,7 +87,7 @@ pk-...                      → [API_KEY]
 Bearer ...                  → bearer [API_TOKEN]
 "access_token": "___TOKEN___"       → "access_token": "___TOKEN___"
 "token": "___TOKEN___"              → "token": "___TOKEN___"
-"botToken": "___BOT_TOKEN___"           → "botToken": "___BOT_TOKEN___"
+"botToken": "___TOKEN___"           → "botToken": "___TOKEN___"
 
 # Environment Variables
 TELEGRAM_BOT_TOKEN=...      → TELEGRAM_BOT_TOKEN=[TELEGRAM_BOT_TOKEN]

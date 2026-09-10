@@ -1,0 +1,9 @@
+{
+  "last_report_path": "/home/herby/.hermes/logs/curator/20260908-185352",
+  "last_run_at": "2026-09-08T18:53:52.610343+00:00",
+  "last_run_duration_seconds": 1.897069,
+  "last_run_summary": "auto: no changes; llm: skipped (consolidation off)",
+  "last_run_summary_shown_at": "2026-08-18T18:31:11.178021+00:00",
+  "paused": false,
+  "run_count": 5
+}

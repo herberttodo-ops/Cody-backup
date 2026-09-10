@@ -58,14 +58,14 @@ imsg history --chat-id 1 --limit 20 --attachments --json
 
 ```bash
 # Text only
-imsg send --to "+___ID_NUMBER___" --text "Hello!"
+imsg send --to "+___ID___" --text "Hello!"
 
 # With attachment
-imsg send --to "+___ID_NUMBER___" --text "Check this out" --file /path/to/image.jpg
+imsg send --to "+___ID___" --text "Check this out" --file /path/to/image.jpg
 
 # Force iMessage or SMS
-imsg send --to "+___ID_NUMBER___" --text "Hi" --service imessage
-imsg send --to "+___ID_NUMBER___" --text "Hi" --service sms
+imsg send --to "+___ID___" --text "Hi" --service imessage
+imsg send --to "+___ID___" --text "Hi" --service sms
 ```
 
 ### Watch for New Messages
@@ -95,8 +95,8 @@ User: "Text mom that I'll be late"
 # 1. Find mom's chat
 imsg chats --limit 20 --json | jq '.[] | select(.displayName | contains("Mom"))'
 
-# 2. Confirm with user: "Found Mom at +___ID_NUMBER___. Send 'I'll be late' via iMessage?"
+# 2. Confirm with user: "Found Mom at +___ID___. Send 'I'll be late' via iMessage?"
 
 # 3. Send after confirmation
-imsg send --to "+___ID_NUMBER___" --text "I'll be late"
+imsg send --to "+___ID___" --text "I'll be late"
 ```

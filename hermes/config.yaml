@@ -304,7 +304,7 @@ platform_toolsets:
     - hermes-signal
   homeassistant:
     - hermes-homeassistant
-TELEGRAM_HOME_CHANNEL: '-___ID_NUMBER___'
+TELEGRAM_HOME_CHANNEL: '-___ID___'
 mcp_servers:
   buffer:
     url: https://mcp.buffer.com/mcp

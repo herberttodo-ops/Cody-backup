@@ -159,7 +159,7 @@ After this, the agent can use any command below without further setup. OAuth 2.0
 | Auth status | `xurl auth status` |
 
 Notes:
-- `POST_ID` accepts full URLs too (e.g. `https://x.com/user/status/___ID_NUMBER___`) — xurl extracts the ID.
+- `POST_ID` accepts full URLs too (e.g. `https://x.com/user/status/___ID___`) — xurl extracts the ID.
 - Usernames work with or without a leading `@`.
 
 ---
@@ -173,12 +173,12 @@ xurl post "Hello world!"
 xurl post "Check this out" --media-id MEDIA_ID
 xurl post "Thread pics" --media-id 111 --media-id 222
 
-xurl reply ___ID_NUMBER___ "Great point!"
-xurl reply https://x.com/user/status/___ID_NUMBER___ "Agreed!"
-xurl reply ___ID_NUMBER___ "Look at this" --media-id MEDIA_ID
+xurl reply ___ID___ "Great point!"
+xurl reply https://x.com/user/status/___ID___ "Agreed!"
+xurl reply ___ID___ "Look at this" --media-id MEDIA_ID
 
-xurl quote ___ID_NUMBER___ "Adding my thoughts"
-xurl delete ___ID_NUMBER___
+xurl quote ___ID___ "Adding my thoughts"
+xurl delete ___ID___
 ```
 
 ### Reading & Search
@@ -186,8 +186,8 @@ xurl delete ___ID_NUMBER___
 `xurl search` queries the X index as your authenticated account and returns raw post objects — IDs, authors, full text — so results can be immediately engaged with (reply, like, repost, quote). Use it when you need the actual posts rather than a summarized answer about a topic.
 
 ```bash
-xurl read ___ID_NUMBER___
-xurl read https://x.com/user/status/___ID_NUMBER___
+xurl read ___ID___
+xurl read https://x.com/user/status/___ID___
 
 xurl search "golang"
 xurl search "from:elonmusk" -n 20
@@ -200,7 +200,7 @@ endpoint. Request the `article` tweet field and ingest `data.article.plain_text`
 from the JSON response:
 
 ```bash
-xurl --app APP_NAME '/2/tweets/___ID_NUMBER___?expansions=author_id,attachments.media_keys,referenced_tweets.id&tweet.fields=created_at,lang,public_metrics,context_annotations,entities,possibly_sensitive,conversation_id,in_reply_to_user_id,referenced_tweets,article'
+xurl --app APP_NAME '/2/tweets/___ID___?expansions=author_id,attachments.media_keys,referenced_tweets.id&tweet.fields=created_at,lang,public_metrics,context_annotations,entities,possibly_sensitive,conversation_id,in_reply_to_user_id,referenced_tweets,article'
 ```
 
 ### Users, Timeline, Mentions
@@ -217,14 +217,14 @@ xurl mentions -n 20
 ### Engagement
 
 ```bash
-xurl like ___ID_NUMBER___
-xurl unlike ___ID_NUMBER___
+xurl like ___ID___
+xurl unlike ___ID___
 
-xurl repost ___ID_NUMBER___
-xurl unrepost ___ID_NUMBER___
+xurl repost ___ID___
+xurl unrepost ___ID___
 
-xurl bookmark ___ID_NUMBER___
-xurl unbookmark ___ID_NUMBER___
+xurl bookmark ___ID___
+xurl unbookmark ___ID___
 
 xurl bookmarks -n 20
 xurl likes -n 20
@@ -289,7 +289,7 @@ xurl /2/users/me
 xurl -X POST /2/tweets -d '{"text":"Hello world!"}'
 
 # DELETE / PUT / PATCH
-xurl -X DELETE /2/tweets/___ID_NUMBER___
+xurl -X DELETE /2/tweets/___ID___
 
 # Custom headers
 xurl -H "Content-Type: application/json" /2/some/endpoint
@@ -332,7 +332,7 @@ Force streaming on any endpoint with `-s`.
 All commands return JSON to stdout. Structure mirrors X API v2:
 
 ```json
-{ "data": { "id": "___ID_NUMBER___", "text": "Hello world!" } }
+{ "data": { "id": "___ID___", "text": "Hello world!" } }
 ```
 
 Errors are also JSON:
@@ -353,8 +353,8 @@ xurl post "Check out this photo!" --media-id MEDIA_ID
 
 ### Reply to a conversation
 ```bash
-xurl read https://x.com/user/status/___ID_NUMBER___
-xurl reply ___ID_NUMBER___ "Here are my thoughts..."
+xurl read https://x.com/user/status/___ID___
+xurl reply ___ID___ "Here are my thoughts..."
 ```
 
 ### Search and engage
