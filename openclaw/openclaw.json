@@ -52,7 +52,7 @@
         }
       },
       "model": {
-        "primary": "openrouter/moonshotai/kimi-k2.6",
+        "primary": "openrouter/moonshotai/kimi-k2.5",
         "fallbacks": [
           "anthropic/claude-sonnet-4-6",
           "anthropic/claude-haiku-3-5"

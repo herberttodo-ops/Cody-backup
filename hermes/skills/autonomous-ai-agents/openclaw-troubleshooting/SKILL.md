@@ -1,7 +1,7 @@
 ---
 name: openclaw-troubleshooting
 description: "Troubleshoot and fix OpenClaw startup failures, migration issues, and database lock problems."
-version: 1.0.0
+version: 1.1.0
 author: Hermes Agent
 platforms: [linux]
 metadata:
@@ -307,6 +307,93 @@ Session history is preserved during migration but the format changes from JSON t
 | `Node.js >=22.22.3 required` | System Node too old | Use local Node binary (see #2) |
 | `Another Gateway owns that state` | Zombie process holds database lock | Kill all node/openclaw processes |
 | `Gateway startup failed` repeated | The failed process keeps crashing | Kill processes, check Node version, then migrate |
+| `LLM request failed` (malformed tool call) | Model returns malformed tool calling responses | Switch primary model (see Model Switching section below) |
+
+---
+
+## LLM Request Failed — Model Malformed Tool Call
+
+**Symptom:** Gateway running, Telegram connected, but messages fail with:
+```
+error=LLM request failed. rawError=Provider returned an incomplete or malformed tool call
+model=moonshotai/kimi-k2.6 provider=openrouter
+```
+
+**Important:** This is a *model-side* bug, not an OpenClaw bug. The model is returning malformed responses when the gateway sends tool schemas.
+
+**Known failing models:** `moonshotai/kimi-k2.6` on OpenRouter exhibits this with certain tool schemas.
+
+> **Note:** This same error message can also appear when `estimatedPromptTokens` exceeds `promptBudgetBeforeReserve`. If the log shows `estimatedPromptTokens=348149 promptBudgetBeforeReserve=242144`, the issue is **context pressure** (accumulated session history), not a model bug. Check [Context Pressure](references/context-pressure-diagnosis.md) first before switching models.
+
+### Diagnosis Steps
+
+1. **Check gateway logs for the exact error:**
+```bash
+journalctl --user -u openclaw-gateway --since "10 minutes ago" 2>/dev/null | grep -E "LLM|error|model"
+```
+
+2. **Check which model is configured:**
+```bash
+openclaw agents list --json 2>/dev/null | python3 -c "import json,sys; print(json.load(sys.stdin)[0]['model'])"
+```
+
+3. **Test model directly via OpenRouter API** (bypass OpenClaw):
+```bash
+curl -s https://openrouter.ai/api/v1/chat/completions \
+  -H "Authorization: Bearer YOUR_OPENROUTER_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "moonshotai/kimi-k2.6",
+    "messages": [{"role":"user","content":"Hello"}],
+    "tools": [{"type":"function","function":{"name":"test","description":"test","parameters":{"type":"object","properties":{}}}}],
+    "max_tokens": 10
+  }' 2>&1 | python3 -m json.tool | head -20
+```
+
+### Fix: Switch Primary Model
+
+**Config path for default agent model:**
+```bash
+# Change primary model (applies dynamically — no gateway restart needed)
+openclaw config set agents.defaults.model.primary "openrouter/moonshotai/kimi-k2.5"
+
+# Verify
+openclaw config get agents.defaults.model.primary
+# → openrouter/moonshotai/kimi-k2.5
+
+# Check agent picked it up
+openclaw agents list --json | grep '"model"'
+# → "model": "openrouter/moonshotai/kimi-k2.5"
+```
+
+### Recommended Models (OpenRouter)
+
+| Model | Status | Notes |
+|-------|--------|-------|
+| `openrouter/moonshotai/kimi-k2.5` | ✅ Reliable | Fast, good tool support |
+| `anthropic/claude-sonnet-4-6` | ✅ Excellent | Best reasoning, slightly slower |
+| `anthropic/claude-haiku-3-5` | ✅ Fast | Good for simple tasks, cheaper |
+| `openrouter/auto` | ⚠️ Variable | Routes to "best" — occasionally picks unstable models |
+| `moonshotai/kimi-k2.6` | ❌ Buggy | Malformed tool calls with some tool schemas |
+
+**Prevention:** Always configure fallback models:
+```bash
+openclaw config get agents.defaults.model.fallbacks
+```
+Ensure fallbacks include at least 2 reliable models.
+
+---
+
+## Context Pressure — Token Budget Exceeded
+
+**Symptom:** Same `"LLM request failed"` error but logs show:
+```
+estimatedPromptTokens=348149 promptBudgetBeforeReserve=242144
+```
+
+**Root cause:** Accumulated session history (8,648+ files totaling 538MB). Even a short user prompt triggers the full history.
+
+**Fix:** See [Context Pressure Diagnosis](references/context-pressure-diagnosis.md) for archiving sessions, starting fresh, and prevention.
 
 ---
 
@@ -322,4 +409,9 @@ Before troubleshooting, verify:
 
 ## Support Files
 
-- See `references/` directory for migration logs and session-specific details.
+- See `references/` directory for detailed guides:
+  - `references/context-pressure-diagnosis.md` — Token budget exceeded due to session accumulation
+  - `references/node-version-upgrade.md` — Upgrading Node.js for OpenClaw
+  - `references/llm-request-failed-errors.md` — Model-side errors and switching
+  - `references/___LONG_STRING___.md` — Multi-agent migration example
+  - `references/telegram-token-troubleshooting.md` — Telegram bot token issues

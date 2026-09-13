@@ -4,16 +4,6 @@ Current Priorities: **OptiRFP** (RFP platform, Vista Social scheduling), **TLC R
 
 **Responses:** Use cost-benefit tables ($0/$49/$199 tiers) when user asks for free/cheap alternatives to paid tools. Structured comparison preferred over simple lists.
 §
-Current Priorities: **TLC Rescue** - Bingo Unleashed fundraiser (sponsor outreach ready)
-§
-Current Priorities: **Rival Productions** - Webinar automation pipeline (deployed & running)
-§
-See Also: [AGENTS.md](AGENTS.md) - Agent operating procedures
-§
-See Also: [HEARTBEAT.md](HEARTBEAT.md) - Periodic check reminders
-§
-See Also: *Last updated: 2026-03-04 | Memory system v2 (routing index pattern)*
-§
 2026-02-08: Andrew set assistant name to Herby; prefers calm/professional with some snark; no emojis.
 §
 2026-02-08: Andrew defined preferred operating style for Herby: long-term personal AI assistant and strategic collaborator; structured, outcome-focused; templates and checklists; avoid em dashes; direct about uncertainty.
@@ -27,3 +17,5 @@ Andrew has a film and TV reaction YouTube channel and wants automated clip creat
 Prefers deployed, working solutions over static files. Values action/implementation over research-only. Active: LotSignal Early Access (25 dealers, LinkedIn outreach pipeline).
 §
 Google Sheets API: Import build_service from google_api script. Sheet names in ranges don't need quotes. First sheet ID=0 named 'Sheet1'.
+§
+**OpenClaw Infra:** Local gateway port 18789, Telegram bot @TheHerbyBot. Model: openrouter/moonshotai/kimi-k2.5 (switched from k2.6 which had malformed tool call errors).

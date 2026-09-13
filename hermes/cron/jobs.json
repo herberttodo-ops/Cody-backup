@@ -18,17 +18,17 @@
       "schedule_display": "30 4 * * *",
       "repeat": {
         "times": null,
-        "completed": 98
+        "completed": 99
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-04-05T17:06:06.321746-04:00",
-      "next_run_at": "2026-09-13T04:30:00-04:00",
-      "last_run_at": "2026-09-11T04:32:44.083779-04:00",
-      "last_status": "error",
-      "last_error": "RuntimeError: Connection error.",
+      "next_run_at": "2026-09-14T04:30:00-04:00",
+      "last_run_at": "2026-09-12T04:33:05.036414-04:00",
+      "last_status": "ok",
+      "last_error": null,
       "deliver": "telegram:___ID___",
       "origin": {
         "platform": "telegram",
@@ -36,7 +36,7 @@
         "chat_name": "Andrew",
         "thread_id": null
       },
-      "last_delivery_error": "delivery error: Telegram send failed: Timed out",
+      "last_delivery_error": null,
       "fire_claim": null
     },
     {
@@ -59,17 +59,17 @@
       "schedule_display": "0 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 44
+        "completed": 45
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-14T09:53:18.644425-04:00",
-      "next_run_at": "2026-09-12T08:00:00-04:00",
-      "last_run_at": "2026-09-11T08:02:27.509155-04:00",
-      "last_status": "error",
-      "last_error": "RuntimeError: Connection error.",
+      "next_run_at": "2026-09-13T08:00:00-04:00",
+      "last_run_at": "2026-09-12T08:04:16.288220-04:00",
+      "last_status": "ok",
+      "last_error": null,
       "deliver": "telegram",
       "origin": {
         "platform": "telegram",
@@ -77,9 +77,9 @@
         "chat_name": "Andrew",
         "thread_id": null
       },
-      "last_delivery_error": "delivery error: Telegram send failed: Timed out",
+      "last_delivery_error": null,
       "fire_claim": null
     }
   ],
-  "updated_at": "2026-09-12T04:30:34.727159-04:00"
+  "updated_at": "2026-09-13T04:30:43.649735-04:00"
 }

@@ -223,6 +223,7 @@ command_allowlist:
   - shell command via -c/-lc flag
   - force kill processes
   - script execution via heredoc
+  - force kill processes (killall -KILL)
   - stop/restart system service
   - script execution via -e/-c flag
   - hermes update (restarts gateway, kills running agents)
