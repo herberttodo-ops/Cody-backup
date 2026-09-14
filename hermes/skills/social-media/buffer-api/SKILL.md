@@ -1,7 +1,7 @@
 ---
 name: buffer-api
 description: Post to LinkedIn and Facebook via Buffer API/MCP. Schedule posts, manage queue, and handle media uploads.
-version: 1.0.1
+version: 1.0.2
 ---
 
 # Buffer API Integration
@@ -208,13 +208,56 @@ The most common error is misplacing parameters inside the assets array. **I made
 }
 ```
 
+## Buffer MCP Server Cooldown & Rate Limits
+
+After 3-5 consecutive failures (validation errors, rate limits, etc.), the MCP server becomes unreachable:
+```
+MCP server 'buffer' is unreachable after N consecutive failures.
+Auto-retry available in ~50s.
+```
+
+**Recovery:**
+- Light failures (1-3): Wait 50-120 seconds
+- Medium batch (5-7 deletions): Wait 2-3 minutes
+- Heavy batch (10+ deletions): Wait 3-4 minutes before resuming
+- After repeated edit_post failures: Wait 2-4 minutes (server may blacklist the session temporarily)
+
+**Cooldown schedule observed (Sep 2026):**
+| Recent Action Count | Required Wait |
+|---------------------|---------------|
+| 4 deletions | 60s |
+| 10 deletions | 180-240s |
+| 6 creations after deletions | 120s between each |
+| Heavy edit_post attempts | 240s minimum |
+
+## edit_post Asset Behavior (Confirmed Sep 2026)
+
+**Buffer's `edit_post` does NOT support adding or changing images on existing posts.**
+
+Behavior matrix (confirmed via exhaustive testing):
+
+| What You Send | Text Result | Asset Result |
+|---------------|-------------|--------------|
+| `text` only (no `assets`) | Updates correctly | Unchanged |
+| `text` + `assets` | Updates correctly | **Silently ignored** |
+| `assets` only (no `text`) | Error: "Post must have either text or media" | — |
+| Empty `text` + `assets` | Error: "Post must have either text or media" | — |
+| Identical `text` + `assets` | Unchanged | **Silently ignored** |
+
+**The ONLY reliable fix for broken image URLs is: delete the post and recreate it with the correct `assets` in the initial `create_post` call.**
+
+This means:
+1. Always attach images at `create_post` time — never plan to "add images later"
+2. If an image host (catbox.moe, etc.) expires, delete the post, don't try to patch it
+3. For batch rebuilds: delete all broken posts, wait for cooldown, then recreate with correct assets
+
 ## Rate Limits
 - 100 requests per 60 seconds for most endpoints
 - 10 media uploads per 60 seconds
 
 ## Related Session Logs
 
-- [references/august-2026-buffer-setup.md](references/august-2026-buffer-setup.md) - Complete Buffer MCP workflow with verified channel IDs, JSON patterns, and scheduling setup for August 2026 batch  
+- [references/august-2026-buffer-setup.md](references/august-2026-buffer-setup.md) - Complete Buffer MCP workflow with verified channel IDs, JSON patterns, and scheduling setup for August 2026 batch
 - [references/hermes-update-august-2026.md](references/hermes-update-august-2026.md) - Hermes update process, merge conflict resolution, and post-update verification (August 2026 session)
 
 ## User Platform Preference

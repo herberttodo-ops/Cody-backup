@@ -12,10 +12,14 @@ Current Priorities: **OptiRFP** (RFP platform, Vista Social scheduling), **TLC R
 §
 OBSIDIAN: Vault at ~/Documents/Obsidian Vault. Files: Index.md, OptiRFP.md, TLC Rescue.md, Rival Productions.md, Daily notes, Brand Guidelines.md. Use obsidian skill to access.
 §
-Andrew has a film and TV reaction YouTube channel and wants automated clip creation for TikTok/Instagram Reels/YouTube Shorts with smart reframing and captions.
-§
 Prefers deployed, working solutions over static files. Values action/implementation over research-only. Active: LotSignal Early Access (25 dealers, LinkedIn outreach pipeline).
 §
 Google Sheets API: Import build_service from google_api script. Sheet names in ranges don't need quotes. First sheet ID=0 named 'Sheet1'.
 §
 **OpenClaw Infra:** Local gateway port 18789, Telegram bot @TheHerbyBot. Model: openrouter/moonshotai/kimi-k2.5 (switched from k2.6 which had malformed tool call errors).
+§
+Andrew prefers phased approaches: "Option A now, then option B" - quick fix first, then long-term solution.
+§
+Buffer social media requires public image URLs; local paths don't work. Image pipeline: generate -> auto-upload to public host -> Buffer post with URL.
+§
+Andrew has Poyo.ai account for unified AI content generation. Prefers consolidated single-API solutions.
