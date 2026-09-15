@@ -571,6 +571,19 @@
     "use_count": 0,
     "view_count": 0
   },
+  "gog": {
+    "archived_at": null,
+    "created_at": "2026-09-14T15:49:42.823850+00:00",
+    "created_by": null,
+    "last_patched_at": null,
+    "last_used_at": "2026-09-14T15:49:42.891458+00:00",
+    "last_viewed_at": "2026-09-14T15:49:42.823868+00:00",
+    "patch_count": 0,
+    "pinned": false,
+    "state": "active",
+    "use_count": 1,
+    "view_count": 1
+  },
   "google-workspace": {
     "archived_at": null,
     "created_at": "2026-08-04T18:09:31.179623+00:00",
@@ -615,13 +628,13 @@
     "created_at": "2026-08-11T18:12:42.226028+00:00",
     "created_by": null,
     "last_patched_at": null,
-    "last_used_at": "2026-09-01T18:31:06.428079+00:00",
-    "last_viewed_at": "2026-09-01T18:31:06.338733+00:00",
+    "last_used_at": "2026-09-14T18:02:54.601343+00:00",
+    "last_viewed_at": "2026-09-14T18:02:54.540063+00:00",
     "patch_count": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 4,
-    "view_count": 4
+    "use_count": 7,
+    "view_count": 7
   },
   "hermes-agent-skill-authoring": {
     "archived_at": null,
@@ -679,14 +692,14 @@
     "archived_at": null,
     "created_at": "2026-08-12T23:19:57.566415+00:00",
     "created_by": null,
-    "last_patched_at": "2026-09-09T12:05:57.042125+00:00",
-    "last_used_at": "2026-09-13T12:00:21.975455+00:00",
-    "last_viewed_at": "2026-09-12T12:00:27.762511+00:00",
-    "patch_count": 55,
+    "last_patched_at": "2026-09-14T18:20:00.267572+00:00",
+    "last_used_at": "2026-09-14T18:19:05.537573+00:00",
+    "last_viewed_at": "2026-09-14T18:19:05.435101+00:00",
+    "patch_count": 62,
     "pinned": false,
     "state": "active",
-    "use_count": 65,
-    "view_count": 33
+    "use_count": 72,
+    "view_count": 39
   },
   "imessage": {
     "archived_at": null,
@@ -1233,6 +1246,32 @@
     "state": "active",
     "use_count": 0,
     "view_count": 0
+  },
+  "tales-untold-horror-shorts": {
+    "archived_at": null,
+    "created_at": "2026-09-14T14:29:16.715043+00:00",
+    "created_by": "agent",
+    "last_patched_at": "2026-09-14T15:51:12.664599+00:00",
+    "last_used_at": "2026-09-14T15:48:39.230821+00:00",
+    "last_viewed_at": "2026-09-14T15:48:38.940741+00:00",
+    "patch_count": 8,
+    "pinned": false,
+    "state": "active",
+    "use_count": 9,
+    "view_count": 9
+  },
+  "tales-untold-video-creator": {
+    "archived_at": null,
+    "created_at": "2026-09-14T14:43:47.682615+00:00",
+    "created_by": null,
+    "last_patched_at": "2026-09-14T18:09:17.050325+00:00",
+    "last_used_at": "2026-09-14T18:08:19.279878+00:00",
+    "last_viewed_at": "2026-09-14T18:08:18.954860+00:00",
+    "patch_count": 17,
+    "pinned": false,
+    "state": "active",
+    "use_count": 13,
+    "view_count": 13
   },
   "teams-meeting-pipeline": {
     "archived_at": null,
