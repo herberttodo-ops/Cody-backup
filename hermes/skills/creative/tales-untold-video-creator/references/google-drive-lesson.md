@@ -1,26 +1,54 @@
-# Google Drive Upload Lesson
+# Google Drive Upload Setup
 
-## What Happened
-- User asked to upload video to Google Drive for review
-- Tried gog CLI (not installed)
-- Tried Python Google Drive API (blocked by approval system)
-- Tried rclone (not available)
-- No working Google credentials found
+## Token Location
+- **File:** `~/.hermes/google_token.json`
+- **NOT** in project directories (common mistake from Sept 15 2026 session)
 
-## Lesson
-Google Drive integration requires:
-1. Proper OAuth credentials OR service account JSON
-2. Working tool (gog CLI, rclone, or Python client library)
-3. User setup completion
+## Token Validity Checks
+1. File must exist at `~/.hermes/google_token.json`
+2. Must contain `"refresh_token"` field (not just access_token)
+3. Scopes should include `https://www.googleapis.com/auth/drive`
+4. If token is missing or lacks refresh_token, re-authentication is required
 
-## What This Means for Future Sessions
-**Don't attempt Google Drive uploads** unless:
-- User explicitly provides credentials
-- gog CLI is installed and authenticated
-- Service account JSON exists in known location
+## Upload Script Pattern
+```python
+import json
+from pathlib import Path
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaFileUpload
 
-## User Preference Captured
-User wants **auto-upload** for review (not manual file sharing). Future solutions should explore:
-- Buffer direct posting (for social content)
-- Proper Google Drive setup wizard
-- Alternative hosting (Cloudflare R2, S3, etc.)
+token = json.loads(Path.home().joinpath(".hermes/google_token.json").read_text())
+creds = Credentials.from_authorized_user_info(token)
+service = build("drive", "v3", credentials=creds, cache_discovery=False)
+
+media = MediaFileUpload(str(file_path), resumable=True)
+file_metadata = {
+    "name": file_path.name,
+    "mimeType": "video/mp4",
+    "parents": [folder_id]
+}
+file = service.files().create(body=file_metadata, media_body=media, fields="id, webViewLink").execute()
+```
+
+## Folder ID Discovery (Don't Hardcode)
+Folder IDs from memory often rot. Query dynamically:
+```python
+results = service.files().list(
+    q="mimeType='application/vnd.google-apps.folder' and trashed=false",
+    fields="files(id, name)",
+    pageSize=50
+).execute()
+# Filter for folder name containing "Tales Untold" or similar
+```
+
+## Common Errors
+| Error | Meaning | Fix |
+|-------|---------|-----|
+| `HttpError 403` + `"parentNotAFolder"` | FOLDER_ID is wrong or not a folder | Query for correct folder ID dynamically |
+| `FileNotFoundError` for token | Looking in wrong directory | Use `~/.hermes/google_token.json` |
+| `invalid_grant` | Refresh token expired | Re-authenticate via Google OAuth |
+
+## Session Reference
+- Sept 15 2026: Upload succeeded when token path corrected from `~/.openclaw/...` to `~/.hermes/google_token.json`
+- Sept 15 2026: Folder ID `1GKg3uuAmsFu6sRMEG9P0AR6TAhxf0u41` (broken) → `1wEI-wZ9rY-z0ciZsTWglVjLJTR_HoOcx` (working). Hardcoded IDs rot — always query.

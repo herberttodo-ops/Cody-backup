@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1080, height=1920">
+  <title>Tales Untold — {{STORY_TITLE}}</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 1080px; height: 1920px;
+      background: #020202;
+      overflow: hidden;
+      position: relative;
+      font-family: 'DejaVu Sans', 'Arial Black', Arial, sans-serif;
+    }
+    .scene {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; overflow: hidden;
+    }
+    .scene img {
+      position: absolute;
+      min-width: 125%; min-height: 125%;
+      object-fit: cover;
+      will-change: transform;
+    }
+    .caption {
+      position: absolute;
+      bottom: 240px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 94%;
+      text-align: center;
+      color: #fff;
+      font-size: 54px;
+      font-weight: bold;
+      line-height: 1.4;
+      text-shadow:
+        -5px -5px 0 #000,  5px -5px 0 #000,
+        -5px  5px 0 #000,  5px  5px 0 #000,
+        -3px  0   0 #000,  3px  0   0 #000,
+         0   -3px 0 #000,  0    3px 0 #000,
+         0    5px 22px rgba(0,0,0,0.9);
+      z-index: 10;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .caption.horror { color: #ff2222; }
+
+    /* INTENSE VIGNETTE — heavy dark corners */
+    .vignette {
+      position: absolute; inset: 0;
+      background: radial-gradient(
+        ellipse at 50% 38%,
+        transparent 0%,
+        transparent 12%,
+        rgba(0,0,0,0.6) 35%,
+        rgba(0,0,0,0.95) 60%,
+        rgba(0,0,0,0.98) 100%
+      );
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    /* VISIBLE GRAIN — film texture */
+    .grain {
+      position: absolute; inset: 0;
+      opacity: 0.38;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      z-index: 6;
+      pointer-events: none;
+    }
+
+    /* FILM SCRATCHES */
+    .scratches {
+      position: absolute; inset: 0;
+      opacity: 0.12;
+      background: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 1px,
+        rgba(255,255,255,0.04) 1px,
+        rgba(255,255,255,0.04) 2px
+      );
+      z-index: 7;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- SCENES: Copy this block for each scene, change id -->
+  <div class="scene" id="s1"><img src="./scene1.png" alt="scene1"></div>
+  <div class="scene" id="s2"><img src="./scene2.png" alt="scene2"></div>
+  <!-- ... scenes 3-10 ... -->
+
+  <!-- CAPTIONS: Generated from Whisper transcript -->
+  <!-- White text for setup, 'horror' class for twist/escalation -->
+  <div class="caption" id="c0">{{CAPTION_0_TEXT}}</div>
+  <div class="caption" id="c1">{{CAPTION_1_TEXT}}</div>
+  <!-- ... captions 2-19 ... -->
+
+  <!-- ATMOSPHERIC OVERLAYS -->
+  <div class="vignette"></div>
+  <div class="grain"></div>
+  <div class="scratches"></div>
+
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    window.__timelines = [tl];
+    const SD = {{SCENE_DURATION}}; // e.g., 8.13 for 10 scenes @ 81.3s
+
+    // SCENE 1: fade in + Ken Burns
+    tl.to('#s1', { opacity: 1, duration: 0.4 }, 0);
+    tl.fromTo('#s1 img', 
+      { scale: {{S1_START_ZOOM}}, x: {{S1_START_X}} }, 
+      { scale: {{S1_END_ZOOM}}, x: {{S1_END_X}}, duration: SD, ease: 'none' }, 0);
+    
+    // SCENE 2: crossfade from scene 1
+    tl.to('#s2', { opacity: 1, duration: 0.5 }, SD);
+    tl.fromTo('#s2 img',
+      { scale: {{S2_START_ZOOM}}, x: {{S2_START_X}} },
+      { scale: {{S2_END_ZOOM}}, x: {{S2_END_X}}, duration: SD, ease: 'none' }, SD);
+    tl.to('#s1', { opacity: 0, duration: 0.5 }, SD + 0.3);
+    
+    // ... repeat pattern for scenes 3-10 ...
+
+    // CAPTIONS: Generated from Whisper timestamps
+    // Start time, end time, caption id
+    tl.to('#c0', { opacity: 1, duration: 0.25 }, {{C0_START}});
+    tl.to('#c0', { opacity: 0, duration: 0.3 }, {{C0_END}});
+    
+    tl.to('#c1', { opacity: 1, duration: 0.25 }, {{C1_START}});
+    tl.to('#c1', { opacity: 0, duration: 0.3 }, {{C1_END}});
+    
+    // ... repeat for all captions ...
+  </script>
+</body>
+</html>

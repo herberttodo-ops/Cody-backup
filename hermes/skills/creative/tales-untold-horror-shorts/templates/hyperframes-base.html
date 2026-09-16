@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080, height=1920">
+<title>Tales Untold</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;background:#000;overflow:hidden;font-family:'Georgia',serif}
+#comp{position:relative;width:1080px;height:1920px}
+.scene{position:absolute;top:0;left:0;width:100%;height:100%;opacity:0}
+.scene img{position:absolute;min-width:125%;min-height:125%;object-fit:cover}
+.caption{position:absolute;z-index:30;bottom:240px;left:50%;transform:translateX(-50%);width:94%;text-align:center;opacity:0}
+.caption span{font-size:52px;font-weight:900;text-transform:uppercase;line-height:1.2}
+.white{color:#fff}
+.red{color:#ff2a2a}
+.cta{position:absolute;z-index:35;bottom:300px;left:0;width:100%;text-align:center;opacity:0}
+.cta span{font-size:64px;font-weight:900;letter-spacing:4px;color:#fff;text-shadow:0 0 40px rgba(0,0,0,0.8)}
+.cta .handle{font-size:32px;color:#9ca3af;font-weight:400;letter-spacing:2px}
+.vignette{position:absolute;inset:0;z-index:5;pointer-events:none;background:radial-gradient(ellipse at 50% 38%,transparent 0%,transparent 12%,rgba(0,0,0,0.6) 35%,rgba(0,0,0,0.95) 60%,rgba(0,0,0,0.98) 100%)}
+.grain{position:absolute;inset:0;z-index:6;pointer-events:none;opacity:0.10;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+</style>
+</head>
+<body>
+<!-- CRITICAL: data-duration from Whisper segments[-1]["end"] + 2-3 -->
+<div id="comp" data-composition-id="tales" data-duration="58">
+  <div class="vignette"></div>
+  <div class="grain"></div>
+
+  <!-- First scene starts visible -->
+  <div id="s1" class="scene" style="opacity:1"><img src="./scene1.png"></div>
+  <div id="s2" class="scene"><img src="./scene2.png"></div>
+  <div id="s3" class="scene"><img src="./scene3.png"></div>
+  <div id="s4" class="scene"><img src="./scene4.png"></div>
+  <div id="s5" class="scene"><img src="./scene5.png"></div>
+
+  <!-- Captions: exact Whisper text -->
+  <div id="c1" class="caption"><span class="white">CAPTION 1 TEXT</span></div>
+  <!-- ... add more captions ... -->
+
+  <!-- CTA at end -->
+  <div id="cta" class="cta">
+    <span>LIKE &amp; SUBSCRIBE</span><br>
+    <span class="handle">@TalesUntold</span>
+  </div>
+</div>
+
+<script>
+const tl=gsap.timeline();
+if(typeof window!=='undefined')window.__timelines=[tl];
+
+/* SCENE 1: visible from start */
+tl.fromTo('#s1 img',{x:0,scale:1.08},{x:-30,scale:1.18,duration:16,ease:'none'},0);
+tl.to('#s1',{opacity:0,duration:1.5,ease:'power2.inOut'},DURATION_BEFORE_S2);
+
+/* SCENE 2 */
+tl.to('#s2',{opacity:1,duration:1.5,ease:'power2.inOut'},DURATION_BEFORE_S2);
+tl.fromTo('#s2 img',{scale:1.10},{scale:1.18,duration:18,ease:'none'},DURATION_BEFORE_S2);
+
+/* CAPTIONS: exact Whisper timing */
+tl.to('#c1',{opacity:1,duration:0.3},START + 0.2);
+tl.to('#c1',{opacity:0,duration:0.3},END - 0.3);
+
+/* CTA */
+tl.to('#cta',{opacity:1,duration:1},NARRATION_END + 0.5);
+</script>
+</body>
+</html>

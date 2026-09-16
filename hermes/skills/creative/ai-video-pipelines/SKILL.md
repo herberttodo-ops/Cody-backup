@@ -84,11 +84,45 @@ This consolidates from 3 separate keys to 2 (OpenAI+ElevenLabs share one approac
 
 ### 4. Poyo-Specific Notes
 
-- **Image model**: `gpt-4o-image` (4 credits per generation)
+- **Image model**: `gpt-image-2` (NOT `gpt-image-2.5-flare` — different model)
 - **Chat model**: Use `claude-sonnet-5` (cost-efficient), NOT `claude-fable-5-1`
 - **Voice model**: `elevenlabs-v3-tts` (uses `"voice"` field, not `"voice_id"`)
 - See `references/poyo-api-discovery.md` for full API details
 - Async pattern: submit → poll `/api/generate/status/{task_id}` → download
+
+#### POYO Image Generation Size Requirements (Critical)
+
+**Must use 2K or 4K resolution minimum**. Custom sizes are rejected with "requires resolution 2K or 4K".
+
+**Valid 9:16 sizes** (both dims divisible by 16, within pixel range):
+
+| Size | Resolution | Status |
+|------|------------|--------|
+| `1088x1920` | ~2.1M pixels | ❌ Too small (rejected as "custom size") |
+| `1200x2128` | ~2.6M pixels | ❌ Rejected (2K not accepted) |
+| `1536x2732` | ~4.2M pixels | ❌ 2732 not divisible by 16 |
+
+**Working 9:16 size for vertical video**:
+```python
+# Valid 4K vertical (closest to 1080x1920)
+size = "1536x2732"  # FAILS - 2732 % 16 = 4
+
+# Calculate valid size:
+# height = 2160 (4K) → width = 2160 * 9/16 = 1215 → round to 1216 (divisible by 16)
+size = "1216x2160"  # 2.6M pixels - TEST THIS
+
+# Alternative: use standard 4K and crop
+size = "2160x3840"  # 8.3M pixels (landscape 4K, rotate in post)
+```
+
+**Pixel constraints**:
+- Min: 655,360 pixels
+- Max: 8,294,400 pixels  
+- Both dimensions divisible by 16
+- Max edge: 3840
+- Aspect ratio: up to 3:1
+
+**Recommendation**: Use `2160x3840` (4K landscape) and rotate 90° in post-processing, OR find a valid 9:16 size by calculation (both dims ÷ 16 = integer).
 
 ### 6. Voice-to-Text Caption Synchronization (Critical)
 

@@ -29,14 +29,16 @@
     "archived_at": null,
     "created_at": "2026-09-13T18:53:56.093501+00:00",
     "created_by": "agent",
-    "last_patched_at": "2026-09-14T03:45:57.303458+00:00",
-    "last_used_at": "2026-09-14T03:43:49.440174+00:00",
-    "last_viewed_at": "2026-09-14T03:43:49.375781+00:00",
-    "patch_count": 26,
+    "last_patched_at": "2026-09-16T02:29:38.348242+00:00",
+    "last_reused_patch_generation": 0,
+    "last_used_at": "2026-09-16T02:28:24.575564+00:00",
+    "last_viewed_at": "2026-09-16T02:28:24.470525+00:00",
+    "patch_count": 29,
+    "patch_generation": 1,
     "pinned": false,
     "state": "active",
-    "use_count": 28,
-    "view_count": 28
+    "use_count": 30,
+    "view_count": 30
   },
   "airtable": {
     "archived_at": null,
@@ -47,7 +49,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -60,7 +62,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -73,7 +75,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -86,7 +88,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -99,7 +101,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -112,7 +114,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -125,7 +127,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -138,7 +140,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -164,7 +166,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -198,14 +200,14 @@
     "archived_at": null,
     "created_at": "2026-08-14T21:04:32.358116+00:00",
     "created_by": null,
-    "last_patched_at": "2026-09-13T18:32:30.375463+00:00",
-    "last_used_at": "2026-09-13T18:25:59.773519+00:00",
-    "last_viewed_at": "2026-09-13T18:25:59.711247+00:00",
-    "patch_count": 19,
+    "last_patched_at": "2026-09-16T01:05:15.754373+00:00",
+    "last_used_at": "2026-09-16T01:13:42.005743+00:00",
+    "last_viewed_at": "2026-09-16T01:13:41.713509+00:00",
+    "patch_count": 20,
     "pinned": false,
     "state": "active",
-    "use_count": 32,
-    "view_count": 32
+    "use_count": 36,
+    "view_count": 36
   },
   "claude-code": {
     "archived_at": null,
@@ -216,7 +218,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -229,7 +231,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -242,7 +244,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -255,7 +257,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -268,7 +270,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -294,9 +296,22 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
+  },
+  "creative:tales-untold-video-creator": {
+    "archived_at": null,
+    "created_at": "2026-09-15T16:22:07.285310+00:00",
+    "created_by": null,
+    "last_patched_at": null,
+    "last_used_at": "2026-09-15T16:27:20.803599+00:00",
+    "last_viewed_at": "2026-09-15T16:27:20.662845+00:00",
+    "patch_count": 0,
+    "pinned": false,
+    "state": "active",
+    "use_count": 2,
+    "view_count": 2
   },
   "cronjob-delivery-debugging": {
     "archived_at": null,
@@ -333,7 +348,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -372,7 +387,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -424,7 +439,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -437,7 +452,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -489,7 +504,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -502,7 +517,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -515,7 +530,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -541,7 +556,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -554,7 +569,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -567,7 +582,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -589,13 +604,13 @@
     "created_at": "2026-08-04T18:09:31.179623+00:00",
     "created_by": null,
     "last_patched_at": null,
-    "last_used_at": "2026-09-13T13:43:55.042305+00:00",
-    "last_viewed_at": "2026-09-13T13:43:54.492020+00:00",
+    "last_used_at": "2026-09-15T11:45:36.789586+00:00",
+    "last_viewed_at": "2026-09-15T11:45:36.732226+00:00",
     "patch_count": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 19,
-    "view_count": 19
+    "use_count": 20,
+    "view_count": 20
   },
   "grounded-citations": {
     "archived_at": null,
@@ -628,13 +643,13 @@
     "created_at": "2026-08-11T18:12:42.226028+00:00",
     "created_by": null,
     "last_patched_at": null,
-    "last_used_at": "2026-09-14T18:02:54.601343+00:00",
-    "last_viewed_at": "2026-09-14T18:02:54.540063+00:00",
+    "last_used_at": "2026-09-15T20:43:31.608093+00:00",
+    "last_viewed_at": "2026-09-15T20:43:31.495670+00:00",
     "patch_count": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 7,
-    "view_count": 7
+    "use_count": 8,
+    "view_count": 8
   },
   "hermes-agent-skill-authoring": {
     "archived_at": null,
@@ -645,7 +660,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -658,7 +673,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -671,7 +686,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -684,7 +699,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -693,12 +708,12 @@
     "created_at": "2026-08-12T23:19:57.566415+00:00",
     "created_by": null,
     "last_patched_at": "2026-09-14T18:20:00.267572+00:00",
-    "last_used_at": "2026-09-14T18:19:05.537573+00:00",
+    "last_used_at": "2026-09-15T12:00:59.808077+00:00",
     "last_viewed_at": "2026-09-14T18:19:05.435101+00:00",
     "patch_count": 62,
     "pinned": false,
     "state": "active",
-    "use_count": 72,
+    "use_count": 73,
     "view_count": 39
   },
   "imessage": {
@@ -710,7 +725,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -745,13 +760,13 @@
     "created_at": "2026-08-04T18:12:49.306961+00:00",
     "created_by": null,
     "last_patched_at": "2026-09-06T20:31:43.507325+00:00",
-    "last_used_at": "2026-09-09T02:00:06.980083+00:00",
-    "last_viewed_at": "2026-09-09T02:00:06.923319+00:00",
+    "last_used_at": "2026-09-15T16:22:12.958754+00:00",
+    "last_viewed_at": "2026-09-15T16:22:12.650850+00:00",
     "patch_count": 11,
     "pinned": false,
     "state": "active",
-    "use_count": 25,
-    "view_count": 25
+    "use_count": 26,
+    "view_count": 26
   },
   "llama-cpp": {
     "archived_at": null,
@@ -762,7 +777,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -775,7 +790,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -801,7 +816,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -814,7 +829,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -853,7 +868,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -905,7 +920,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -931,7 +946,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -957,7 +972,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -970,7 +985,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -983,7 +998,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -1035,7 +1050,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -1048,7 +1063,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -1061,7 +1076,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -1087,7 +1102,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -1100,7 +1115,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -1113,7 +1128,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -1165,7 +1180,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -1178,7 +1193,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -1186,14 +1201,14 @@
     "archived_at": null,
     "created_at": "2026-08-14T21:06:31.442260+00:00",
     "created_by": "agent",
-    "last_patched_at": "2026-09-06T20:32:19.959413+00:00",
-    "last_used_at": "2026-09-13T18:24:13.944719+00:00",
-    "last_viewed_at": "2026-09-13T18:24:13.819455+00:00",
-    "patch_count": 5,
+    "last_patched_at": "2026-09-15T13:22:31.436463+00:00",
+    "last_used_at": "2026-09-16T01:17:52.965452+00:00",
+    "last_viewed_at": "2026-09-16T01:17:52.898677+00:00",
+    "patch_count": 6,
     "pinned": false,
     "state": "active",
-    "use_count": 14,
-    "view_count": 14
+    "use_count": 18,
+    "view_count": 18
   },
   "songsee": {
     "archived_at": null,
@@ -1204,7 +1219,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -1217,9 +1232,24 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
+  },
+  "spielberg": {
+    "archived_at": null,
+    "created_at": "2026-09-15T23:58:30.597983+00:00",
+    "created_by": null,
+    "last_patched_at": "2026-09-16T01:17:41.348642+00:00",
+    "last_reused_patch_generation": 0,
+    "last_used_at": "2026-09-16T02:27:02.989146+00:00",
+    "last_viewed_at": "2026-09-16T02:27:02.797851+00:00",
+    "patch_count": 10,
+    "patch_generation": 0,
+    "pinned": false,
+    "state": "active",
+    "use_count": 16,
+    "view_count": 15
   },
   "spike": {
     "archived_at": null,
@@ -1230,7 +1260,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -1243,7 +1273,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -1251,27 +1281,27 @@
     "archived_at": null,
     "created_at": "2026-09-14T14:29:16.715043+00:00",
     "created_by": "agent",
-    "last_patched_at": "2026-09-14T15:51:12.664599+00:00",
-    "last_used_at": "2026-09-14T15:48:39.230821+00:00",
-    "last_viewed_at": "2026-09-14T15:48:38.940741+00:00",
-    "patch_count": 8,
+    "last_patched_at": "2026-09-15T23:53:29.833466+00:00",
+    "last_used_at": "2026-09-16T01:13:31.497376+00:00",
+    "last_viewed_at": "2026-09-16T01:13:31.430374+00:00",
+    "patch_count": 30,
     "pinned": false,
     "state": "active",
-    "use_count": 9,
-    "view_count": 9
+    "use_count": 31,
+    "view_count": 31
   },
   "tales-untold-video-creator": {
     "archived_at": null,
     "created_at": "2026-09-14T14:43:47.682615+00:00",
     "created_by": null,
-    "last_patched_at": "2026-09-14T18:09:17.050325+00:00",
-    "last_used_at": "2026-09-14T18:08:19.279878+00:00",
-    "last_viewed_at": "2026-09-14T18:08:18.954860+00:00",
-    "patch_count": 17,
+    "last_patched_at": "2026-09-15T21:12:41.827871+00:00",
+    "last_used_at": "2026-09-15T22:02:20.014341+00:00",
+    "last_viewed_at": "2026-09-15T22:02:19.906297+00:00",
+    "patch_count": 53,
     "pinned": false,
     "state": "active",
-    "use_count": 13,
-    "view_count": 13
+    "use_count": 52,
+    "view_count": 52
   },
   "teams-meeting-pipeline": {
     "archived_at": null,
@@ -1282,7 +1312,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -1308,7 +1338,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -1321,7 +1351,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -1399,7 +1429,7 @@
     "last_viewed_at": null,
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 0,
     "view_count": 0
   },
@@ -1438,7 +1468,7 @@
     "last_viewed_at": "2026-08-13T12:10:46.000332+00:00",
     "patch_count": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 1,
     "view_count": 1
   },

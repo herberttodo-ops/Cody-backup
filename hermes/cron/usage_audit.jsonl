@@ -1,0 +1,1 @@
+{"ts": "2026-09-16T02:12:51.509Z", "job_id": "7bb4ab80b2c2", "fire_id": "c68a3d52dea94be79dc072d955ef0a19", "prompt_tokens": 1360391, "completion_tokens": 8281, "total_tokens": 1368672, "response_silent": false, "deliver_target": "origin", "model": "moonshotai/kimi-k2.5", "duration_ms": 831490, "error": null}

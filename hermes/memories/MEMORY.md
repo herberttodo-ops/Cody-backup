@@ -14,12 +14,6 @@ OBSIDIAN: Vault at ~/Documents/Obsidian Vault. Files: Index.md, OptiRFP.md, TLC 
 §
 Prefers deployed, working solutions over static files. Values action/implementation over research-only. Active: LotSignal Early Access (25 dealers, LinkedIn outreach pipeline).
 §
-Google Sheets API: Import build_service from google_api script. Sheet names in ranges don't need quotes. First sheet ID=0 named 'Sheet1'.
-§
-**OpenClaw Infra:** Local gateway port 18789, Telegram bot @TheHerbyBot. Model: openrouter/moonshotai/kimi-k2.5 (switched from k2.6 which had malformed tool call errors).
-§
 Andrew prefers phased approaches: "Option A now, then option B" - quick fix first, then long-term solution.
 §
-Buffer social media requires public image URLs; local paths don't work. Image pipeline: generate -> auto-upload to public host -> Buffer post with URL.
-§
-Andrew has Poyo.ai account for unified AI content generation. Prefers consolidated single-API solutions.
+Tales Untold preferred background music: Andrew provided two music files (audio_230284ee0e25.mp3 and audio_db60805e175c.mp3) for Tales Untold shorts. Always use these over programmatically generated drone music. If files are missing, ask Andrew for location.

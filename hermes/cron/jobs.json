@@ -18,15 +18,15 @@
       "schedule_display": "30 4 * * *",
       "repeat": {
         "times": null,
-        "completed": 101
+        "completed": 102
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-04-05T17:06:06.321746-04:00",
-      "next_run_at": "2026-09-16T04:30:00-04:00",
-      "last_run_at": "2026-09-14T04:33:27.119853-04:00",
+      "next_run_at": "2026-09-17T04:30:00-04:00",
+      "last_run_at": "2026-09-15T04:32:46.882048-04:00",
       "last_status": "ok",
       "last_error": null,
       "deliver": "telegram:___ID___",
@@ -37,7 +37,10 @@
         "thread_id": null
       },
       "last_delivery_error": null,
-      "fire_claim": null
+      "fire_claim": {
+        "at": "2026-09-16T04:32:19.080289-04:00",
+        "by": "herby-Virtual-Machine:3750775:e8a___ID___a902b4bb8c74f9565"
+      }
     },
     {
       "id": "d0ba9894a668",
@@ -59,15 +62,15 @@
       "schedule_display": "0 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 47
+        "completed": 48
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-14T09:53:18.644425-04:00",
-      "next_run_at": "2026-09-15T08:00:00-04:00",
-      "last_run_at": "2026-09-14T08:02:46.022419-04:00",
+      "next_run_at": "2026-09-16T08:00:00-04:00",
+      "last_run_at": "2026-09-15T08:04:11.700910-04:00",
       "last_status": "ok",
       "last_error": null,
       "deliver": "telegram",
@@ -105,24 +108,179 @@
       "schedule_display": "0 9 * * *",
       "repeat": {
         "times": null,
-        "completed": 0
+        "completed": 1
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-14T14:11:18.806605-04:00",
-      "next_run_at": "2026-09-15T09:00:00-04:00",
-      "last_run_at": null,
-      "last_status": null,
+      "next_run_at": "2026-09-16T09:00:00-04:00",
+      "last_run_at": "2026-09-15T09:01:42.672260-04:00",
+      "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
       "failure_streak": 0,
       "deliver": "telegram:___ID___",
       "origin": null,
       "enabled_toolsets": null,
-      "workdir": "/home/herby/.openclaw/workspace"
+      "workdir": "/home/herby/.openclaw/workspace",
+      "fire_claim": null
+    },
+    {
+      "id": "7bb4ab80b2c2",
+      "name": "spielberg-queue-processor",
+      "prompt": "You are Spielberg. Check ~/.openclaw/workspace/tales-untold/queue/ for any new .txt story files (ignore README.md). If found:\n\n1. Read the file. If it's a full story (>100 words), use it verbatim. If it's a topic/title, write a 140-180 word horror micro-story.\n2. Produce the video using the full Spielberg pipeline:\n   a. Generate \"Adam\" voice via POYO (elevenlabs-tts-turbo-2-5)\n   b. Whisper caption transcription\n   c. Generate 5-7 Gammell scenes via nano-banana-2-lite\n   d. HyperFrames render with lighter vignette\n   e. ffmpeg mix with background music (amix duration=longest)\n3. Upload final video to Google Drive for backup + review\n4. **PUBLISH TO YOUTUBE (PUBLIC):**\n   a. Upload final video to litterbox.catbox.moe (temporary URL):\n      ```\n      curl -s -F \"reqtype=fileupload\" -F \"time=1h\" -F \"fileToUpload=@output/FINAL_*.mp4\" https://litterbox.catbox.moe/resources/internals/api.php\n      ```\n   b. Get the returned URL (format: https://litter.catbox.moe/XXXXXX.mp4)\n   c. Post to YouTube via Buffer MCP directly:\n      Use curl POST to https://mcp.buffer.com/mcp with:\n      - Authorization: bearer ___TOKEN___\n      - channelId: 6aa9a22eea19ca0bde4e0e84\n      - text: \"STORY_TITLE | Tales Untold — teaser hook #shorts #horror\"\n      - assets: [{\"video\": {\"url\": \"LITTERBOX_URL\", \"metadata\": {\"title\": \"STORY_TITLE | Tales Untold\"}}}]\n      - metadata.youtube: {\"title\": \"...\", \"categoryId\": \"24\", \"privacy\": \"public\", \"madeForKids\": false}\n      - mode: \"shareNow\", schedulingType: \"automatic\"\n   d. CRITICAL: privacy MUST be \"public\" — all live posts go public immediately\n5. Report results: video file, drive link, YouTube post status, and any errors.\n\nIf no files in queue, report \"No new stories in queue.\"\nFollow the spielberg skill exactly for all pipeline steps.",
+      "skills": [
+        "spielberg"
+      ],
+      "skill": "spielberg",
+      "model": null,
+      "provider": null,
+      "provider_snapshot": "openrouter",
+      "model_snapshot": "moonshotai/kimi-k2.5",
+      "base_url": null,
+      "script": null,
+      "no_agent": false,
+      "context_from": null,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 8 * * 1",
+        "display": "0 8 * * 1"
+      },
+      "schedule_display": "0 8 * * 1",
+      "repeat": {
+        "times": null,
+        "completed": 1
+      },
+      "enabled": true,
+      "state": "scheduled",
+      "paused_at": null,
+      "paused_reason": null,
+      "created_at": "2026-09-15T19:55:41.454702-04:00",
+      "next_run_at": "2026-09-21T08:00:00-04:00",
+      "last_run_at": "2026-09-15T22:12:53.515846-04:00",
+      "last_status": "ok",
+      "last_error": null,
+      "last_delivery_error": null,
+      "deliver": "origin",
+      "origin": {
+        "platform": "telegram",
+        "chat_id": "___ID___",
+        "chat_name": "Andrew",
+        "thread_id": null,
+        "user_id": "___ID___"
+      },
+      "enabled_toolsets": null,
+      "workdir": "/home/herby/.openclaw/workspace/tales-untold",
+      "fire_claim": null,
+      "failure_streak": 0
+    },
+    {
+      "id": "514871c9b627",
+      "name": "spielberg-publish-8am",
+      "prompt": "Run the Spielberg publisher script to publish one video from the produced/ queue to YouTube via Buffer.\n\n\n\nReport: which video was published, Buffer post ID, and status.",
+      "skills": [],
+      "skill": null,
+      "model": null,
+      "provider": null,
+      "base_url": null,
+      "script": "~/.hermes/scripts/spielberg_publish.sh",
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 8 * * *",
+        "display": "0 8 * * *"
+      },
+      "schedule_display": "0 8 * * *",
+      "repeat": {
+        "times": null,
+        "completed": 0
+      },
+      "enabled": true,
+      "state": "scheduled",
+      "paused_at": null,
+      "paused_reason": null,
+      "created_at": "2026-09-16T01:51:41.753063-04:00",
+      "next_run_at": "2026-09-16T08:00:00-04:00",
+      "last_run_at": null,
+      "last_status": null,
+      "last_delivery_error": null,
+      "deliver": "origin",
+      "workdir": "/home/herby/.openclaw/workspace/tales-untold",
+      "enabled_toolsets": [],
+      "attach_to_session": true,
+      "no_agent": true
+    },
+    {
+      "id": "17a96e617bdc",
+      "name": "spielberg-publish-2pm",
+      "prompt": "Run the Spielberg publisher script to publish one video from the produced/ queue to YouTube via Buffer.\n\n\n\nReport: which video was published, Buffer post ID, and status.",
+      "skills": [],
+      "skill": null,
+      "model": null,
+      "provider": null,
+      "base_url": null,
+      "script": "~/.hermes/scripts/spielberg_publish.sh",
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 14 * * *",
+        "display": "0 14 * * *"
+      },
+      "schedule_display": "0 14 * * *",
+      "repeat": {
+        "times": null,
+        "completed": 0
+      },
+      "enabled": true,
+      "state": "scheduled",
+      "paused_at": null,
+      "paused_reason": null,
+      "created_at": "2026-09-16T01:51:41.753084-04:00",
+      "next_run_at": "2026-09-16T14:00:00-04:00",
+      "last_run_at": null,
+      "last_status": null,
+      "last_delivery_error": null,
+      "deliver": "origin",
+      "workdir": "/home/herby/.openclaw/workspace/tales-untold",
+      "enabled_toolsets": [],
+      "attach_to_session": true,
+      "no_agent": true
+    },
+    {
+      "id": "6c1189021c3f",
+      "name": "spielberg-publish-8pm",
+      "prompt": "Run the Spielberg publisher script to publish one video from the produced/ queue to YouTube via Buffer.\n\n\n\nReport: which video was published, Buffer post ID, and status.",
+      "skills": [],
+      "skill": null,
+      "model": null,
+      "provider": null,
+      "base_url": null,
+      "script": "~/.hermes/scripts/spielberg_publish.sh",
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 20 * * *",
+        "display": "0 20 * * *"
+      },
+      "schedule_display": "0 20 * * *",
+      "repeat": {
+        "times": null,
+        "completed": 0
+      },
+      "enabled": true,
+      "state": "scheduled",
+      "paused_at": null,
+      "paused_reason": null,
+      "created_at": "2026-09-16T01:51:41.753089-04:00",
+      "next_run_at": "2026-09-16T20:00:00-04:00",
+      "last_run_at": null,
+      "last_status": null,
+      "last_delivery_error": null,
+      "deliver": "origin",
+      "workdir": "/home/herby/.openclaw/workspace/tales-untold",
+      "enabled_toolsets": [],
+      "attach_to_session": true,
+      "no_agent": true
     }
   ],
-  "updated_at": "2026-09-15T04:30:21.012126-04:00"
+  "updated_at": "2026-09-16T04:32:19.080543-04:00"
 }
