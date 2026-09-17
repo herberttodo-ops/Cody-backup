@@ -18,15 +18,15 @@
       "schedule_display": "30 4 * * *",
       "repeat": {
         "times": null,
-        "completed": 102
+        "completed": 103
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-04-05T17:06:06.321746-04:00",
-      "next_run_at": "2026-09-17T04:30:00-04:00",
-      "last_run_at": "2026-09-15T04:32:46.882048-04:00",
+      "next_run_at": "2026-09-18T04:30:00-04:00",
+      "last_run_at": "2026-09-16T04:33:05.655036-04:00",
       "last_status": "ok",
       "last_error": null,
       "deliver": "telegram:___ID___",
@@ -38,14 +38,15 @@
       },
       "last_delivery_error": null,
       "fire_claim": {
-        "at": "2026-09-16T04:32:19.080289-04:00",
-        "by": "herby-Virtual-Machine:3750775:e8a___ID___a902b4bb8c74f9565"
-      }
+        "at": "2026-09-17T04:32:31.110773-04:00",
+        "by": "herby-Virtual-Machine:3750775:8f1f7bdc2aec46959410fb9ef6a7d844"
+      },
+      "failure_streak": 0
     },
     {
       "id": "d0ba9894a668",
       "name": "optirfp-linkedin-daily",
-      "prompt": "Generate a new LinkedIn post for OptiRFP about successful RFP proposals. \n\nThe objective: teach one useful RFP tip in a concise, punchy headline.\n\nUse the ideogram-image-generation skill to:\n1. Generate the image using Ideogram V4 with the headline baked into the graphic\n2. Composite the exact OptiRFP logo at the bottom\n\nProcess:\n- Pick a relevant topic from: copy-paste, mirror-language, specificity, page-one, workflow, ai-automation, winning\n- Generate a punchy headline (5-8 words max)\n- Use generate_optirfp_post_with_logo() from scripts/ideogram_logo_compositor.py\n- This creates the final image with text + exact logo\n\nBefore posting:\n1. Verify the generated image is high quality (text readable, no artifacts, logo clean)\n2. If quality is 9/10 or above, proceed to post\n3. If below 9/10, regenerate with adjusted prompt\n\nThe final post should include:\n- The generated image\n- The headline as the post text\n- 3-5 relevant hashtags (#RFP #B2B #ProposalWriting, etc.)\n\nAPI Key is already configured in the skill script.",
+      "prompt": "Generate OptiRFP LinkedIn content and post via MCP Buffer.\n\nSteps:\n1. mcp__buffer__get_account → get org ID\n2. mcp__buffer__list_channels → find LinkedIn channel\n3. Generate post about RFP/proposals using ideogram-image-generation skill\n4. mcp__buffer__create_post → schedule to LinkedIn\n\nReport: post scheduled or error.",
       "skills": [
         "ideogram-image-generation"
       ],
@@ -53,7 +54,7 @@
       "model": null,
       "provider": null,
       "base_url": null,
-      "script": null,
+      "script": "optirfp_daily_post.sh",
       "schedule": {
         "kind": "cron",
         "expr": "0 8 * * *",
@@ -62,15 +63,15 @@
       "schedule_display": "0 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 48
+        "completed": 57
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-14T09:53:18.644425-04:00",
-      "next_run_at": "2026-09-16T08:00:00-04:00",
-      "last_run_at": "2026-09-15T08:04:11.700910-04:00",
+      "next_run_at": "2026-09-17T08:00:00-04:00",
+      "last_run_at": "2026-09-16T08:50:43.495961-04:00",
       "last_status": "ok",
       "last_error": null,
       "deliver": "telegram",
@@ -81,21 +82,26 @@
         "thread_id": null
       },
       "last_delivery_error": null,
-      "fire_claim": null
+      "fire_claim": null,
+      "failure_streak": 0,
+      "workdir": "/home/herby/.openclaw/workspace",
+      "no_agent": true,
+      "provider_snapshot": null,
+      "model_snapshot": null
     },
     {
       "id": "___ID___cc",
       "name": "optirfp-linkedin-auto",
-      "prompt": "Auto-post for OptiRFP LinkedIn.\\n\\nSTEP 1: Generate random content\\n- Run: python3 ~/.hermes/scripts/optirfp_post_generator.py\\n- This outputs a JSON with channelId, text, image_url, etc.\\n\\nSTEP 2: Extract image URL from the JSON output\\n\\nSTEP 3: Post to Buffer using mcp__buffer__create_post\\n- channelId: 6a7f74bcb2d9d577437af9a4\\n- Use the text and image_url from step 1\\n- schedulingType: 'automatic'\\n- mode: 'addToQueue'\\n\\nSTEP 4: Report success or failure\\n\\nIf image generation fails, output a fallback text-only post.\\nIf Buffer posting fails, save the post data for manual retry.",
+      "prompt": "Auto-post OptiRFP LinkedIn via MCP Buffer.\nGenerate RFP content and schedule post using mcp__buffer__create_post.",
       "skills": [],
       "skill": null,
       "model": null,
       "provider": null,
-      "provider_snapshot": "openrouter",
-      "model_snapshot": "moonshotai/kimi-k2.5",
+      "provider_snapshot": null,
+      "model_snapshot": null,
       "base_url": null,
-      "script": null,
-      "no_agent": false,
+      "script": "optirfp_daily_post.sh",
+      "no_agent": true,
       "monitor_script": null,
       "monitor_url": null,
       "monitor_state": null,
@@ -110,9 +116,9 @@
         "times": null,
         "completed": 1
       },
-      "enabled": true,
-      "state": "scheduled",
-      "paused_at": null,
+      "enabled": false,
+      "state": "paused",
+      "paused_at": "2026-09-16T08:56:21.401889-04:00",
       "paused_reason": null,
       "created_at": "2026-09-14T14:11:18.806605-04:00",
       "next_run_at": "2026-09-16T09:00:00-04:00",
@@ -129,8 +135,8 @@
     },
     {
       "id": "7bb4ab80b2c2",
-      "name": "spielberg-queue-processor",
-      "prompt": "You are Spielberg. Check ~/.openclaw/workspace/tales-untold/queue/ for any new .txt story files (ignore README.md). If found:\n\n1. Read the file. If it's a full story (>100 words), use it verbatim. If it's a topic/title, write a 140-180 word horror micro-story.\n2. Produce the video using the full Spielberg pipeline:\n   a. Generate \"Adam\" voice via POYO (elevenlabs-tts-turbo-2-5)\n   b. Whisper caption transcription\n   c. Generate 5-7 Gammell scenes via nano-banana-2-lite\n   d. HyperFrames render with lighter vignette\n   e. ffmpeg mix with background music (amix duration=longest)\n3. Upload final video to Google Drive for backup + review\n4. **PUBLISH TO YOUTUBE (PUBLIC):**\n   a. Upload final video to litterbox.catbox.moe (temporary URL):\n      ```\n      curl -s -F \"reqtype=fileupload\" -F \"time=1h\" -F \"fileToUpload=@output/FINAL_*.mp4\" https://litterbox.catbox.moe/resources/internals/api.php\n      ```\n   b. Get the returned URL (format: https://litter.catbox.moe/XXXXXX.mp4)\n   c. Post to YouTube via Buffer MCP directly:\n      Use curl POST to https://mcp.buffer.com/mcp with:\n      - Authorization: bearer ___TOKEN___\n      - channelId: 6aa9a22eea19ca0bde4e0e84\n      - text: \"STORY_TITLE | Tales Untold — teaser hook #shorts #horror\"\n      - assets: [{\"video\": {\"url\": \"LITTERBOX_URL\", \"metadata\": {\"title\": \"STORY_TITLE | Tales Untold\"}}}]\n      - metadata.youtube: {\"title\": \"...\", \"categoryId\": \"24\", \"privacy\": \"public\", \"madeForKids\": false}\n      - mode: \"shareNow\", schedulingType: \"automatic\"\n   d. CRITICAL: privacy MUST be \"public\" — all live posts go public immediately\n5. Report results: video file, drive link, YouTube post status, and any errors.\n\nIf no files in queue, report \"No new stories in queue.\"\nFollow the spielberg skill exactly for all pipeline steps.",
+      "name": "spielberg-buffer-refill",
+      "prompt": "Tales Untold Buffer Refill — Monday & Thursday Edition\n\nCheck the current Buffer queue for Tales Untold YouTube channel. If fewer than 6 posts are scheduled:\n\n**Phase 1: Story Topic Generation**\n- Check ~/.openclaw/workspace/tales-untold/queue/ folder — if fewer than 10 topics exist, write new ones\n- Create 10 fresh horror micro-story topics (one-liners)\n- Save as queue/XX_topic_name.txt files\n\n**Phase 2: Video Production**\n- Run Spielberg pipeline on all new queue topics\n- Generate: story → Adam voice → Whisper → Gammell scenes → HTML → HyperFrames → ffmpeg\n- Produce FINAL_*.mp4 files in output/\n\n**Phase 3: Upload to Drive**\n- Upload videos to Google Drive folder 1EbHh1_zhHDVX2YAO2i7yV_3epwUvNppj\n- Get public URLs: https://drive.google.com/uc?export=view&id=XXX\n\n**Phase 4: Schedule via Dual-Account Script**\nUse the buffer_dual_account.py script with explicit token:\n\n```python\npython3 ~/.openclaw/workspace/scripts/buffer_dual_account.py post-youtube \\\n  \"TITLE\" \\\n  \"DRIVE_URL\" \\\n  \"DESCRIPTION #shorts #horror\"\n```\n\nSchedule 3 per day at: 6 PM, 7 PM, 8 PM ET\nStop when Buffer reaches 9-10 posts.\n\n**Tokens are stored in script - DO NOT ask user for tokens.**\n\nReport: posts created, scheduled times, Buffer fill level",
       "skills": [
         "spielberg"
       ],
@@ -145,21 +151,21 @@
       "context_from": null,
       "schedule": {
         "kind": "cron",
-        "expr": "0 8 * * 1",
-        "display": "0 8 * * 1"
+        "expr": "0 8 * * 1,4",
+        "display": "0 8 * * 1,4"
       },
-      "schedule_display": "0 8 * * 1",
+      "schedule_display": "0 8 * * 1,4",
       "repeat": {
         "times": null,
-        "completed": 1
+        "completed": 2
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-15T19:55:41.454702-04:00",
-      "next_run_at": "2026-09-21T08:00:00-04:00",
-      "last_run_at": "2026-09-15T22:12:53.515846-04:00",
+      "next_run_at": "2026-09-17T08:00:00-04:00",
+      "last_run_at": "2026-09-16T05:48:20.013105-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -179,13 +185,13 @@
     {
       "id": "514871c9b627",
       "name": "spielberg-publish-8am",
-      "prompt": "Run the Spielberg publisher script to publish one video from the produced/ queue to YouTube via Buffer.\n\n\n\nReport: which video was published, Buffer post ID, and status.",
+      "prompt": "Tales Untold YouTube Publisher — 8 AM Daily\n\nUse the buffer_dual_account.py script to publish the next available video from the produced/ queue.\n\nSteps:\n1. Check ~/.openclaw/workspace/tales-untold/produced/ for unposted FINAL_*.mp4 files\n2. Upload to Google Drive (folder: 1EbHh1_zhHDVX2YAO2i7yV_3epwUvNppj)\n3. Get Drive URL\n4. Post to Buffer via dual-account script:\n   python3 ~/.hermes/scripts/buffer_dual_account.py post-youtube \"TITLE\" \"DRIVE_URL\" \"Description #shorts #horror\"\n\nStop if:\n- No videos in produced/\n- Buffer already has 10 posts (at limit)\n- No unposted videos found\n\nReport: Video posted or reason skipped.",
       "skills": [],
       "skill": null,
       "model": null,
       "provider": null,
       "base_url": null,
-      "script": "~/.hermes/scripts/spielberg_publish.sh",
+      "script": "tales_publisher_8am.sh",
       "schedule": {
         "kind": "cron",
         "expr": "0 8 * * *",
@@ -194,22 +200,25 @@
       "schedule_display": "0 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 0
+        "completed": 1
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-16T01:51:41.753063-04:00",
-      "next_run_at": "2026-09-16T08:00:00-04:00",
-      "last_run_at": null,
-      "last_status": null,
+      "next_run_at": "2026-09-17T08:00:00-04:00",
+      "last_run_at": "2026-09-16T08:00:04.248310-04:00",
+      "last_status": "ok",
       "last_delivery_error": null,
       "deliver": "origin",
       "workdir": "/home/herby/.openclaw/workspace/tales-untold",
       "enabled_toolsets": [],
       "attach_to_session": true,
-      "no_agent": true
+      "no_agent": true,
+      "fire_claim": null,
+      "last_error": null,
+      "failure_streak": 0
     },
     {
       "id": "17a96e617bdc",
@@ -220,7 +229,7 @@
       "model": null,
       "provider": null,
       "base_url": null,
-      "script": "~/.hermes/scripts/spielberg_publish.sh",
+      "script": "tales_publisher_8am.sh",
       "schedule": {
         "kind": "cron",
         "expr": "0 14 * * *",
@@ -229,22 +238,25 @@
       "schedule_display": "0 14 * * *",
       "repeat": {
         "times": null,
-        "completed": 0
+        "completed": 1
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-16T01:51:41.753084-04:00",
-      "next_run_at": "2026-09-16T14:00:00-04:00",
-      "last_run_at": null,
-      "last_status": null,
+      "next_run_at": "2026-09-17T14:00:00-04:00",
+      "last_run_at": "2026-09-16T14:00:17.525948-04:00",
+      "last_status": "ok",
       "last_delivery_error": null,
       "deliver": "origin",
       "workdir": "/home/herby/.openclaw/workspace/tales-untold",
       "enabled_toolsets": [],
       "attach_to_session": true,
-      "no_agent": true
+      "no_agent": true,
+      "fire_claim": null,
+      "last_error": null,
+      "failure_streak": 0
     },
     {
       "id": "6c1189021c3f",
@@ -255,7 +267,7 @@
       "model": null,
       "provider": null,
       "base_url": null,
-      "script": "~/.hermes/scripts/spielberg_publish.sh",
+      "script": "tales_publisher_8am.sh",
       "schedule": {
         "kind": "cron",
         "expr": "0 20 * * *",
@@ -264,23 +276,75 @@
       "schedule_display": "0 20 * * *",
       "repeat": {
         "times": null,
-        "completed": 0
+        "completed": 1
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-16T01:51:41.753089-04:00",
-      "next_run_at": "2026-09-16T20:00:00-04:00",
-      "last_run_at": null,
-      "last_status": null,
+      "next_run_at": "2026-09-17T20:00:00-04:00",
+      "last_run_at": "2026-09-16T20:00:26.219242-04:00",
+      "last_status": "ok",
       "last_delivery_error": null,
       "deliver": "origin",
       "workdir": "/home/herby/.openclaw/workspace/tales-untold",
       "enabled_toolsets": [],
       "attach_to_session": true,
-      "no_agent": true
+      "no_agent": true,
+      "fire_claim": null,
+      "last_error": null,
+      "failure_streak": 0
+    },
+    {
+      "id": "c0c3d0c3835c",
+      "name": "tales-untold-longform-v4-youtube",
+      "prompt": "Run the Tales Untold long-form video producer script and deliver results to Telegram.",
+      "skills": [],
+      "skill": null,
+      "model": null,
+      "provider": null,
+      "provider_snapshot": "openrouter",
+      "model_snapshot": "moonshotai/kimi-k2.5",
+      "base_url": null,
+      "script": "tales_longform_producer_v4.sh",
+      "no_agent": false,
+      "monitor_script": null,
+      "monitor_url": null,
+      "monitor_state": null,
+      "context_from": null,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 10 * * 1,4",
+        "display": "0 10 * * 1,4"
+      },
+      "schedule_display": "0 10 * * 1,4",
+      "repeat": {
+        "times": null,
+        "completed": 0
+      },
+      "enabled": true,
+      "state": "scheduled",
+      "paused_at": null,
+      "paused_reason": null,
+      "created_at": "2026-09-16T11:16:47.020886-04:00",
+      "next_run_at": "2026-09-17T10:00:00-04:00",
+      "last_run_at": null,
+      "last_status": null,
+      "last_error": null,
+      "last_delivery_error": null,
+      "failure_streak": 0,
+      "deliver": "origin",
+      "origin": {
+        "platform": "telegram",
+        "chat_id": "___ID___",
+        "chat_name": "Andrew",
+        "thread_id": null,
+        "user_id": "___ID___"
+      },
+      "enabled_toolsets": null,
+      "workdir": "/home/herby/.openclaw/workspace/tales-untold"
     }
   ],
-  "updated_at": "2026-09-16T04:32:19.080543-04:00"
+  "updated_at": "2026-09-17T04:32:31.112733-04:00"
 }
