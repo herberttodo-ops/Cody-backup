@@ -18,15 +18,15 @@
       "schedule_display": "30 4 * * *",
       "repeat": {
         "times": null,
-        "completed": 103
+        "completed": 104
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-04-05T17:06:06.321746-04:00",
-      "next_run_at": "2026-09-18T04:30:00-04:00",
-      "last_run_at": "2026-09-16T04:33:05.655036-04:00",
+      "next_run_at": "2026-09-19T04:30:00-04:00",
+      "last_run_at": "2026-09-17T04:33:29.820138-04:00",
       "last_status": "ok",
       "last_error": null,
       "deliver": "telegram:___ID___",
@@ -38,8 +38,8 @@
       },
       "last_delivery_error": null,
       "fire_claim": {
-        "at": "2026-09-17T04:32:31.110773-04:00",
-        "by": "herby-Virtual-Machine:3750775:8f1f7bdc2aec46959410fb9ef6a7d844"
+        "at": "2026-09-18T04:32:02.812152-04:00",
+        "by": "herby-Virtual-Machine:3750775:0391e3b21f5642c382452b1fbed7ba78"
       },
       "failure_streak": 0
     },
@@ -63,15 +63,15 @@
       "schedule_display": "0 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 57
+        "completed": 58
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-14T09:53:18.644425-04:00",
-      "next_run_at": "2026-09-17T08:00:00-04:00",
-      "last_run_at": "2026-09-16T08:50:43.495961-04:00",
+      "next_run_at": "2026-09-18T08:00:00-04:00",
+      "last_run_at": "2026-09-17T08:01:14.468631-04:00",
       "last_status": "ok",
       "last_error": null,
       "deliver": "telegram",
@@ -135,8 +135,8 @@
     },
     {
       "id": "7bb4ab80b2c2",
-      "name": "spielberg-buffer-refill",
-      "prompt": "Tales Untold Buffer Refill — Monday & Thursday Edition\n\nCheck the current Buffer queue for Tales Untold YouTube channel. If fewer than 6 posts are scheduled:\n\n**Phase 1: Story Topic Generation**\n- Check ~/.openclaw/workspace/tales-untold/queue/ folder — if fewer than 10 topics exist, write new ones\n- Create 10 fresh horror micro-story topics (one-liners)\n- Save as queue/XX_topic_name.txt files\n\n**Phase 2: Video Production**\n- Run Spielberg pipeline on all new queue topics\n- Generate: story → Adam voice → Whisper → Gammell scenes → HTML → HyperFrames → ffmpeg\n- Produce FINAL_*.mp4 files in output/\n\n**Phase 3: Upload to Drive**\n- Upload videos to Google Drive folder 1EbHh1_zhHDVX2YAO2i7yV_3epwUvNppj\n- Get public URLs: https://drive.google.com/uc?export=view&id=XXX\n\n**Phase 4: Schedule via Dual-Account Script**\nUse the buffer_dual_account.py script with explicit token:\n\n```python\npython3 ~/.openclaw/workspace/scripts/buffer_dual_account.py post-youtube \\\n  \"TITLE\" \\\n  \"DRIVE_URL\" \\\n  \"DESCRIPTION #shorts #horror\"\n```\n\nSchedule 3 per day at: 6 PM, 7 PM, 8 PM ET\nStop when Buffer reaches 9-10 posts.\n\n**Tokens are stored in script - DO NOT ask user for tokens.**\n\nReport: posts created, scheduled times, Buffer fill level",
+      "name": "spielberg-buffer-refill-daily",
+      "prompt": "Tales Untold Shorts Buffer Refill — Daily Edition\n\nGOAL: keep the Tales Untold YouTube Buffer queue stocked so shorts post exactly 3x per day at 6:00 PM, 7:00 PM, 8:00 PM America/New_York, every single day with no gaps.\n\nIMPORTANT CONSTRAINT discovered 2026-09-17: Buffer's Tales Untold org plan caps SCHEDULED posts at 10 total, account-wide. You cannot schedule further ahead than that. This means at 3 posts/day, you can only ever look ~3 days ahead before hitting the cap — do NOT try to fill a full 4-day window like earlier versions of this job did. Always check the actual cap via step 1 before attempting to schedule anything.\n\nSTEP 1 - Check current coverage AND remaining slot budget:\npython3 ~/.hermes/scripts/buffer_dual_account.py check tales_untold\nList every SCHEDULED post's dueAt (convert from UTC to America/New_York) and count the total. Remaining budget = 10 - current_scheduled_count. If remaining budget is 0, report \"Buffer at 10/10 cap, no room to schedule more today\" and stop (skip steps 3-6) — this is normal and will resolve itself as older posts publish.\n\nSTEP 2 - Determine how many new posts are needed, bounded by budget:\nIdentify which of the next 3 days' 6/7/8 PM ET slots are empty (a slot counts as filled if a post's dueAt is within +/- 5 minutes of 18:00, 19:00, or 20:00 ET that day). Needed = count of empty slots in that 3-day window. Actually produce = min(needed, remaining budget from step 1). If actually_produce is 0, report \"queue healthy\" and stop.\n\nSTEP 3 - Story Topic Generation (only if needed):\nCheck ~/.openclaw/workspace/tales-untold/queue/ folder. If fewer unused topics exist than actually_produce, write new horror micro-story topics (one-liners, 140-180 word target when expanded) and save as queue/XX_topic_name.txt files (XX = next available two-digit number).\n\nSTEP 4 - Title A/B variant + Video Production (per the spielberg skill, updated 2026-09-17):\nFor each new video (up to actually_produce), before writing/finalizing its title run: python3 ~/.hermes/scripts/tales_ab_tracker.py next\nThis returns \"A\" (direct first-person hook) or \"B\" (third-person retrospective-reveal hook). Write the title to match. This is a running A/B test — see references/title-and-metadata-strategy.md in the spielberg skill.\n\nProduce videos SERIALLY, one full pipeline at a time, never in parallel — parallel dispatch caused real race conditions (duplicate topic claims, file collisions) on 2026-09-17. Produce FINAL_*.mp4 files, upload each to Google Drive folder 1EbHh1_zhHDVX2YAO2i7yV_3epwUvNppj using /home/herby/.hermes/hermes-agent/venv/bin/python3 ~/.hermes/scripts/upload_video_to_drive.py <path> (not the tales-untold venv). After each render, verify faststart (moov before mdat); if the file is large (>50MB) or fails this check, re-encode: ffmpeg -i in.mp4 -c:v libx264 -crf 23 -preset medium -c:a aac -b:a 128k -movflags +faststart out.mp4 (target under 25MB).\n\nSTEP 5 - Verify Drive URL, then schedule with EXACT times and updated metadata:\nBefore scheduling, verify the Drive URL downloads as a real video: curl -sL '<url>' -o /tmp/verify.bin --max-time 30 -w '%{content_type} %{size_download}\\n' then file /tmp/verify.bin -- must show video/mp4, not text/html (a large non-faststart file triggers Google's virus-scan warning page instead of the real video).\n\nBuild the description using the no-hashtag, cross-promotion pattern: one hook line (no hashtags, no #shorts #horror #creepypasta stuffing) followed by \"Subscribe for more Tales Untold, short and long form horror.\" on its own line. Do NOT pass any tags field.\n\nCall:\n  python3 ~/.hermes/scripts/buffer_dual_account.py post-youtube \"TITLE\" \"DRIVE_URL\" \"HOOK_LINE\nSubscribe for more Tales Untold, short and long form horror.\" \"DUE_AT_UTC_ISO8601\"\n\nDUE_AT_UTC_ISO8601 must be the exact UTC equivalent of that slot's 6/7/8 PM ET time. ALWAYS pass this 4th argument explicitly. If Buffer rejects with a \"Limit reached\" / scheduled-posts-cap error even though step 1's count suggested room (race condition with another process), stop immediately, report the actual error, and do NOT delete or bump any existing post without asking the user first.\n\nVerify each post landed at the correct time by re-running the check command after scheduling and confirming the dueAt matches within 5 minutes.\n\nSTEP 6 - Log the A/B result:\nOnce a post is confirmed scheduled and you can identify its underlying video ID (via the Buffer check output's post id, which is sufficient if the true YouTube video ID isn't resolvable pre-publish), log it: python3 ~/.hermes/scripts/tales_ab_tracker.py log <id> <A|B> \"<title>\"\n\nReport: current queue coverage before and after this run (scheduled count out of 10, which of the next 3 days have all 3 slots filled), how many videos were produced/scheduled this run and their titles + variants + exact scheduled times, and whether it's been ~2 weeks since the A/B test started (if so, remind the user to run `python3 ~/.hermes/scripts/tales_ab_tracker.py report`). If Spielberg production fails for any topic, report the failure clearly and do not schedule a placeholder or invented video in its place.",
       "skills": [
         "spielberg"
       ],
@@ -151,21 +151,21 @@
       "context_from": null,
       "schedule": {
         "kind": "cron",
-        "expr": "0 8 * * 1,4",
-        "display": "0 8 * * 1,4"
+        "expr": "0 8 * * *",
+        "display": "0 8 * * *"
       },
-      "schedule_display": "0 8 * * 1,4",
+      "schedule_display": "0 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 2
+        "completed": 3
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-15T19:55:41.454702-04:00",
-      "next_run_at": "2026-09-17T08:00:00-04:00",
-      "last_run_at": "2026-09-16T05:48:20.013105-04:00",
+      "next_run_at": "2026-09-18T08:00:00-04:00",
+      "last_run_at": "2026-09-17T08:24:36.664177-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -180,120 +180,6 @@
       "enabled_toolsets": null,
       "workdir": "/home/herby/.openclaw/workspace/tales-untold",
       "fire_claim": null,
-      "failure_streak": 0
-    },
-    {
-      "id": "514871c9b627",
-      "name": "spielberg-publish-8am",
-      "prompt": "Tales Untold YouTube Publisher — 8 AM Daily\n\nUse the buffer_dual_account.py script to publish the next available video from the produced/ queue.\n\nSteps:\n1. Check ~/.openclaw/workspace/tales-untold/produced/ for unposted FINAL_*.mp4 files\n2. Upload to Google Drive (folder: 1EbHh1_zhHDVX2YAO2i7yV_3epwUvNppj)\n3. Get Drive URL\n4. Post to Buffer via dual-account script:\n   python3 ~/.hermes/scripts/buffer_dual_account.py post-youtube \"TITLE\" \"DRIVE_URL\" \"Description #shorts #horror\"\n\nStop if:\n- No videos in produced/\n- Buffer already has 10 posts (at limit)\n- No unposted videos found\n\nReport: Video posted or reason skipped.",
-      "skills": [],
-      "skill": null,
-      "model": null,
-      "provider": null,
-      "base_url": null,
-      "script": "tales_publisher_8am.sh",
-      "schedule": {
-        "kind": "cron",
-        "expr": "0 8 * * *",
-        "display": "0 8 * * *"
-      },
-      "schedule_display": "0 8 * * *",
-      "repeat": {
-        "times": null,
-        "completed": 1
-      },
-      "enabled": true,
-      "state": "scheduled",
-      "paused_at": null,
-      "paused_reason": null,
-      "created_at": "2026-09-16T01:51:41.753063-04:00",
-      "next_run_at": "2026-09-17T08:00:00-04:00",
-      "last_run_at": "2026-09-16T08:00:04.248310-04:00",
-      "last_status": "ok",
-      "last_delivery_error": null,
-      "deliver": "origin",
-      "workdir": "/home/herby/.openclaw/workspace/tales-untold",
-      "enabled_toolsets": [],
-      "attach_to_session": true,
-      "no_agent": true,
-      "fire_claim": null,
-      "last_error": null,
-      "failure_streak": 0
-    },
-    {
-      "id": "17a96e617bdc",
-      "name": "spielberg-publish-2pm",
-      "prompt": "Run the Spielberg publisher script to publish one video from the produced/ queue to YouTube via Buffer.\n\n\n\nReport: which video was published, Buffer post ID, and status.",
-      "skills": [],
-      "skill": null,
-      "model": null,
-      "provider": null,
-      "base_url": null,
-      "script": "tales_publisher_8am.sh",
-      "schedule": {
-        "kind": "cron",
-        "expr": "0 14 * * *",
-        "display": "0 14 * * *"
-      },
-      "schedule_display": "0 14 * * *",
-      "repeat": {
-        "times": null,
-        "completed": 1
-      },
-      "enabled": true,
-      "state": "scheduled",
-      "paused_at": null,
-      "paused_reason": null,
-      "created_at": "2026-09-16T01:51:41.753084-04:00",
-      "next_run_at": "2026-09-17T14:00:00-04:00",
-      "last_run_at": "2026-09-16T14:00:17.525948-04:00",
-      "last_status": "ok",
-      "last_delivery_error": null,
-      "deliver": "origin",
-      "workdir": "/home/herby/.openclaw/workspace/tales-untold",
-      "enabled_toolsets": [],
-      "attach_to_session": true,
-      "no_agent": true,
-      "fire_claim": null,
-      "last_error": null,
-      "failure_streak": 0
-    },
-    {
-      "id": "6c1189021c3f",
-      "name": "spielberg-publish-8pm",
-      "prompt": "Run the Spielberg publisher script to publish one video from the produced/ queue to YouTube via Buffer.\n\n\n\nReport: which video was published, Buffer post ID, and status.",
-      "skills": [],
-      "skill": null,
-      "model": null,
-      "provider": null,
-      "base_url": null,
-      "script": "tales_publisher_8am.sh",
-      "schedule": {
-        "kind": "cron",
-        "expr": "0 20 * * *",
-        "display": "0 20 * * *"
-      },
-      "schedule_display": "0 20 * * *",
-      "repeat": {
-        "times": null,
-        "completed": 1
-      },
-      "enabled": true,
-      "state": "scheduled",
-      "paused_at": null,
-      "paused_reason": null,
-      "created_at": "2026-09-16T01:51:41.753089-04:00",
-      "next_run_at": "2026-09-17T20:00:00-04:00",
-      "last_run_at": "2026-09-16T20:00:26.219242-04:00",
-      "last_status": "ok",
-      "last_delivery_error": null,
-      "deliver": "origin",
-      "workdir": "/home/herby/.openclaw/workspace/tales-untold",
-      "enabled_toolsets": [],
-      "attach_to_session": true,
-      "no_agent": true,
-      "fire_claim": null,
-      "last_error": null,
       "failure_streak": 0
     },
     {
@@ -321,14 +207,118 @@
       "schedule_display": "0 10 * * 1,4",
       "repeat": {
         "times": null,
+        "completed": 1
+      },
+      "enabled": false,
+      "state": "paused",
+      "paused_at": "2026-09-17T10:10:12.026698-04:00",
+      "paused_reason": null,
+      "created_at": "2026-09-16T11:16:47.020886-04:00",
+      "next_run_at": "2026-09-21T10:00:00-04:00",
+      "last_run_at": "2026-09-17T10:32:07.182875-04:00",
+      "last_status": "ok",
+      "last_error": null,
+      "last_delivery_error": null,
+      "failure_streak": 0,
+      "deliver": "origin",
+      "origin": {
+        "platform": "telegram",
+        "chat_id": "___ID___",
+        "chat_name": "Andrew",
+        "thread_id": null,
+        "user_id": "___ID___"
+      },
+      "enabled_toolsets": null,
+      "workdir": "/home/herby/.openclaw/workspace/tales-untold",
+      "fire_claim": null
+    },
+    {
+      "id": "7dbe0f52ca76",
+      "name": "tales-v5-pilot-watch",
+      "prompt": "One-shot check on the Tales Untold V5 pilot build. Run:\n\n  tail -25 /tmp/longform_v5_output.log\n  ls -la ~/.openclaw/workspace/tales-untold/longform/finals/*.mp4 2>/dev/null | tail -3\n\nIf a TalesUntold_01_road_home*.mp4 exists in finals/, report its duration (ffprobe) and size. If the log shows \"PRODUCTION HALTED\", report the error line. Otherwise report the current stage. Keep it to 3 lines.",
+      "skills": [],
+      "skill": null,
+      "model": null,
+      "provider": null,
+      "provider_snapshot": "openrouter",
+      "model_snapshot": "moonshotai/kimi-k2.5",
+      "base_url": null,
+      "script": null,
+      "no_agent": false,
+      "monitor_script": null,
+      "monitor_url": null,
+      "monitor_state": null,
+      "context_from": null,
+      "schedule": {
+        "kind": "once",
+        "run_at": "2026-09-17T11:20:00-04:00",
+        "display": "once at 2026-09-17 11:20"
+      },
+      "schedule_display": "once at 2026-09-17 11:20",
+      "repeat": {
+        "times": 1,
+        "completed": 1
+      },
+      "enabled": false,
+      "state": "completed",
+      "paused_at": null,
+      "paused_reason": null,
+      "created_at": "2026-09-17T10:24:55.077477-04:00",
+      "next_run_at": null,
+      "last_run_at": "2026-09-17T11:20:50.731657-04:00",
+      "last_status": "ok",
+      "last_error": null,
+      "last_delivery_error": null,
+      "failure_streak": 0,
+      "deliver": "local",
+      "origin": {
+        "platform": "telegram",
+        "chat_id": "___ID___",
+        "chat_name": "Andrew",
+        "thread_id": null,
+        "user_id": "___ID___"
+      },
+      "enabled_toolsets": [
+        "terminal",
+        "file"
+      ],
+      "workdir": null,
+      "run_claim": null,
+      "fire_claim": null
+    },
+    {
+      "id": "c804baf22afe",
+      "name": "tales-untold-longform-v5-3x-weekly",
+      "prompt": "Tales Untold long-form: queue maintenance + production + scheduled upload.\n\nSTEP 1 - Check the queue:\nRun: python3 ~/.hermes/scripts/tales_queue_refill.py --check\nThis prints how many stories are needed to keep the queue stocked (target: at least 2 waiting after this run consumes one).\n\nSTEP 2 - If stories are needed, generate them via delegation:\nRun: python3 ~/.hermes/scripts/tales_queue_refill.py --premises N\n(N = the \"stories needed\" number from step 1) to get N premises, one per line.\n\nFor EACH premise, use delegate_task (as a single batched parallel call, one task per premise) with this exact goal/context pattern:\n\n  goal: \"Write a complete original horror creepypasta story of exactly 4,150-4,350 words targeting a 26-28 minute narrated video at 155-160 wpm. Output as a single queue file written to /home/herby/.openclaw/workspace/tales-untold/longform/queue/NN_SLUG.txt (NN = next available two-digit number after the highest-numbered file already in longform/queue/ and longform/queue_done/ combined; SLUG = a short slug from the story's core image/location).\"\n\n  context: \"STORY PREMISE: <the premise text from step 1, expanded into one paragraph: a first-person account from someone in this role who notices a specific recurring anomaly in their own job's ordinary records over time. Avoid gore or an explicit supernatural reveal; the horror is in the pattern and the procedural/bureaucratic detail treated matter-of-factly.\n\nHARD STYLE RULES (non-negotiable):\n- First-person confessional tone, long flowing sentences with subordinate clauses. Present-tense framing like 'I want to say clearly...' or 'I do not have a theory that...'\n- ZERO em dashes anywhere in the story body. Use commas or periods instead.\n- No gore, no jump scares, no supernatural explained outright.\n\nQUEUE FILE FORMAT (exact structure):\ntitle: <hook-first title, first-person, specific, no brand suffix, no em dash, under 100 chars>\ndesc: <1-2 sentence honest premise, not clickbait, no em dash>\nchapters: <5-6 short chapter names separated by | mapping onto story beats in order>\nthumbnail: <one sentence describing a single-subject dark scene for the thumbnail image>\nthumb_text: <2-5 word ALL CAPS hook tied to actual story content, no em dash>\nscenes: <one line per visual beat, 14-18 total, Gammell-ink-wash-appropriate: dark, atmospheric, objects/environments/silhouettes, no detailed faces>\ntags: horror, creepypasta, narrated horror, scary stories, true scary stories, horror story\n---\n<the full story body, 4150-4350 words, first person>\n\nVerify your own word count of the text after '---' before finishing. It MUST be 4150-4350 words.\"\n\n  output_schema: {\"type\":\"object\",\"properties\":{\"file_path\":{\"type\":\"string\"},\"word_count\":{\"type\":\"integer\"}},\"required\":[\"file_path\",\"word_count\"]}\n\nAfter delegation completes, verify each returned file actually exists at the reported path and its word count is genuinely 4150-4350 (recount it yourself, don't just trust the report) before moving on. If a story is out of range or malformed, fix it directly rather than leaving a broken queue file.\n\nSTEP 3 - Run production and scheduled upload:\nRun this exact command via the terminal tool and wait for it to finish (it can take 30-90 minutes, use a generous timeout or background+poll):\n  bash ~/.hermes/scripts/tales_longform_pipeline.sh\nIt pulls the next queue story, produces the full video, and uploads it to YouTube scheduled to auto-publish at the next Mon/Tue/Thu 5:00 PM ET slot.\n\nReport: how many stories were generated (if any) and their titles, then the produced video's title, scheduled publish time, and YouTube URL. If production halts with an error, report that clearly and do not invent or substitute content.",
+      "skills": [],
+      "skill": null,
+      "model": null,
+      "provider": null,
+      "provider_snapshot": "openrouter",
+      "model_snapshot": "moonshotai/kimi-k2.5",
+      "base_url": null,
+      "script": null,
+      "no_agent": false,
+      "monitor_script": null,
+      "monitor_url": null,
+      "monitor_state": null,
+      "context_from": null,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 14 * * 1,2,4",
+        "display": "0 14 * * 1,2,4"
+      },
+      "schedule_display": "0 14 * * 1,2,4",
+      "repeat": {
+        "times": null,
         "completed": 0
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
-      "created_at": "2026-09-16T11:16:47.020886-04:00",
-      "next_run_at": "2026-09-17T10:00:00-04:00",
+      "created_at": "2026-09-17T13:42:27.386294-04:00",
+      "next_run_at": "2026-09-21T14:00:00-04:00",
       "last_run_at": null,
       "last_status": null,
       "last_error": null,
@@ -342,9 +332,115 @@
         "thread_id": null,
         "user_id": "___ID___"
       },
-      "enabled_toolsets": null,
+      "enabled_toolsets": [
+        "terminal",
+        "file",
+        "delegation"
+      ],
       "workdir": "/home/herby/.openclaw/workspace/tales-untold"
+    },
+    {
+      "id": "42a1783d7e1a",
+      "name": "tales-shorts-slot2-followup",
+      "prompt": "Tales Untold Shorts: schedule the pending Sunday 7PM ET video now that a Buffer slot should have freed up.\n\nContext: Buffer's Tales Untold org caps scheduled posts at 10. Video \"The Figure In The Elevator Hallway Was The New Tenant\" (topic 11_elevator_stop.txt, A/B variant B) is FULLY PRODUCED and sitting ready — do not re-produce it. It's already rendered, faststart-verified, and uploaded to Google Drive at:\nhttps://drive.google.com/uc?export=download&id=1ATqTKAXo0Oo1efvzTmfsQCH7U9qLP3iK\n\nSteps:\n1. Run: python3 ~/.hermes/scripts/buffer_dual_account.py check tales_untold\n   Confirm current scheduled post count is now below 10 (Thursday 6PM's post should have published by now, freeing a slot). If still at 10/10, wait 10 minutes and check again once; if still blocked after that, report the blocker and stop — do not delete/bump any post without asking.\n2. Verify the Drive URL still downloads as real video: curl -sL '<url>' -o /tmp/verify.bin --max-time 30 -w '%{content_type} %{size_download}\\n' then file /tmp/verify.bin -- must show video/mp4.\n3. Schedule it:\npython3 ~/.hermes/scripts/buffer_dual_account.py post-youtube \"The Figure In The Elevator Hallway Was The New Tenant | Tales Untold\" \"https://drive.google.com/uc?export=download&id=1ATqTKAXo0Oo1efvzTmfsQCH7U9qLP3iK\" \"The figure standing in the elevator hallway every night was never a resident. Tonight the building told me why.\nSubscribe for more Tales Untold, short and long form horror.\" \"2026-09-20T23:00:00.000Z\"\n4. Verify via check command that dueAt matches 2026-09-20T23:00:00.000Z exactly.\n5. Log the A/B result: python3 ~/.hermes/scripts/tales_ab_tracker.py log <post_id> B \"The Figure In The Elevator Hallway Was The New Tenant\"\n6. Update ~/.openclaw/workspace/tales-untold/queue/README.md to mark 11_elevator_stop.txt as Done with the confirmed dueAt.\n\nReport the outcome clearly: scheduled successfully with confirmed dueAt, or blocked (and why). This is a ONE-SHOT job, do not treat it as recurring.",
+      "skills": [],
+      "skill": null,
+      "model": null,
+      "provider": null,
+      "provider_snapshot": "openrouter",
+      "model_snapshot": "moonshotai/kimi-k2.5",
+      "base_url": null,
+      "script": null,
+      "no_agent": false,
+      "monitor_script": null,
+      "monitor_url": null,
+      "monitor_state": null,
+      "context_from": null,
+      "schedule": {
+        "kind": "once",
+        "run_at": "2026-09-17T18:05:00-04:00",
+        "display": "once at 2026-09-17 18:05"
+      },
+      "schedule_display": "once at 2026-09-17 18:05",
+      "repeat": {
+        "times": 1,
+        "completed": 1
+      },
+      "enabled": false,
+      "state": "completed",
+      "paused_at": null,
+      "paused_reason": null,
+      "created_at": "2026-09-17T16:16:25.951054-04:00",
+      "next_run_at": null,
+      "last_run_at": "2026-09-17T18:06:33.633052-04:00",
+      "last_status": "ok",
+      "last_error": null,
+      "last_delivery_error": null,
+      "failure_streak": 0,
+      "deliver": "origin",
+      "origin": {
+        "platform": "telegram",
+        "chat_id": "___ID___",
+        "chat_name": "Andrew",
+        "thread_id": null,
+        "user_id": "___ID___"
+      },
+      "enabled_toolsets": null,
+      "workdir": "/home/herby/.openclaw/workspace/tales-untold",
+      "run_claim": null,
+      "fire_claim": null
+    },
+    {
+      "id": "cd163f06059d",
+      "name": "tales-shorts-slot3-followup",
+      "prompt": "Tales Untold Shorts: produce and schedule the last pending video for Sunday 8PM ET, now that Buffer slots should have freed up from today's Thursday posts publishing.\n\nLoad the 'spielberg' skill for full pipeline instructions (updated 2026-09-17 with title A/B testing and no-hashtag description requirements).\n\nSteps:\n1. Run: python3 ~/.hermes/scripts/buffer_dual_account.py check tales_untold\n   Confirm scheduled post count is below 10 (Thursday's 3 posts should have published by 8PM today, freeing slots). If still at 10/10, wait 15 min and check once more; if still blocked, report the blocker and stop.\n2. Get A/B variant: python3 ~/.hermes/scripts/tales_ab_tracker.py next\n3. Use topic file: /home/herby/.openclaw/workspace/tales-untold/queue/12_voicemail_loop.txt -- expand into a 140-180 word story if it's just a one-liner, write the title to match the A/B variant returned.\n4. Run the FULL Spielberg pipeline: TTS, Whisper, scene images, HyperFrames render, ffmpeg audio mix.\n5. CRITICAL: after rendering, check file size and faststart (moov before mdat). If over ~50MB or moov is not near the front, re-encode: ffmpeg -i in.mp4 -c:v libx264 -crf 23 -preset medium -c:a aac -b:a 128k -movflags +faststart out.mp4 (target under 25MB).\n6. Upload to Drive using: /home/herby/.hermes/hermes-agent/venv/bin/python3 ~/.hermes/scripts/upload_video_to_drive.py <path>  (NOT the tales-untold venv, it's missing hermes_constants).\n7. Verify the Drive URL downloads as real video BEFORE scheduling: curl -sL '<url>' -o /tmp/verify.bin --max-time 30 -w '%{content_type} %{size_download}\\n' then file /tmp/verify.bin -- must show video/mp4.\n8. Schedule: python3 ~/.hermes/scripts/buffer_dual_account.py post-youtube \"TITLE | Tales Untold\" \"DRIVE_URL\" \"HOOK_LINE (no hashtags)\nSubscribe for more Tales Untold, short and long form horror.\" \"2026-09-21T00:00:00.000Z\"\n9. Verify via check command that dueAt matches exactly.\n10. Log: python3 ~/.hermes/scripts/tales_ab_tracker.py log <post_id> <A|B> \"<title>\"\n11. Update ~/.openclaw/workspace/tales-untold/queue/README.md marking 12_voicemail_loop.txt Done.\n\nReport the outcome clearly: scheduled successfully with confirmed dueAt, or blocked (and why). Do not fabricate success. This is a ONE-SHOT job, not recurring.",
+      "skills": [],
+      "skill": null,
+      "model": null,
+      "provider": null,
+      "provider_snapshot": "openrouter",
+      "model_snapshot": "moonshotai/kimi-k2.5",
+      "base_url": null,
+      "script": null,
+      "no_agent": false,
+      "monitor_script": null,
+      "monitor_url": null,
+      "monitor_state": null,
+      "context_from": null,
+      "schedule": {
+        "kind": "once",
+        "run_at": "2026-09-17T20:10:00-04:00",
+        "display": "once at 2026-09-17 20:10"
+      },
+      "schedule_display": "once at 2026-09-17 20:10",
+      "repeat": {
+        "times": 1,
+        "completed": 1
+      },
+      "enabled": false,
+      "state": "completed",
+      "paused_at": null,
+      "paused_reason": null,
+      "created_at": "2026-09-17T16:16:43.168191-04:00",
+      "next_run_at": null,
+      "last_run_at": "2026-09-17T20:27:09.742389-04:00",
+      "last_status": "ok",
+      "last_error": null,
+      "last_delivery_error": null,
+      "failure_streak": 0,
+      "deliver": "origin",
+      "origin": {
+        "platform": "telegram",
+        "chat_id": "___ID___",
+        "chat_name": "Andrew",
+        "thread_id": null,
+        "user_id": "___ID___"
+      },
+      "enabled_toolsets": null,
+      "workdir": "/home/herby/.openclaw/workspace/tales-untold",
+      "run_claim": null,
+      "fire_claim": null
     }
   ],
-  "updated_at": "2026-09-17T04:32:31.112733-04:00"
+  "updated_at": "2026-09-18T04:32:02.812502-04:00"
 }

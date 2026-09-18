@@ -144,6 +144,7 @@ display:
   busy_input_mode: interrupt
   bell_on_complete: false
   show_reasoning: false
+  background_process_notifications: all
   streaming: true
   inline_diffs: true
   show_cost: false
@@ -151,7 +152,6 @@ display:
   tool_progress_command: false
   tool_preview_length: 0
   tool_progress: all
-  background_process_notifications: all
 privacy:
   redact_pii: false
 tts:
@@ -218,21 +218,23 @@ approvals:
   mode: manual
   timeout: 60
 command_allowlist:
-  - recursive delete
   - delete in root path
-  - shell command via -c/-lc flag
-  - force kill processes
+  - overwrite project env/config via redirection
+  - script execution via -e/-c flag
   - in-place edit of Hermes config/env
   - script execution via heredoc
-  - shell execution via heredoc
-  - overwrite project env/config via redirection
-  - kill hermes/gateway process (self-termination)
+  - command parser limit or malformed executable payload
   - force kill processes (killall -KILL)
-  - stop/restart system service
-  - script execution via -e/-c flag
-  - pipe remote content to shell
   - hermes update (restarts gateway, kills running agents)
+  - execute_code
+  - kill hermes/gateway process (self-termination)
   - overwrite system file via redirection
+  - pipe remote content to shell
+  - recursive delete
+  - force kill processes
+  - shell execution via heredoc
+  - stop/restart system service
+  - shell command via -c/-lc flag
 security:
   redact_secrets: true
   tirith_enabled: true
