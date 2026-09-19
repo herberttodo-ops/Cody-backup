@@ -1,0 +1,146 @@
+Cronjob Response: spielberg-buffer-refill-daily
+(job_id: 7bb4ab80b2c2)
+-------------
+
+Now I have a complete picture. Let me provide a comprehensive debug report:
+
+---
+
+## 🔍 Tales Untold Buffer Refill — Debug Report
+
+### ⏰ Current Time
+**2026-09-18 14:10 EDT** (America/New_York)
+
+---
+
+### ✅ Critical Components Status
+
+| Component | Status | Details |
+|-----------|--------|---------|
+| `.env` accessible | ✅ OK | POYO_API_KEY and BUFFER_API_KEY present, file readable |
+| `produced/` videos | ⚠️ EMPTY | No .mp4 files waiting to publish |
+| spielberg_publish.sh | ✅ EXECUTABLE | Permissions: `-rwxrwxr-x` |
+| Buffer API | ✅ WORKING | Returns 9 scheduled posts |
+
+---
+
+### 🚨 PRIMARY ERROR IDENTIFIED
+
+**Cron Job:** `spielberg-buffer-refill-daily` (7bb4ab80b2c2)
+**Last Run:** 2026-09-18 at 08:00 EDT
+**Error:** `RuntimeError: Response truncated due to output length limit`
+
+**Execution History:**
+```
+d2ab38d118...  RUNNING    2026-09-18 14:09 (current execution)
+f85d271a75...  FAILED     2026-09-18 08:00 ← ERROR HERE
+d16e48fc53...  completed  2026-09-17 08:00
+2fe578c908...  completed  2026-09-16 04:56
+```
+
+---
+
+### 📊 Current Buffer State (April 10 Buffer Capacity)
+
+Buffer is at **9/10 slots** (90% capacity):
+
+| Date (ET) | Time | Title | Post ID |
+|-----------|------|-------|---------|
+| Sep 18 | 6:00 PM | Basement Noise | 6aabdadb... |
+| Sep 18 | 7:00 PM | Wrong Number | 6aabda64... |
+| Sep 18 | 8:00 PM | *EMPTY SLOT* | — |
+| Sep 19 | 12:00 AM | GPS Road | 6aac4683... |
+| Sep 19 | 6:00 PM | Baby Monitor | 6aac4468... |
+| Sep 19 | 7:00 PM | Child's Drawing | 6aac468e... |
+| Sep 20 | 6:00 PM | Last Passenger | 6aac4402... |
+| Sep 20 | 7:00 PM | New Door | 6aac47fb... |
+| Sep 20 | 8:00 PM | Elevator Stop | 6aac6455... |
+| Sep 21 | 8:00 PM | Voicemail Loop | 6aac851b... |
+
+**Remaining Slot Budget:** 1/10
+
+---
+
+### 🎬 Production Pipeline Status
+
+**Queue Topics (12 total):**
+- All 12 topics (01-12) are in `queue/` folder
+- **README shows all are "Done" / archived**
+- Most recent: `12_voicemail_loop.txt` (Sep 17 20:26)
+
+**Output/ Archive:**
+- ✅ 12 FINAL_*.mp4 videos exist in `output/` directory
+- Most recent: `FINAL_voicemail_loop.mp4` (Sep 17 20:24)
+
+**produced/ Directory:**
+- ❌ **EMPTY** — contains only README.md
+- This is the staging area for `spielberg_publish.sh`
+
+---
+
+### 🔧 Issues Found
+
+| Issue | Severity | Description |
+|-------|----------|-------------|
+| **Output truncation** | 🔴 HIGH | Skill output exceeds Hermes output limit during buffer check |
+| **Missing production→produced copy** | 🟡 MEDIUM | Videos are in `output/` but not in `produced/` |
+| **spielberg_publish.sh outdated** | 🟡 MEDIUM | Uses old hashtag metadata pattern (`#shorts #horror #creepypasta`) |
+| **Buffer metadata inconsistent** | 🟡 MEDIUM | Some posts have old hashtags, some don't |
+
+---
+
+### 📋 Root Cause Analysis
+
+The **Sep 18 08:00 failure** occurred because:
+
+1. The Spielberg skill runs the full buffer refill pipeline
+2. Step 1 checks Buffer status, which returns ~12KB of JSON
+3. Combined with verbose logging during the skill execution, total output exceeded Hermes' output length limit
+4. The cron job truncated the response, causing `RuntimeError`
+
+**Additional context:**
+- All queue topics have been processed (production complete)
+- Videos exist in `output/` but were never moved to `produced/`
+- The staging mechanism (`spielberg_publish.sh` expecting videos in `produced/`) is broken
+
+---
+
+### ✋ Recommendations
+
+1. **Reduce output verbosity** — The skill should suppress verbose JSON output from buffer checks, showing only essential status (slot count, needed posts)
+
+2. **Fix produced/ directory flow** — Either:
+   - Copy/move completed videos from `output/` → `produced/`
+   - Update `spielberg_publish.sh` to look in `output/` directly
+   - Automate the handoff between production completion and publish staging
+
+3. **Update spielberg_publish.sh** — Remove hashtag stuffing per 2026-09-17 metadata research:
+   ```bash
+   # Change from:
+   "$TITLE | Tales Untold — short horror #shorts #horror"
+   # To:
+   "$TITLE | Tales Untold"
+   ```
+
+4. **A/B Test Status** — Currently 3 videos logged:
+   - Variant A: 2 videos (Door, Voicemail)
+   - Variant B: 1 video (Elevator)
+   - **Not yet 2 weeks** — remind after ~Oct 1 to run report
+
+---
+
+### 📁 File Locations for Reference
+
+| File | Path |
+|------|------|
+| Environment | `~/.openclaw/workspace/tales-untold/.env` |
+| Queue topics | `~/.openclaw/workspace/tales-untold/queue/*.txt` |
+| Produced videos | `~/.openclaw/workspace/tales-untold/produced/` (EMPTY) |
+| Output videos | `~/.openclaw/workspace/tales-untold/output/FINAL_*.mp4` |
+| Publish script | `~/.hermes/scripts/spielberg_publish.sh` |
+| Buffer script | `~/.hermes/scripts/buffer_dual_account.py` |
+| A/B tracker | `~/.hermes/scripts/tales_ab_tracker.py` |
+| A/B log | `~/.openclaw/workspace/tales-untold/ab_test_log.json` |
+| Queue README | `~/.openclaw/workspace/tales-untold/queue/README.md` |
+
+To stop or manage this job, send me a new message (e.g. "stop reminder spielberg-buffer-refill-daily").

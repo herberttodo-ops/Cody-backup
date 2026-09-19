@@ -19,3 +19,5 @@ Andrew expects verification before assumptions, not just for APIs but for output
 POYO takes raw ElevenLabs voice IDs and 12k+ chars/request without truncation, but does NOT error on a bad voice ID: verify a voice swap via MD5 + duration + band RMS.
 §
 Telegram caps bot downloads at 20MB; bigger files are rejected server-side and never hit disk, so don't hunt for them. Use ~/.hermes/scripts/tales_add_music.sh <path|direct URL> for large audio.
+§
+OptiRFP Buffer posting: Ensure cron script posts to both LinkedIn AND Facebook. The optirfp_daily_post.sh only called post-linkedin, missing post-facebook entirely. When adding new channels, update both buffer_dual_account.py (add channel ID and CLI command) AND the daily posting script (add the platform call). Images via Ideogram are working correctly.

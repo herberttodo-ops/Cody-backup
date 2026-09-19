@@ -18,15 +18,15 @@
       "schedule_display": "30 4 * * *",
       "repeat": {
         "times": null,
-        "completed": 104
+        "completed": 105
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-04-05T17:06:06.321746-04:00",
-      "next_run_at": "2026-09-19T04:30:00-04:00",
-      "last_run_at": "2026-09-17T04:33:29.820138-04:00",
+      "next_run_at": "2026-09-20T04:30:00-04:00",
+      "last_run_at": "2026-09-18T04:33:02.258441-04:00",
       "last_status": "ok",
       "last_error": null,
       "deliver": "telegram:___ID___",
@@ -38,8 +38,8 @@
       },
       "last_delivery_error": null,
       "fire_claim": {
-        "at": "2026-09-18T04:32:02.812152-04:00",
-        "by": "herby-Virtual-Machine:3750775:0391e3b21f5642c382452b1fbed7ba78"
+        "at": "2026-09-19T04:32:14.389034-04:00",
+        "by": "herby-Virtual-Machine:3750775:cccd144aca35402f89b0eb86fe5e1fb2"
       },
       "failure_streak": 0
     },
@@ -63,15 +63,15 @@
       "schedule_display": "0 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 58
+        "completed": 60
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-14T09:53:18.644425-04:00",
-      "next_run_at": "2026-09-18T08:00:00-04:00",
-      "last_run_at": "2026-09-17T08:01:14.468631-04:00",
+      "next_run_at": "2026-09-19T08:00:00-04:00",
+      "last_run_at": "2026-09-18T08:07:02.171950-04:00",
       "last_status": "ok",
       "last_error": null,
       "deliver": "telegram",
@@ -157,15 +157,15 @@
       "schedule_display": "0 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 3
+        "completed": 5
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-15T19:55:41.454702-04:00",
-      "next_run_at": "2026-09-18T08:00:00-04:00",
-      "last_run_at": "2026-09-17T08:24:36.664177-04:00",
+      "next_run_at": "2026-09-19T08:00:00-04:00",
+      "last_run_at": "2026-09-18T14:11:51.237618-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -289,7 +289,7 @@
     {
       "id": "c804baf22afe",
       "name": "tales-untold-longform-v5-3x-weekly",
-      "prompt": "Tales Untold long-form: queue maintenance + production + scheduled upload.\n\nSTEP 1 - Check the queue:\nRun: python3 ~/.hermes/scripts/tales_queue_refill.py --check\nThis prints how many stories are needed to keep the queue stocked (target: at least 2 waiting after this run consumes one).\n\nSTEP 2 - If stories are needed, generate them via delegation:\nRun: python3 ~/.hermes/scripts/tales_queue_refill.py --premises N\n(N = the \"stories needed\" number from step 1) to get N premises, one per line.\n\nFor EACH premise, use delegate_task (as a single batched parallel call, one task per premise) with this exact goal/context pattern:\n\n  goal: \"Write a complete original horror creepypasta story of exactly 4,150-4,350 words targeting a 26-28 minute narrated video at 155-160 wpm. Output as a single queue file written to /home/herby/.openclaw/workspace/tales-untold/longform/queue/NN_SLUG.txt (NN = next available two-digit number after the highest-numbered file already in longform/queue/ and longform/queue_done/ combined; SLUG = a short slug from the story's core image/location).\"\n\n  context: \"STORY PREMISE: <the premise text from step 1, expanded into one paragraph: a first-person account from someone in this role who notices a specific recurring anomaly in their own job's ordinary records over time. Avoid gore or an explicit supernatural reveal; the horror is in the pattern and the procedural/bureaucratic detail treated matter-of-factly.\n\nHARD STYLE RULES (non-negotiable):\n- First-person confessional tone, long flowing sentences with subordinate clauses. Present-tense framing like 'I want to say clearly...' or 'I do not have a theory that...'\n- ZERO em dashes anywhere in the story body. Use commas or periods instead.\n- No gore, no jump scares, no supernatural explained outright.\n\nQUEUE FILE FORMAT (exact structure):\ntitle: <hook-first title, first-person, specific, no brand suffix, no em dash, under 100 chars>\ndesc: <1-2 sentence honest premise, not clickbait, no em dash>\nchapters: <5-6 short chapter names separated by | mapping onto story beats in order>\nthumbnail: <one sentence describing a single-subject dark scene for the thumbnail image>\nthumb_text: <2-5 word ALL CAPS hook tied to actual story content, no em dash>\nscenes: <one line per visual beat, 14-18 total, Gammell-ink-wash-appropriate: dark, atmospheric, objects/environments/silhouettes, no detailed faces>\ntags: horror, creepypasta, narrated horror, scary stories, true scary stories, horror story\n---\n<the full story body, 4150-4350 words, first person>\n\nVerify your own word count of the text after '---' before finishing. It MUST be 4150-4350 words.\"\n\n  output_schema: {\"type\":\"object\",\"properties\":{\"file_path\":{\"type\":\"string\"},\"word_count\":{\"type\":\"integer\"}},\"required\":[\"file_path\",\"word_count\"]}\n\nAfter delegation completes, verify each returned file actually exists at the reported path and its word count is genuinely 4150-4350 (recount it yourself, don't just trust the report) before moving on. If a story is out of range or malformed, fix it directly rather than leaving a broken queue file.\n\nSTEP 3 - Run production and scheduled upload:\nRun this exact command via the terminal tool and wait for it to finish (it can take 30-90 minutes, use a generous timeout or background+poll):\n  bash ~/.hermes/scripts/tales_longform_pipeline.sh\nIt pulls the next queue story, produces the full video, and uploads it to YouTube scheduled to auto-publish at the next Mon/Tue/Thu 5:00 PM ET slot.\n\nReport: how many stories were generated (if any) and their titles, then the produced video's title, scheduled publish time, and YouTube URL. If production halts with an error, report that clearly and do not invent or substitute content.",
+      "prompt": "Tales Untold Long-Form Auto-Pipe: story → production → upload → schedule.\n\nSTEP 1: Run the automation script\n  bash ~/.hermes/scripts/tales_longform_automation.sh\n\nSTEP 2: If upload succeeds, log the video variant for A/B tracking:\n  python3 ~/.hermes/scripts/tales_ab_tracker.py log <video_id> <A|B> \"<title>\"\n\nSTEP 3: Report results to user via Telegram.\n\nIf no stories in queue, respond with [SILENT].\nIf errors, report them immediately.",
       "skills": [],
       "skill": null,
       "model": null,
@@ -297,7 +297,7 @@
       "provider_snapshot": "openrouter",
       "model_snapshot": "moonshotai/kimi-k2.5",
       "base_url": null,
-      "script": null,
+      "script": "tales_longform_automation.sh",
       "no_agent": false,
       "monitor_script": null,
       "monitor_url": null,
@@ -440,7 +440,57 @@
       "workdir": "/home/herby/.openclaw/workspace/tales-untold",
       "run_claim": null,
       "fire_claim": null
+    },
+    {
+      "id": "10a2b90f73e1",
+      "name": "heartbeat-ollama-buffer-check",
+      "prompt": "",
+      "skills": [],
+      "skill": null,
+      "model": null,
+      "provider": null,
+      "provider_snapshot": null,
+      "model_snapshot": null,
+      "base_url": null,
+      "script": "heartbeat_ollama.py",
+      "no_agent": true,
+      "monitor_script": null,
+      "monitor_url": null,
+      "monitor_state": null,
+      "context_from": null,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 */4 * * *",
+        "display": "0 */4 * * *"
+      },
+      "schedule_display": "0 */4 * * *",
+      "repeat": {
+        "times": null,
+        "completed": 3
+      },
+      "enabled": true,
+      "state": "scheduled",
+      "paused_at": null,
+      "paused_reason": null,
+      "created_at": "2026-09-18T18:37:03.954111-04:00",
+      "next_run_at": "2026-09-19T08:00:00-04:00",
+      "last_run_at": "2026-09-19T04:00:17.483276-04:00",
+      "last_status": "ok",
+      "last_error": null,
+      "last_delivery_error": null,
+      "failure_streak": 0,
+      "deliver": "origin",
+      "origin": {
+        "platform": "telegram",
+        "chat_id": "___ID___",
+        "chat_name": "Andrew",
+        "thread_id": null,
+        "user_id": "___ID___"
+      },
+      "enabled_toolsets": null,
+      "workdir": "/home/herby/.hermes/scripts",
+      "fire_claim": null
     }
   ],
-  "updated_at": "2026-09-18T04:32:02.812502-04:00"
+  "updated_at": "2026-09-19T04:32:14.389403-04:00"
 }
