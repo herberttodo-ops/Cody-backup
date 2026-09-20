@@ -1,0 +1,50 @@
+Cronjob Response: optirfp-linkedin-daily
+(job_id: d0ba9894a668)
+-------------
+
+Headline: Copy-paste is invisible to evaluators.
+Topic: copy-paste
+Sat Sep 19 08:00:59 AM EDT 2026: Starting OptiRFP daily post with image...
+Sat Sep 19 08:00:59 AM EDT 2026: Generated headline: Copy-paste is invisible to evaluators.
+Sat Sep 19 08:00:59 AM EDT 2026: Topic: copy-paste
+Sat Sep 19 08:00:59 AM EDT 2026: Generating image...
+Sat Sep 19 08:01:16 AM EDT 2026: Image generated: /home/herby/.hermes/generated_images/optirfp_social____ID___.png
+Sat Sep 19 08:01:16 AM EDT 2026: Uploading to Drive...
+Sat Sep 19 08:01:21 AM EDT 2026: Drive URL: https://drive.google.com/uc?export=view&id=1zvzd1aDfwokafXr-BSbvJsjVRefoanel
+Sat Sep 19 08:01:21 AM EDT 2026: Posting to LinkedIn...
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"6aae79921e8bdcdb5243f9ac\",\"allowedActions\":[\"publishPostNow\",\"updatePost\",\"movePostToDraft\",\"publishPostNext\",\"updatePostSchedule\",\"updatePostTags\",\"addPostNote\",\"duplicatePost\",\"deletePost\",\"updateShopGridLink\",\"createPostRecurrence\"],\"status\":\"scheduled\",\"text\":\"Copy-paste is invisible to evaluators. Specificity wins.\\n\\nShow outcomes before process.\\n\\n#RFP #B2BSales #ProposalWriting\",\"channelId\":\"6a7f74bcb2d9d577437af9a4\",\"channelService\":\"linkedin\",\"dueAt\":\"2026-09-22T01:41:00.000Z\",\"sentAt\":null,\"schedulingType\":\"automatic\",\"shareMode\":\"addToQueue\",\"sharedNow\":false,\"isCustomScheduled\":false,\"createdAt\":\"2026-09-19T12:01:22.793Z\",\"updatedAt\":\"2026-09-19T12:01:22.820Z\",\"tags\":[],\"assets\":[{\"id\":null,\"type\":\"image\",\"mimeType\":\"image/jpeg\",\"source\":\"https://drive.google.com/uc?export=view&id=1zvzd1aDfwokafXr-BSbvJsjVRefoanel\",\"thumbnail\":\"https://drive.google.com/uc?export=view&id=1zvzd1aDfwokafXr-BSbvJsjVRefoanel\",\"image\":{\"width\":2048,\"height\":2048,\"altText\":\"Copy-paste is invisible to evaluators. Specificity wins.\\n\\nShow outcomes before process.\\n\\n#RFP #B2BSa\",\"isAnimated\":false,\"animatedThumbnail\":null,\"userTags\":null}}],\"error\":null,\"metadata\":{\"type\":\"post\",\"annotations\":[{\"type\":\"hashtag\",\"content\":\"#RFP\",\"indices\":[89,93],\"text\":\"#RFP\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=RFP\"},{\"type\":\"hashtag\",\"content\":\"#B2BSales\",\"indices\":[94,103],\"text\":\"#B2BSales\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=B2BSales\"},{\"type\":\"hashtag\",\"content\":\"#ProposalWriting\",\"indices\":[104,120],\"text\":\"#ProposalWriting\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=ProposalWriting\"}],\"firstComment\":null,\"linkAttachment\":null}}"
+      },
+      {
+        "type": "text",
+        "text": "{\"rateLimit\":[{\"remaining\":99,\"resetSeconds\":900},{\"remaining\":249,\"resetSeconds\":86400},{\"remaining\":2939,\"resetSeconds\":2160042}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+Sat Sep 19 08:01:22 AM EDT 2026: Posting to Facebook...
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"6aae7993f4364554a89bd095\",\"allowedActions\":[\"publishPostNow\",\"updatePost\",\"movePostToDraft\",\"publishPostNext\",\"updatePostSchedule\",\"updatePostTags\",\"addPostNote\",\"duplicatePost\",\"deletePost\",\"updateShopGridLink\",\"createPostRecurrence\"],\"status\":\"scheduled\",\"text\":\"Copy-paste is invisible to evaluators. Specificity wins.\\n\\nShow outcomes before process.\\n\\n#RFP #B2BSales #ProposalWriting\",\"channelId\":\"6a7f7476b2d9d577437af67f\",\"channelService\":\"facebook\",\"dueAt\":\"2026-09-20T02:32:00.000Z\",\"sentAt\":null,\"schedulingType\":\"automatic\",\"shareMode\":\"addToQueue\",\"sharedNow\":false,\"isCustomScheduled\":false,\"createdAt\":\"2026-09-19T12:01:23.261Z\",\"updatedAt\":\"2026-09-19T12:01:23.318Z\",\"tags\":[],\"assets\":[{\"id\":null,\"type\":\"image\",\"mimeType\":\"image/jpeg\",\"source\":\"https://drive.google.com/uc?export=view&id=1zvzd1aDfwokafXr-BSbvJsjVRefoanel\",\"thumbnail\":\"https://drive.google.com/uc?export=view&id=1zvzd1aDfwokafXr-BSbvJsjVRefoanel\",\"image\":{\"width\":2048,\"height\":2048,\"altText\":\"Copy-paste is invisible to evaluators. Specificity wins.\\n\\nShow outcomes before process.\\n\\n#RFP #B2BSa\",\"isAnimated\":false,\"animatedThumbnail\":null,\"userTags\":null}}],\"error\":null,\"metadata\":{\"type\":\"post\",\"annotations\":[{\"type\":\"hashtag\",\"content\":\"#RFP\",\"indices\":[89,93],\"text\":\"#RFP\",\"url\":\"https://www.facebook.com/hashtag/RFP\"},{\"type\":\"hashtag\",\"content\":\"#B2BSales\",\"indices\":[94,103],\"text\":\"#B2BSales\",\"url\":\"https://www.facebook.com/hashtag/B2BSales\"},{\"type\":\"hashtag\",\"content\":\"#ProposalWriting\",\"indices\":[104,120],\"text\":\"#ProposalWriting\",\"url\":\"https://www.facebook.com/hashtag/ProposalWriting\"}],\"title\":null,\"firstComment\":null,\"linkAttachment\":null}}"
+      },
+      {
+        "type": "text",
+        "text": "{\"rateLimit\":[{\"remaining\":98,\"resetSeconds\":899},{\"remaining\":248,\"resetSeconds\":86399},{\"remaining\":2938,\"resetSeconds\":2160041}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+Sat Sep 19 08:01:23 AM EDT 2026: DONE
+
+To stop or manage this job, send me a new message (e.g. "stop reminder optirfp-linkedin-daily").
