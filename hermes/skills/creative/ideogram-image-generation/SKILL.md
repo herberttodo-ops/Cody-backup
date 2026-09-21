@@ -181,10 +181,11 @@ VISUAL STYLE:
 - No clutter, focused composition
 
 LAYOUT:
-- Headline text should be the focal point, large and centered or top-aligned
-- Visual elements should support, not compete with, the text
-- Ample negative space
-- Premium quality, suitable for professional social media
+- **Text position**: LOWER-LEFT or CENTER-LEFT (~40-60% down from top), NOT top corner
+- **Visual position**: UPPER portion (top 30-50%), flowing DOWN toward text
+- **Vertical flow**: Graphics above, text below, ample padding between them
+- **Negative space**: Ample margin at top, between elements, and at bottom
+- **Premium quality**: Suitable for professional social media
 
 RENDERING:
 - Crystal clear text readability
@@ -658,6 +659,22 @@ This pattern prevents posting low-quality or artifact-ridden images to social me
 ### Logo Compositing Best Practices
 
 1. **Transparency**: Always make white backgrounds transparent for dark themes
-2. **Sizing**: Logo should be 15-20% of image width, positioned at bottom
-3. **Margins**: Keep 40-60px padding from edges
+2. **Sizing**: Logo should be **70-100px tall** (~8% of image height), minimum 70px for visibility
+3. **Margins**: Keep **60px** padding from bottom edge for breathing room
 4. **Format**: Accept both PNG and JPG logos, auto-detect in `~/.hermes/assets/`
+
+**Code pattern for logo sizing** (in compositor script):
+```python
+# Resize logo to be more prominent
+# Calculate logo height as ~8% of image height for better visibility
+logo_height = int(img.height * 0.08)  # ~82px on 1024px image
+logo_height = max(logo_height, 70)    # Minimum 70px tall
+logo_height = min(logo_height, 100)   # Cap at 100px so it doesn't dominate
+aspect = logo.width / logo.height
+logo = logo.resize((int(logo_height * aspect), logo_height), Image.Resampling.LANCZOS)
+
+# Position at bottom center with 60px margin
+position = ((img.width - logo.width) // 2, img.height - logo.height - 60)
+```
+
+**See:** `scripts/ideogram_logo_compositor.py` for complete updated implementation.

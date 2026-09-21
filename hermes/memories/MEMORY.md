@@ -1,14 +1,10 @@
-Pattern: this file is a routing index; load detail from the Obsidian vault on demand.
-§
-Andrew set the assistant name to Herby; no emojis.
-§
-Andrew's style: strategic collaborator; structured, outcome-focused; templates/checklists; avoid em dashes; direct about uncertainty.
+Andrew (name: Herby): strategic collaborator, templates/checklists, avoid em dashes, direct about uncertainty, no emojis.
 §
 OBSIDIAN: Vault at ~/Documents/Obsidian Vault (Index, OptiRFP, TLC Rescue, Rival Productions, Brand Guidelines, daily notes). Use obsidian skill.
 §
 Skills USER-OWNED, need `hermes curator adopt`. Buffer caps scheduled posts at 10 total account-wide; refill crons must check remaining budget. Andrew wants zero-manual-step autonomy but prefers waiting for natural resolution (posts publishing, credits refreshing) over upgrading plans/bumping existing posts when blocked.
 §
-Andrew asks for unit economics (cost per video) before operationalizing. Horror Shorts cost: $0.15-0.35/video, ~$20-30/month at 3/day.
+OptiRFP LinkedIn graphics: 4:3 aspect ratio, text LEFT, visuals RIGHT, logo 70-100px. Tales Untold pivot to 'creatures in the woods' after Sep 22.
 §
 TALES_UNTOLD_BUFFER_TOKEN=___LONG_STRING___ (YouTube channel)
 OPTIRFP_BUFFER_TOKEN=___LONG_STRING___ (LinkedIn/Facebook)
