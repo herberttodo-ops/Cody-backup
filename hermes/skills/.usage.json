@@ -186,15 +186,17 @@
   "branded-social-graphics": {
     "archived_at": null,
     "created_at": "2026-08-04T18:12:58.375094+00:00",
-    "created_by": null,
+    "created_by": "agent",
     "last_patched_at": null,
-    "last_used_at": "2026-08-12T23:05:33.667472+00:00",
-    "last_viewed_at": "2026-08-12T23:05:33.555444+00:00",
+    "last_reused_patch_generation": 0,
+    "last_used_at": "2026-09-21T16:09:07.527668+00:00",
+    "last_viewed_at": "2026-09-21T16:09:07.411741+00:00",
     "patch_count": 0,
+    "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 4,
-    "view_count": 4
+    "use_count": 5,
+    "view_count": 5
   },
   "buffer-api": {
     "archived_at": null,
@@ -316,6 +318,21 @@
     "patch_count": 0,
     "pinned": false,
     "state": "stale",
+    "use_count": 0,
+    "view_count": 0
+  },
+  "content-performance-analysis": {
+    "archived_at": null,
+    "created_at": "2026-09-21T17:53:24.206972+00:00",
+    "created_by": "agent",
+    "last_patched_at": null,
+    "last_reused_patch_generation": 0,
+    "last_used_at": null,
+    "last_viewed_at": null,
+    "patch_count": 0,
+    "patch_generation": 0,
+    "pinned": false,
+    "state": "active",
     "use_count": 0,
     "view_count": 0
   },
@@ -1303,14 +1320,14 @@
     "created_by": null,
     "last_patched_at": "2026-09-17T20:17:17.829442+00:00",
     "last_reused_patch_generation": 5,
-    "last_used_at": "2026-09-21T00:06:10.463872+00:00",
-    "last_viewed_at": "2026-09-21T00:06:10.287186+00:00",
+    "last_used_at": "2026-09-21T18:43:58.128141+00:00",
+    "last_viewed_at": "2026-09-21T18:43:57.922514+00:00",
     "patch_count": 15,
     "patch_generation": 5,
     "pinned": false,
     "state": "active",
-    "use_count": 62,
-    "view_count": 55
+    "use_count": 66,
+    "view_count": 58
   },
   "spike": {
     "archived_at": null,
@@ -1338,18 +1355,35 @@
     "use_count": 0,
     "view_count": 0
   },
+  "tales-longform-compiler": {
+    "archived_at": null,
+    "created_at": "2026-09-22T01:28:29.566007+00:00",
+    "created_by": null,
+    "last_patched_at": null,
+    "last_reused_patch_generation": 0,
+    "last_used_at": null,
+    "last_viewed_at": null,
+    "patch_count": 0,
+    "patch_generation": 0,
+    "pinned": false,
+    "state": "active",
+    "use_count": 0,
+    "view_count": 0
+  },
   "tales-untold-horror-shorts": {
     "archived_at": null,
     "created_at": "2026-09-14T14:29:16.715043+00:00",
     "created_by": "agent",
-    "last_patched_at": "2026-09-15T23:53:29.833466+00:00",
-    "last_used_at": "2026-09-16T01:13:31.497376+00:00",
-    "last_viewed_at": "2026-09-16T01:13:31.430374+00:00",
-    "patch_count": 30,
+    "last_patched_at": "2026-09-21T18:57:06.040169+00:00",
+    "last_reused_patch_generation": 0,
+    "last_used_at": "2026-09-21T18:55:54.787313+00:00",
+    "last_viewed_at": "2026-09-21T18:55:54.679181+00:00",
+    "patch_count": 31,
+    "patch_generation": 1,
     "pinned": false,
     "state": "active",
-    "use_count": 31,
-    "view_count": 31
+    "use_count": 33,
+    "view_count": 33
   },
   "tales-untold-video-creator": {
     "archived_at": null,
@@ -1450,14 +1484,14 @@
     "created_by": "agent",
     "last_patched_at": "2026-09-20T13:25:24.789420+00:00",
     "last_reused_patch_generation": 4,
-    "last_used_at": "2026-09-21T00:06:36.889789+00:00",
-    "last_viewed_at": "2026-09-21T00:06:36.738907+00:00",
+    "last_used_at": "2026-09-21T18:53:35.189444+00:00",
+    "last_viewed_at": "2026-09-21T18:53:35.017557+00:00",
     "patch_count": 4,
     "patch_generation": 4,
     "pinned": false,
     "state": "active",
-    "use_count": 37,
-    "view_count": 37
+    "use_count": 38,
+    "view_count": 38
   },
   "web-entertainment-research": {
     "archived_at": null,
@@ -1556,14 +1590,14 @@
     "created_by": "agent",
     "last_patched_at": "2026-09-17T13:34:53.927322+00:00",
     "last_reused_patch_generation": 1,
-    "last_used_at": "2026-09-17T13:35:42.771799+00:00",
-    "last_viewed_at": "2026-09-17T13:35:42.627668+00:00",
+    "last_used_at": "2026-09-21T18:53:35.274036+00:00",
+    "last_viewed_at": "2026-09-21T18:53:35.139528+00:00",
     "patch_count": 5,
     "patch_generation": 1,
     "pinned": false,
     "state": "active",
-    "use_count": 9,
-    "view_count": 9
+    "use_count": 10,
+    "view_count": 10
   },
   "youtube-content": {
     "archived_at": null,

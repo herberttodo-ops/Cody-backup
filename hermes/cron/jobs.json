@@ -18,15 +18,15 @@
       "schedule_display": "30 4 * * *",
       "repeat": {
         "times": null,
-        "completed": 107
+        "completed": 108
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-04-05T17:06:06.321746-04:00",
-      "next_run_at": "2026-09-22T04:30:00-04:00",
-      "last_run_at": "2026-09-20T04:33:24.023585-04:00",
+      "next_run_at": "2026-09-23T04:30:00-04:00",
+      "last_run_at": "2026-09-21T04:31:50.250956-04:00",
       "last_status": "ok",
       "last_error": null,
       "deliver": "telegram:___ID___",
@@ -38,8 +38,8 @@
       },
       "last_delivery_error": null,
       "fire_claim": {
-        "at": "2026-09-21T04:30:59.478821-04:00",
-        "by": "herby-Virtual-Machine:3750775:2c6102a15feb4cd8b39f4082cfd0d937"
+        "at": "2026-09-22T04:30:15.060192-04:00",
+        "by": "herby-Virtual-Machine:3750775:ecaab540515640b79d18424df6d78b22"
       },
       "failure_streak": 0
     },
@@ -63,15 +63,15 @@
       "schedule_display": "0 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 62
+        "completed": 63
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-14T09:53:18.644425-04:00",
-      "next_run_at": "2026-09-21T08:00:00-04:00",
-      "last_run_at": "2026-09-20T08:01:07.349616-04:00",
+      "next_run_at": "2026-09-22T08:00:00-04:00",
+      "last_run_at": "2026-09-21T08:01:23.370772-04:00",
       "last_status": "ok",
       "last_error": null,
       "deliver": "telegram",
@@ -136,7 +136,7 @@
     {
       "id": "7bb4ab80b2c2",
       "name": "spielberg-buffer-refill-daily",
-      "prompt": "Tales Untold Shorts Buffer Refill — Daily Edition\n\nGOAL: keep the Tales Untold YouTube Buffer queue stocked so shorts post exactly 3x per day at 6:00 PM, 7:00 PM, 8:00 PM America/New_York, every single day with no gaps.\n\nIMPORTANT CONSTRAINT discovered 2026-09-17: Buffer's Tales Untold org plan caps SCHEDULED posts at 10 total, account-wide. You cannot schedule further ahead than that. This means at 3 posts/day, you can only ever look ~3 days ahead before hitting the cap — do NOT try to fill a full 4-day window like earlier versions of this job did. Always check the actual cap via step 1 before attempting to schedule anything.\n\nSTEP 1 - Check current coverage AND remaining slot budget:\npython3 ~/.hermes/scripts/buffer_dual_account.py check tales_untold\nList every SCHEDULED post's dueAt (convert from UTC to America/New_York) and count the total. Remaining budget = 10 - current_scheduled_count. If remaining budget is 0, report \"Buffer at 10/10 cap, no room to schedule more today\" and stop (skip steps 3-6) — this is normal and will resolve itself as older posts publish.\n\nSTEP 2 - Determine how many new posts are needed, bounded by budget:\nIdentify which of the next 3 days' 6/7/8 PM ET slots are empty (a slot counts as filled if a post's dueAt is within +/- 5 minutes of 18:00, 19:00, or 20:00 ET that day). Needed = count of empty slots in that 3-day window. Actually produce = min(needed, remaining budget from step 1). If actually_produce is 0, report \"queue healthy\" and stop.\n\nSTEP 3 - Story Topic Generation (only if needed):\nCheck ~/.openclaw/workspace/tales-untold/queue/ folder. If fewer unused topics exist than actually_produce, write new horror micro-story topics (one-liners, 140-180 word target when expanded) and save as queue/XX_topic_name.txt files (XX = next available two-digit number).\n\nSTEP 4 - Title A/B variant + Video Production (per the spielberg skill, updated 2026-09-17):\nFor each new video (up to actually_produce), before writing/finalizing its title run: python3 ~/.hermes/scripts/tales_ab_tracker.py next\nThis returns \"A\" (direct first-person hook) or \"B\" (third-person retrospective-reveal hook). Write the title to match. This is a running A/B test — see references/title-and-metadata-strategy.md in the spielberg skill.\n\nProduce videos SERIALLY, one full pipeline at a time, never in parallel — parallel dispatch caused real race conditions (duplicate topic claims, file collisions) on 2026-09-17. Produce FINAL_*.mp4 files, upload each to Google Drive folder 1EbHh1_zhHDVX2YAO2i7yV_3epwUvNppj using /home/herby/.hermes/hermes-agent/venv/bin/python3 ~/.hermes/scripts/upload_video_to_drive.py <path> (not the tales-untold venv). After each render, verify faststart (moov before mdat); if the file is large (>50MB) or fails this check, re-encode: ffmpeg -i in.mp4 -c:v libx264 -crf 23 -preset medium -c:a aac -b:a 128k -movflags +faststart out.mp4 (target under 25MB).\n\nSTEP 5 - Verify Drive URL, then schedule with EXACT times and updated metadata:\nBefore scheduling, verify the Drive URL downloads as a real video: curl -sL '<url>' -o /tmp/verify.bin --max-time 30 -w '%{content_type} %{size_download}\\n' then file /tmp/verify.bin -- must show video/mp4, not text/html (a large non-faststart file triggers Google's virus-scan warning page instead of the real video).\n\nBuild the description using the no-hashtag, cross-promotion pattern: one hook line (no hashtags, no #shorts #horror #creepypasta stuffing) followed by \"Subscribe for more Tales Untold, short and long form horror.\" on its own line. Do NOT pass any tags field.\n\nCall:\n  python3 ~/.hermes/scripts/buffer_dual_account.py post-youtube \"TITLE\" \"DRIVE_URL\" \"HOOK_LINE\nSubscribe for more Tales Untold, short and long form horror.\" \"DUE_AT_UTC_ISO8601\"\n\nDUE_AT_UTC_ISO8601 must be the exact UTC equivalent of that slot's 6/7/8 PM ET time. ALWAYS pass this 4th argument explicitly. If Buffer rejects with a \"Limit reached\" / scheduled-posts-cap error even though step 1's count suggested room (race condition with another process), stop immediately, report the actual error, and do NOT delete or bump any existing post without asking the user first.\n\nVerify each post landed at the correct time by re-running the check command after scheduling and confirming the dueAt matches within 5 minutes.\n\nSTEP 6 - Log the A/B result:\nOnce a post is confirmed scheduled and you can identify its underlying video ID (via the Buffer check output's post id, which is sufficient if the true YouTube video ID isn't resolvable pre-publish), log it: python3 ~/.hermes/scripts/tales_ab_tracker.py log <id> <A|B> \"<title>\"\n\nReport: current queue coverage before and after this run (scheduled count out of 10, which of the next 3 days have all 3 slots filled), how many videos were produced/scheduled this run and their titles + variants + exact scheduled times, and whether it's been ~2 weeks since the A/B test started (if so, remind the user to run `python3 ~/.hermes/scripts/tales_ab_tracker.py report`). If Spielberg production fails for any topic, report the failure clearly and do not schedule a placeholder or invented video in its place.",
+      "prompt": "Tales Untold Shorts Buffer Refill — Folklore/Cryptid Pivot (September 2026)\n\nGOAL: Keep the Tales Untold YouTube Buffer queue filled with named folklore/cryptid shorts. Do NOT produce generic horror.\n\n## Content Strategy (Proven by Data)\nNamed folklore/cryptid content outperforms generic horror by 3.2x. TOPIC PRIORITY:\n\n**TIER 1 (Primary - 70%): Named folklore/cryptids with cultural recognition**\nSkinwalkers, Wendigos, Dracula, Bell Witch, Mothman, Chupacabra, Baba Yaga, Banshees, La Llorona, Jersey Devil, Beast of Gévaudan, Shadow People, Phantom Hikers, Michigan Dogman, Fouke Monster, Enfield Poltergeist, Kuchisake-onna, The Kraken, Drop Bears, Yowie\n\n**TIER 2 (Secondary - 25%): Original creature/entity with specificity**\nNamed places with named threats, historical-document tie-ins, entity variants (\"Not Skinwalkers. Something Older.\")\n\n**TIER 3 (Minimal - 5%): Place-based ONLY with attached entity**\nNever produce: basement noises, wrong numbers, GPS glitches without a named entity.\n\n## Pipeline Steps\n1. Choose a TIER 1 entity from ~/.hermes/skills/creative/spielberg/references/folklore-cryptid-topics.csv\n2. Generate story via Spielberg skill with the updated system prompt (now requires named entity in first sentence)\n3. Title format: \"[Entity]: [Specific Angle]\" — NO \"| Tales Untold\" suffix\n4. Produce video via Spielberg pipeline\n5. Upload to Google Drive\n6. Schedule via buffer_dual_account.py with NO hashtags, NO brand suffix\n7. Log A/B variant via tales_ab_tracker.py\n\n## Buffer Constraints\n- Check remaining budget (10 - current scheduled count) before producing\n- Only look 3 days ahead\n- Stop if at cap, report \"at cap\"\n- Use customScheduled with explicit due_at (6/7/8 PM ET)\n\n## Important\n- The system prompt at ~/.openclaw/workspace/tales-untold/prompts/shorts_system.txt has been rewritten for folklore/cryptid focus\n- The buffer_dual_account.py now strips \"| Tales Untold\" suffix from titles automatically\n- DO NOT produce generic horror topics. The 9 non-horror shorts on the channel averaged 5 views.\n- DO NOT produce place-based horror without a named entity. These average 50 views.\n- The folklore database is at ~/.hermes/skills/creative/spielberg/references/folklore-cryptid-topics.csv",
       "skills": [
         "spielberg"
       ],
@@ -157,17 +157,17 @@
       "schedule_display": "0 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 7
+        "completed": 8
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-15T19:55:41.454702-04:00",
-      "next_run_at": "2026-09-21T08:00:00-04:00",
-      "last_run_at": "2026-09-20T08:25:09.967116-04:00",
-      "last_status": "ok",
-      "last_error": null,
+      "next_run_at": "2026-09-22T08:00:00-04:00",
+      "last_run_at": "2026-09-21T08:25:40.368851-04:00",
+      "last_status": "error",
+      "last_error": "RuntimeError: Non-streaming API call timed out after 150s with no response (threshold: 150s)",
       "last_delivery_error": null,
       "deliver": "origin",
       "origin": {
@@ -180,7 +180,7 @@
       "enabled_toolsets": null,
       "workdir": "/home/herby/.openclaw/workspace/tales-untold",
       "fire_claim": null,
-      "failure_streak": 0
+      "failure_streak": 1
     },
     {
       "id": "c0c3d0c3835c",
@@ -311,16 +311,16 @@
       "schedule_display": "0 14 * * 1,2,4",
       "repeat": {
         "times": null,
-        "completed": 0
+        "completed": 1
       },
-      "enabled": true,
-      "state": "scheduled",
-      "paused_at": null,
+      "enabled": false,
+      "state": "paused",
+      "paused_at": "2026-09-21T21:28:46.866084-04:00",
       "paused_reason": null,
       "created_at": "2026-09-17T13:42:27.386294-04:00",
-      "next_run_at": "2026-09-21T14:00:00-04:00",
-      "last_run_at": null,
-      "last_status": null,
+      "next_run_at": "2026-09-22T14:00:00-04:00",
+      "last_run_at": "2026-09-21T15:03:10.627426-04:00",
+      "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
       "failure_streak": 0,
@@ -337,7 +337,8 @@
         "file",
         "delegation"
       ],
-      "workdir": "/home/herby/.openclaw/workspace/tales-untold"
+      "workdir": "/home/herby/.openclaw/workspace/tales-untold",
+      "fire_claim": null
     },
     {
       "id": "42a1783d7e1a",
@@ -466,15 +467,15 @@
       "schedule_display": "0 */4 * * *",
       "repeat": {
         "times": null,
-        "completed": 15
+        "completed": 21
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-18T18:37:03.954111-04:00",
-      "next_run_at": "2026-09-21T08:00:00-04:00",
-      "last_run_at": "2026-09-21T04:00:52.137732-04:00",
+      "next_run_at": "2026-09-22T08:00:00-04:00",
+      "last_run_at": "2026-09-22T04:00:23.484802-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -490,7 +491,62 @@
       "enabled_toolsets": null,
       "workdir": "/home/herby/.hermes/scripts",
       "fire_claim": null
+    },
+    {
+      "id": "3fdc01eca2ec",
+      "name": "tales-longform-conditional",
+      "prompt": "Tales Untold Long-Form Conditional Compiler\n\n**ONLY run if a short exceeded 500+ views in the last 7 days.**\n\n## Step 1: Check Analytics\nUse yt-dlp or YouTube Data API to check view counts on recent shorts (last 7 days).\n\n```bash\n# Get recent shorts and their view counts\nyt-dlp -j --flat-playlist \"https://www.youtube.com/channel/UCr20g-L8cMMfBgSp7PA09ZQ/shorts\" 2>/dev/null | python3 -c \"\nimport json, sys, datetime\nfrom datetime import datetime, timedelta\n\none_week_ago = (datetime.now() - timedelta(days=7)).strftime('%Y%m%d')\n\nfor line in sys.stdin:\n    if line.strip().startswith('{'):\n        d = json.loads(line)\n        upload_date = d.get('upload_date', '')\n        views = d.get('view_count', 0)\n        title = d.get('title', '')\n        \n        if upload_date >= one_week_ago and views >= 500:\n            print(f'{views}\\t{title[:50]}\\t{upload_date}')\n\" 2>/dev/null\n```\n\n## Step 2: Decision Gate\n- If any short >= 500 views: PROCEED with compilation\n- If NO shorts >= 500 views: STOP and report \"No shorts exceeded 500 views. Skipping long-form.\"\n\n## Step 3: If Proceeding\n1. Identify the top-performing short (highest views in last 7 days)\n2. Use `tales-longform-compiler` skill to build 10-12 minute compilation\n3. Target 3 related shorts on same entity\n4. Upload via YouTube API\n5. Schedule for Thursday or Saturday 6-8 PM ET\n\n## Step 4: Report\nReport to user: \"Long-form queued for [Entity]. Based on short with [X] views.\" OR \"No shorts exceeded 500 views. Long-form production skipped.\"\n\n**Do NOT produce long-form without verified 500+ view threshold.**",
+      "skills": [
+        "tales-longform-compiler"
+      ],
+      "skill": "tales-longform-compiler",
+      "model": null,
+      "provider": null,
+      "provider_snapshot": "openrouter",
+      "model_snapshot": "moonshotai/kimi-k2.5",
+      "base_url": null,
+      "script": null,
+      "no_agent": false,
+      "monitor_script": null,
+      "monitor_url": null,
+      "monitor_state": null,
+      "context_from": null,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 9 * * 4",
+        "display": "0 9 * * 4"
+      },
+      "schedule_display": "0 9 * * 4",
+      "repeat": {
+        "times": null,
+        "completed": 0
+      },
+      "enabled": true,
+      "state": "scheduled",
+      "paused_at": null,
+      "paused_reason": null,
+      "created_at": "2026-09-21T21:28:59.589284-04:00",
+      "next_run_at": "2026-09-24T09:00:00-04:00",
+      "last_run_at": null,
+      "last_status": null,
+      "last_error": null,
+      "last_delivery_error": null,
+      "failure_streak": 0,
+      "deliver": "origin",
+      "origin": {
+        "platform": "telegram",
+        "chat_id": "___ID___",
+        "chat_name": "Andrew",
+        "thread_id": null,
+        "user_id": "___ID___"
+      },
+      "enabled_toolsets": [
+        "terminal",
+        "file",
+        "delegation"
+      ],
+      "workdir": "/home/herby/.openclaw/workspace/tales-untold"
     }
   ],
-  "updated_at": "2026-09-21T04:30:59.479188-04:00"
+  "updated_at": "2026-09-22T04:30:15.060448-04:00"
 }
