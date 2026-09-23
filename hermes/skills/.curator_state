@@ -1,9 +1,9 @@
 {
-  "last_report_path": "/home/herby/.hermes/logs/curator/20260915-190948",
-  "last_run_at": "2026-09-15T19:09:48.702570+00:00",
-  "last_run_duration_seconds": 8.815961,
-  "last_run_summary": "auto: 57 marked stale; llm: skipped (consolidation off)",
+  "last_report_path": "/home/herby/.hermes/logs/curator/20260922-192937",
+  "last_run_at": "2026-09-22T19:29:37.597137+00:00",
+  "last_run_duration_seconds": 9.207743,
+  "last_run_summary": "auto: 2 marked stale, 1 reactivated; llm: skipped (consolidation off)",
   "last_run_summary_shown_at": "2026-08-18T18:31:11.178021+00:00",
   "paused": false,
-  "run_count": 6
+  "run_count": 7
 }

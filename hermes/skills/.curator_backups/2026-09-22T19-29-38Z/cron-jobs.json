@@ -25,7 +25,7 @@
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-04-05T17:06:06.321746-04:00",
-      "next_run_at": "2026-09-24T04:30:00-04:00",
+      "next_run_at": "2026-09-23T04:30:00-04:00",
       "last_run_at": "2026-09-22T04:31:49.188166-04:00",
       "last_status": "ok",
       "last_error": null,
@@ -37,10 +37,7 @@
         "thread_id": null
       },
       "last_delivery_error": null,
-      "fire_claim": {
-        "at": "2026-09-23T04:30:21.392729-04:00",
-        "by": "herby-Virtual-Machine:3750775:f1311e57536d48c7af39593f46be0b15"
-      },
+      "fire_claim": null,
       "failure_streak": 0
     },
     {
@@ -467,15 +464,15 @@
       "schedule_display": "0 */4 * * *",
       "repeat": {
         "times": null,
-        "completed": 27
+        "completed": 23
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-18T18:37:03.954111-04:00",
-      "next_run_at": "2026-09-23T08:00:00-04:00",
-      "last_run_at": "2026-09-23T04:00:18.341051-04:00",
+      "next_run_at": "2026-09-22T16:00:00-04:00",
+      "last_run_at": "2026-09-22T12:01:01.725937-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -548,5 +545,5 @@
       "workdir": "/home/herby/.openclaw/workspace/tales-untold"
     }
   ],
-  "updated_at": "2026-09-23T04:30:21.393005-04:00"
+  "updated_at": "2026-09-22T12:01:01.726554-04:00"
 }
