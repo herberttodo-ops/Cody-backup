@@ -18,15 +18,15 @@
       "schedule_display": "30 4 * * *",
       "repeat": {
         "times": null,
-        "completed": 109
+        "completed": 110
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-04-05T17:06:06.321746-04:00",
-      "next_run_at": "2026-09-24T04:30:00-04:00",
-      "last_run_at": "2026-09-22T04:31:49.188166-04:00",
+      "next_run_at": "2026-09-25T04:30:00-04:00",
+      "last_run_at": "2026-09-23T04:31:28.211518-04:00",
       "last_status": "ok",
       "last_error": null,
       "deliver": "telegram:___ID___",
@@ -38,8 +38,8 @@
       },
       "last_delivery_error": null,
       "fire_claim": {
-        "at": "2026-09-23T04:30:21.392729-04:00",
-        "by": "herby-Virtual-Machine:3750775:f1311e57536d48c7af39593f46be0b15"
+        "at": "2026-09-24T04:31:11.859453-04:00",
+        "by": "herby-Virtual-Machine:3750775:a34d4b058a1a4c02a3733a14b0049ab6"
       },
       "failure_streak": 0
     },
@@ -63,15 +63,15 @@
       "schedule_display": "0 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 64
+        "completed": 65
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-14T09:53:18.644425-04:00",
-      "next_run_at": "2026-09-23T08:00:00-04:00",
-      "last_run_at": "2026-09-22T08:01:23.865024-04:00",
+      "next_run_at": "2026-09-24T08:00:00-04:00",
+      "last_run_at": "2026-09-23T08:00:26.212202-04:00",
       "last_status": "ok",
       "last_error": null,
       "deliver": "telegram",
@@ -157,15 +157,15 @@
       "schedule_display": "0 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 9
+        "completed": 10
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-15T19:55:41.454702-04:00",
-      "next_run_at": "2026-09-23T08:00:00-04:00",
-      "last_run_at": "2026-09-22T08:31:49.507253-04:00",
+      "next_run_at": "2026-09-24T08:00:00-04:00",
+      "last_run_at": "2026-09-23T08:12:37.758503-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -467,15 +467,15 @@
       "schedule_display": "0 */4 * * *",
       "repeat": {
         "times": null,
-        "completed": 27
+        "completed": 33
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-18T18:37:03.954111-04:00",
-      "next_run_at": "2026-09-23T08:00:00-04:00",
-      "last_run_at": "2026-09-23T04:00:18.341051-04:00",
+      "next_run_at": "2026-09-24T08:00:00-04:00",
+      "last_run_at": "2026-09-24T04:00:08.840262-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -548,5 +548,5 @@
       "workdir": "/home/herby/.openclaw/workspace/tales-untold"
     }
   ],
-  "updated_at": "2026-09-23T04:30:21.393005-04:00"
+  "updated_at": "2026-09-24T04:31:11.859730-04:00"
 }

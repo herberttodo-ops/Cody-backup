@@ -4,7 +4,7 @@ OBSIDIAN: Vault at ~/Documents/Obsidian Vault (Index, OptiRFP, TLC Rescue, Rival
 §
 Skills USER-OWNED, need `hermes curator adopt`. Buffer caps scheduled posts at 10 total account-wide; refill crons must check remaining budget. Andrew wants zero-manual-step autonomy but prefers waiting for natural resolution (posts publishing, credits refreshing) over upgrading plans/bumping existing posts when blocked.
 §
-OptiRFP LinkedIn graphics: 4:3 aspect ratio, text LEFT, visuals RIGHT, logo 70-100px. Tales Untold pivot to 'creatures in the woods' after Sep 22.
+OptiRFP LinkedIn graphics: 4:3 aspect ratio, text LEFT, visuals RIGHT, logo 70-100px. Logo compositing: use 150px bottom margin (not 50px) to prevent cutoff by LinkedIn/Facebook feed crop. Tales Untold pivot to 'creatures in the woods' after Sep 22.
 §
 TALES_UNTOLD_BUFFER_TOKEN=___LONG_STRING___ (YouTube channel)
 OPTIRFP_BUFFER_TOKEN=___LONG_STRING___ (LinkedIn/Facebook)
