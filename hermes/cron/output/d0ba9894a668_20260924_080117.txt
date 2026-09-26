@@ -1,0 +1,50 @@
+Cronjob Response: optirfp-linkedin-daily
+(job_id: d0ba9894a668)
+-------------
+
+Headline: The 'so what' is what wins.
+Topic: so-what
+Thu Sep 24 08:00:56 AM EDT 2026: Starting OptiRFP daily post with image...
+Thu Sep 24 08:00:56 AM EDT 2026: Generated headline: The 'so what' is what wins.
+Thu Sep 24 08:00:56 AM EDT 2026: Topic: so-what
+Thu Sep 24 08:00:56 AM EDT 2026: Generating image...
+Thu Sep 24 08:01:11 AM EDT 2026: Image generated: /home/herby/.hermes/generated_images/optirfp_social____ID___.png
+Thu Sep 24 08:01:11 AM EDT 2026: Uploading to Drive...
+Thu Sep 24 08:01:14 AM EDT 2026: Drive URL: https://drive.google.com/uc?export=view&id=1biOZgpGGCU-NG6Yk9KixzzoHYbzwGKEK
+Thu Sep 24 08:01:14 AM EDT 2026: Posting to LinkedIn...
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"6ab5110c5a88b1999624f3c9\",\"allowedActions\":[\"publishPostNow\",\"updatePost\",\"movePostToDraft\",\"publishPostNext\",\"updatePostSchedule\",\"updatePostTags\",\"addPostNote\",\"duplicatePost\",\"deletePost\",\"updateShopGridLink\",\"createPostRecurrence\"],\"status\":\"scheduled\",\"text\":\"The 'so what' is what wins. Lead with transformation.\\n\\nShow outcomes before process.\\n\\n#RFP #B2BSales #ProposalWriting\",\"channelId\":\"6a7f74bcb2d9d577437af9a4\",\"channelService\":\"linkedin\",\"dueAt\":\"2026-09-25T20:31:00.000Z\",\"sentAt\":null,\"schedulingType\":\"automatic\",\"shareMode\":\"addToQueue\",\"sharedNow\":false,\"isCustomScheduled\":false,\"createdAt\":\"2026-09-24T12:01:16.097Z\",\"updatedAt\":\"2026-09-24T12:01:16.175Z\",\"tags\":[],\"assets\":[{\"id\":null,\"type\":\"image\",\"mimeType\":\"image/jpeg\",\"source\":\"https://drive.google.com/uc?export=view&id=1biOZgpGGCU-NG6Yk9KixzzoHYbzwGKEK\",\"thumbnail\":\"https://drive.google.com/uc?export=view&id=1biOZgpGGCU-NG6Yk9KixzzoHYbzwGKEK\",\"image\":{\"width\":2560,\"height\":1440,\"altText\":\"The 'so what' is what wins. Lead with transformation.\\n\\nShow outcomes before process.\\n\\n#RFP #B2BSales\",\"isAnimated\":false,\"animatedThumbnail\":null,\"userTags\":null}}],\"error\":null,\"metadata\":{\"type\":\"post\",\"annotations\":[{\"type\":\"hashtag\",\"content\":\"#RFP\",\"indices\":[86,90],\"text\":\"#RFP\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=RFP\"},{\"type\":\"hashtag\",\"content\":\"#B2BSales\",\"indices\":[91,100],\"text\":\"#B2BSales\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=B2BSales\"},{\"type\":\"hashtag\",\"content\":\"#ProposalWriting\",\"indices\":[101,117],\"text\":\"#ProposalWriting\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=ProposalWriting\"}],\"firstComment\":null,\"linkAttachment\":null}}"
+      },
+      {
+        "type": "text",
+        "text": "{\"rateLimit\":[{\"remaining\":99,\"resetSeconds\":900},{\"remaining\":235,\"resetSeconds\":14380},{\"remaining\":2849,\"resetSeconds\":1728049}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+Thu Sep 24 08:01:16 AM EDT 2026: Posting to Facebook...
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"6ab5110ca4b44bcbaec4adfc\",\"allowedActions\":[\"publishPostNow\",\"updatePost\",\"movePostToDraft\",\"publishPostNext\",\"updatePostSchedule\",\"updatePostTags\",\"addPostNote\",\"duplicatePost\",\"deletePost\",\"updateShopGridLink\",\"createPostRecurrence\"],\"status\":\"scheduled\",\"text\":\"The 'so what' is what wins. Lead with transformation.\\n\\nShow outcomes before process.\\n\\n#RFP #B2BSales #ProposalWriting\",\"channelId\":\"6a7f7476b2d9d577437af67f\",\"channelService\":\"facebook\",\"dueAt\":\"2026-09-24T12:14:00.000Z\",\"sentAt\":null,\"schedulingType\":\"automatic\",\"shareMode\":\"addToQueue\",\"sharedNow\":false,\"isCustomScheduled\":false,\"createdAt\":\"2026-09-24T12:01:16.983Z\",\"updatedAt\":\"2026-09-24T12:01:17.009Z\",\"tags\":[],\"assets\":[{\"id\":null,\"type\":\"image\",\"mimeType\":\"image/jpeg\",\"source\":\"https://drive.google.com/uc?export=view&id=1biOZgpGGCU-NG6Yk9KixzzoHYbzwGKEK\",\"thumbnail\":\"https://drive.google.com/uc?export=view&id=1biOZgpGGCU-NG6Yk9KixzzoHYbzwGKEK\",\"image\":{\"width\":2560,\"height\":1440,\"altText\":\"The 'so what' is what wins. Lead with transformation.\\n\\nShow outcomes before process.\\n\\n#RFP #B2BSales\",\"isAnimated\":false,\"animatedThumbnail\":null,\"userTags\":null}}],\"error\":null,\"metadata\":{\"type\":\"post\",\"annotations\":[{\"type\":\"hashtag\",\"content\":\"#RFP\",\"indices\":[86,90],\"text\":\"#RFP\",\"url\":\"https://www.facebook.com/hashtag/RFP\"},{\"type\":\"hashtag\",\"content\":\"#B2BSales\",\"indices\":[91,100],\"text\":\"#B2BSales\",\"url\":\"https://www.facebook.com/hashtag/B2BSales\"},{\"type\":\"hashtag\",\"content\":\"#ProposalWriting\",\"indices\":[101,117],\"text\":\"#ProposalWriting\",\"url\":\"https://www.facebook.com/hashtag/ProposalWriting\"}],\"title\":null,\"firstComment\":null,\"linkAttachment\":null}}"
+      },
+      {
+        "type": "text",
+        "text": "{\"rateLimit\":[{\"remaining\":98,\"resetSeconds\":899},{\"remaining\":234,\"resetSeconds\":14378},{\"remaining\":2848,\"resetSeconds\":1728047}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+Thu Sep 24 08:01:17 AM EDT 2026: DONE
+
+To stop or manage this job, send me a new message (e.g. "stop reminder optirfp-linkedin-daily").

@@ -93,7 +93,8 @@ def composite_logo_on_image(
     logo_path: str = None,
     logo_size_percent: float = 0.20,
     position: str = "bottom_center",
-    margin_percent: float = 0.05
+    margin_percent: float = None,  # DEPRECATED: use fixed_margin_px instead
+    fixed_margin_px: int = 150    # Fixed pixel margin (recommended for social platforms)
 ) -> str:
     """
     Composite exact logo onto an existing image.
@@ -103,7 +104,8 @@ def composite_logo_on_image(
         logo_path: Path to logo file (auto-detected if None)
         logo_size_percent: Logo width as % of image width
         position: bottom_center, bottom_right, bottom_left
-        margin_percent: Margin from edges
+        margin_percent: DEPRECATED - kept for backward compat, use fixed_margin_px
+        fixed_margin_px: Fixed pixel margin from bottom edge (default 150 for LinkedIn/FB safety)
     
     Returns:
         Path to final composited image
@@ -128,8 +130,14 @@ def composite_logo_on_image(
     new_height = int(new_width * logo_ratio)
     logo = logo.resize((new_width, new_height), Image.Resampling.LANCZOS)
     
-    # Calculate position
-    margin = int(base.height * margin_percent)
+    # Calculate position - use FIXED margin (150px) for social platform safety
+    # Percentage margin is deprecated due to LinkedIn/Facebook feed cropping
+    if margin_percent is not None:
+        # Backward compatibility - convert percent to pixels
+        margin = int(base.height * margin_percent)
+    else:
+        # Fixed 150px margin - prevents logo cutoff on social platforms
+        margin = fixed_margin_px
     
     if position == "bottom_center":
         x = (base.width - new_width) // 2

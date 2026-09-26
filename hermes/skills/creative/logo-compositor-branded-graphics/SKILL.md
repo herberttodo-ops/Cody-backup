@@ -198,9 +198,38 @@ This ensures the exact logo is used every time.
 | Issue | Solution |
 |-------|----------|
 | Logo looks blurry | Don't scale logo down too small (min 150px width) |
+| Logo cut off at bottom | Use 150px+ fixed margin (not percentage). LinkedIn/Facebook crop ~100px from bottom edge. See Pitfall: Social Platform Cropping |
 | Text hard to read | Add shadow, adjust font size based on image width |
 | Logo has white box | Use PNG with transparency, not JPG |
 | Background has logos/text | Strengthen "no logos" prompt, iterate |
+| Fix deployed but old images still broken | Check file creation dates. Cron may use ~/.hermes/scripts/ while skill uses ~/.hermes/skills/*/scripts/. Keep them in sync. |
+
+### Pitfall: Social Platform Cropping
+
+**Problem:** LinkedIn and Facebook crop images in feed display. The bottom 50-100px of your image may be hidden.
+
+**Wrong (gets cropped):**
+```python
+margin_bottom = int(height * 0.05)  # 5% = 72px on 1440px image
+position = (center_x, height - logo_height - margin_bottom)
+```
+
+**Right (safe from cropping):**
+```python
+margin_bottom = 150  # Fixed pixel margin, not percentage
+position = (center_x, height - logo_height - margin_bottom)
+```
+
+**Verification:** After generating, check the image:
+```python
+# Bottom 150px should be clean navy (no logo, no content)
+bottom_150 = img.crop((0, height-150, width, height))
+pixels = list(bottom_150.getdata())
+non_navy = sum(1 for r,g,b in pixels if not (5<r<20 and 10<g<30 and 20<b<45))
+assert non_navy == 0, "Logo too close to bottom edge!"
+```
+
+**Migration:** When updating from percentage to fixed margin, regenerate all pending posts. Old images with percentage margins will still crop.
 
 ## Brand Consistency Checklist
 
