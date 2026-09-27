@@ -49,13 +49,23 @@ trace each job's actual file dependency end to end rather than trusting the
 job's name/description — three daily crons were found doing exactly this on
 2026-09-17 and were removed.
 
+## Tales Untold Shorts — Verified Pitfalls (2026-09-26)
+
+See `references/tales-untold-pitfalls-2026-09-26.md` for complete details.
+
+- **Voice is Ezekiel, not Adam.** Adam was incorrectly used until caught during user review. Audit any old pipeline/script for `"voice": "Adam"`.
+- **Buffer cannot read Google Drive URLs;** use `litterbox.catbox.moe` for hosting.
+- **BunnyCDN failed** (401 Unauthorized) — do not rely without verification.
+- **Cron scheduling:** Create 3 separate hardcoded-slot cron jobs instead of trying time detection inside one prompt.
+- **POYO key truncation:** Shell `$POYO_API_KEY` expansion truncates to ~13 chars. Use Python `subprocess` with `env=` dict.
+
 ## Cost Per Video
 
 ### Shorts (~60s, 9:16)
 | Component | Est. Cost |
 |-----------|-----------|
 | Script (GPT-4o-mini via POYO) | $0.01-0.03 |
-| Voice (ElevenLabs via POYO) | $0.05-0.10 |
+| Voice (Ezekiel, ElevenLabs via POYO) | $0.05-0.10 |
 | Images (5-7 scenes) | $0.10-0.25 |
 | Rendering / Upload | $0 |
 | **Total** | **$0.15-0.35** |
@@ -65,7 +75,7 @@ job's name/description — three daily crons were found doing exactly this on
 |-----------|-------|-----------|
 | Scenes (~75 images) | 75 × nano-banana | ~$0.60 |
 | Thumbnail | 1 × nano-banana | ~$0.05 |
-| Adam TTS (~15 min) | elevenlabs-tts-turbo-2-5 | ~$0.18 |
+| TTS (~15 min) | elevenlabs-tts-turbo-2-5 | ~$0.18 |
 | **Total** | | **~$0.83** |
 
 Monthly (90 shorts at 3/day): ~$20-30. Always provide when user asks about scaling.

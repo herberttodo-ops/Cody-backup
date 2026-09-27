@@ -1,0 +1,50 @@
+Cronjob Response: optirfp-linkedin-daily
+(job_id: d0ba9894a668)
+-------------
+
+Headline: RFPs are scored, not read.
+Topic: page-one
+Sat Sep 26 08:00:38 AM EDT 2026: Starting OptiRFP daily post with image...
+Sat Sep 26 08:00:38 AM EDT 2026: Generated headline: RFPs are scored, not read.
+Sat Sep 26 08:00:38 AM EDT 2026: Topic: page-one
+Sat Sep 26 08:00:38 AM EDT 2026: Generating image...
+Sat Sep 26 08:00:50 AM EDT 2026: Image generated: /home/herby/.hermes/generated_images/optirfp_social____ID___.png
+Sat Sep 26 08:00:50 AM EDT 2026: Uploading to Drive...
+Sat Sep 26 08:00:54 AM EDT 2026: Drive URL: https://drive.google.com/uc?export=view&id=1wIcOCUBTmY878bIYe-8k7mz-H74ccitu
+Sat Sep 26 08:00:54 AM EDT 2026: Posting to LinkedIn...
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"6ab7b3f838c0afb4ce65007e\",\"allowedActions\":[\"publishPostNow\",\"updatePost\",\"movePostToDraft\",\"publishPostNext\",\"updatePostSchedule\",\"updatePostTags\",\"addPostNote\",\"duplicatePost\",\"deletePost\",\"updateShopGridLink\",\"createPostRecurrence\"],\"status\":\"scheduled\",\"text\":\"RFPs are scored, not read. Most vendors lose in the first 4 pages.\\n\\nShow outcomes before process.\\n\\n#RFP #B2BSales #ProposalWriting\",\"channelId\":\"6a7f74bcb2d9d577437af9a4\",\"channelService\":\"linkedin\",\"dueAt\":\"2026-09-26T13:25:00.000Z\",\"sentAt\":null,\"schedulingType\":\"automatic\",\"shareMode\":\"addToQueue\",\"sharedNow\":false,\"isCustomScheduled\":false,\"createdAt\":\"2026-09-26T12:00:56.184Z\",\"updatedAt\":\"2026-09-26T12:00:56.225Z\",\"tags\":[],\"assets\":[{\"id\":null,\"type\":\"image\",\"mimeType\":\"image/jpeg\",\"source\":\"https://drive.google.com/uc?export=view&id=1wIcOCUBTmY878bIYe-8k7mz-H74ccitu\",\"thumbnail\":\"https://drive.google.com/uc?export=view&id=1wIcOCUBTmY878bIYe-8k7mz-H74ccitu\",\"image\":{\"width\":2560,\"height\":1440,\"altText\":\"RFPs are scored, not read. Most vendors lose in the first 4 pages.\\n\\nShow outcomes before process.\\n\\n#\",\"isAnimated\":false,\"animatedThumbnail\":null,\"userTags\":null}}],\"error\":null,\"metadata\":{\"type\":\"post\",\"annotations\":[{\"type\":\"hashtag\",\"content\":\"#RFP\",\"indices\":[99,103],\"text\":\"#RFP\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=RFP\"},{\"type\":\"hashtag\",\"content\":\"#B2BSales\",\"indices\":[104,113],\"text\":\"#B2BSales\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=B2BSales\"},{\"type\":\"hashtag\",\"content\":\"#ProposalWriting\",\"indices\":[114,130],\"text\":\"#ProposalWriting\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=ProposalWriting\"}],\"firstComment\":null,\"linkAttachment\":null}}"
+      },
+      {
+        "type": "text",
+        "text": "{\"rateLimit\":[{\"remaining\":99,\"resetSeconds\":900},{\"remaining\":241,\"resetSeconds\":15893},{\"remaining\":2824,\"resetSeconds\":1555269}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+Sat Sep 26 08:00:56 AM EDT 2026: Posting to Facebook...
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"6ab7b3f8ee8af48ba8aa94fb\",\"allowedActions\":[\"publishPostNow\",\"updatePost\",\"movePostToDraft\",\"publishPostNext\",\"updatePostSchedule\",\"updatePostTags\",\"addPostNote\",\"duplicatePost\",\"deletePost\",\"updateShopGridLink\",\"createPostRecurrence\"],\"status\":\"scheduled\",\"text\":\"RFPs are scored, not read. Most vendors lose in the first 4 pages.\\n\\nShow outcomes before process.\\n\\n#RFP #B2BSales #ProposalWriting\",\"channelId\":\"6a7f7476b2d9d577437af67f\",\"channelService\":\"facebook\",\"dueAt\":\"2026-09-27T02:32:00.000Z\",\"sentAt\":null,\"schedulingType\":\"automatic\",\"shareMode\":\"addToQueue\",\"sharedNow\":false,\"isCustomScheduled\":false,\"createdAt\":\"2026-09-26T12:00:56.694Z\",\"updatedAt\":\"2026-09-26T12:00:56.728Z\",\"tags\":[],\"assets\":[{\"id\":null,\"type\":\"image\",\"mimeType\":\"image/jpeg\",\"source\":\"https://drive.google.com/uc?export=view&id=1wIcOCUBTmY878bIYe-8k7mz-H74ccitu\",\"thumbnail\":\"https://drive.google.com/uc?export=view&id=1wIcOCUBTmY878bIYe-8k7mz-H74ccitu\",\"image\":{\"width\":2560,\"height\":1440,\"altText\":\"RFPs are scored, not read. Most vendors lose in the first 4 pages.\\n\\nShow outcomes before process.\\n\\n#\",\"isAnimated\":false,\"animatedThumbnail\":null,\"userTags\":null}}],\"error\":null,\"metadata\":{\"type\":\"post\",\"annotations\":[{\"type\":\"hashtag\",\"content\":\"#RFP\",\"indices\":[99,103],\"text\":\"#RFP\",\"url\":\"https://www.facebook.com/hashtag/RFP\"},{\"type\":\"hashtag\",\"content\":\"#B2BSales\",\"indices\":[104,113],\"text\":\"#B2BSales\",\"url\":\"https://www.facebook.com/hashtag/B2BSales\"},{\"type\":\"hashtag\",\"content\":\"#ProposalWriting\",\"indices\":[114,130],\"text\":\"#ProposalWriting\",\"url\":\"https://www.facebook.com/hashtag/ProposalWriting\"}],\"title\":null,\"firstComment\":null,\"linkAttachment\":null}}"
+      },
+      {
+        "type": "text",
+        "text": "{\"rateLimit\":[{\"remaining\":98,\"resetSeconds\":899},{\"remaining\":240,\"resetSeconds\":15892},{\"remaining\":2823,\"resetSeconds\":1555267}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+Sat Sep 26 08:00:56 AM EDT 2026: DONE
+
+To stop or manage this job, send me a new message (e.g. "stop reminder optirfp-linkedin-daily").

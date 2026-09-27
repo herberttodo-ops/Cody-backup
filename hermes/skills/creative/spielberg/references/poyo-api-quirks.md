@@ -68,7 +68,7 @@ POYO removed `elevenlabs` and `elevenlabs-tts` models. Current working model:
 {
   "model": "elevenlabs-tts-turbo-2-5",
   "input": {
-    "voice": "Adam",
+    "voice": "Ezekiel",
     "text": "Your story here",
     "speed": 1.0
   }
