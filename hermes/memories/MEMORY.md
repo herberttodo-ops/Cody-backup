@@ -8,10 +8,10 @@ OptiRFP LinkedIn graphics: 4:3 aspect ratio, text LEFT, visuals RIGHT, logo 70-1
 §
 Andrew expects verification before assumptions, not just for APIs but for output claims (e.g. caught 53% of video captions silently truncated by watching — verify things like caption completeness against actual rendered output, not just code logic). He verifies posting times against niche best practices and shifts quickly when suboptimal.
 §
-POYO takes raw ElevenLabs voice IDs and 12k+ chars/request without truncation, but does NOT error on a bad voice ID: verify a voice swap via MD5 + duration + band RMS.
+Ezekiel voice ID: "2tTjAGX0n5ajDmazDcWk" (correct as of 2026-09-26). Use this exact ID in all TTS configs. Previous ID "vtgK8BnczFgE1AamLPao" was invalid.
 §
 Telegram caps bot downloads at 20MB; bigger files are rejected server-side and never hit disk, so don't hunt for them. Use ~/.hermes/scripts/tales_add_music.sh <path|direct URL> for large audio.
 §
-OptiRFP Buffer posting: Ensure cron script posts to both LinkedIn AND Facebook. The optirfp_daily_post.sh only called post-linkedin, missing post-facebook entirely. When adding new channels, update both buffer_dual_account.py (add channel ID and CLI command) AND the daily posting script (add the platform call). Images via Ideogram are working correctly.
+LotSignal (user's company): Automotive marketing software for car dealerships. User preference: parallel delegation for research tasks. Focus: marketing, inventory, lead gen, customer retention across Facebook, Instagram, LinkedIn, TikTok, YouTube.
 §
 TALES UNTOLD: Voice=Ezekiel (not Adam; fixed 2026-09-26). Buffer token=___LONG_STRING___. OptiRFP token=___LONG_STRING___, org=6a7f74229bd9eca99cf9f777. Buffer caps 10 scheduled posts.
