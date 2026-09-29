@@ -18,15 +18,15 @@
       "schedule_display": "30 4 * * *",
       "repeat": {
         "times": null,
-        "completed": 114
+        "completed": 115
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-04-05T17:06:06.321746-04:00",
-      "next_run_at": "2026-09-29T04:30:00-04:00",
-      "last_run_at": "2026-09-27T04:32:48.791509-04:00",
+      "next_run_at": "2026-09-30T04:30:00-04:00",
+      "last_run_at": "2026-09-28T04:32:29.347014-04:00",
       "last_status": "ok",
       "last_error": null,
       "deliver": "telegram:___ID___",
@@ -38,8 +38,8 @@
       },
       "last_delivery_error": null,
       "fire_claim": {
-        "at": "2026-09-28T04:31:25.459851-04:00",
-        "by": "herby-Virtual-Machine:3750775:e01ed0fe3b5e4cb4b4db344d9fd89e44"
+        "at": "2026-09-29T04:31:47.012891-04:00",
+        "by": "herby-Virtual-Machine:3750775:414097d09f6c44f4aa76b___ID___e"
       },
       "failure_streak": 0
     },
@@ -63,15 +63,15 @@
       "schedule_display": "0 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 69
+        "completed": 70
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-14T09:53:18.644425-04:00",
-      "next_run_at": "2026-09-28T08:00:00-04:00",
-      "last_run_at": "2026-09-27T08:00:50.963870-04:00",
+      "next_run_at": "2026-09-29T08:00:00-04:00",
+      "last_run_at": "2026-09-28T08:00:45.620667-04:00",
       "last_status": "ok",
       "last_error": null,
       "deliver": "telegram",
@@ -311,15 +311,15 @@
       "schedule_display": "0 */4 * * *",
       "repeat": {
         "times": null,
-        "completed": 57
+        "completed": 63
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-18T18:37:03.954111-04:00",
-      "next_run_at": "2026-09-28T08:00:00-04:00",
-      "last_run_at": "2026-09-28T04:00:28.969815-04:00",
+      "next_run_at": "2026-09-29T08:00:00-04:00",
+      "last_run_at": "2026-09-29T04:00:53.280883-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -419,15 +419,15 @@
       "schedule_display": "0 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 1
+        "completed": 2
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-26T19:55:59.710569-04:00",
-      "next_run_at": "2026-09-28T08:00:00-04:00",
-      "last_run_at": "2026-09-27T08:13:13.367688-04:00",
+      "next_run_at": "2026-09-29T08:00:00-04:00",
+      "last_run_at": "2026-09-28T08:28:25.724463-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -471,15 +471,15 @@
       "schedule_display": "0 12 * * *",
       "repeat": {
         "times": null,
-        "completed": 1
+        "completed": 2
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-26T19:55:59.927469-04:00",
-      "next_run_at": "2026-09-28T12:00:00-04:00",
-      "last_run_at": "2026-09-27T12:29:44.816279-04:00",
+      "next_run_at": "2026-09-29T12:00:00-04:00",
+      "last_run_at": "2026-09-28T12:36:16.907016-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -523,15 +523,15 @@
       "schedule_display": "0 16 * * *",
       "repeat": {
         "times": null,
-        "completed": 1
+        "completed": 2
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-26T19:56:00.143843-04:00",
-      "next_run_at": "2026-09-28T16:00:00-04:00",
-      "last_run_at": "2026-09-27T16:37:13.424612-04:00",
+      "next_run_at": "2026-09-29T16:00:00-04:00",
+      "last_run_at": "2026-09-28T16:26:09.602500-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -547,7 +547,206 @@
       "enabled_toolsets": null,
       "workdir": "/home/herby/.openclaw/workspace/tales-untold",
       "fire_claim": null
+    },
+    {
+      "id": "cfa361617a98",
+      "name": "lotsignal-daily-pipeline",
+      "prompt": "LotSignal Daily Pipeline - Morning Schedule\n\nGenerate LotSignal social media content for B2B automotive dealers.\nNow runs at 10:00 AM ET for optimal B2B engagement.\n\nTarget: Single-point franchise dealers (Owner/GM)\nBest posting time: 10:00 AM ET (peak LinkedIn engagement)\n\nSteps:\n1. Check weekly rotation: Monday=stat, Tuesday=insight, Wednesday=tip, Thursday=stat, Friday=insight, Saturday=tip, Sunday=rest\n2. Generate draft content based on day-of-week rotation\n3. Create branded image using auto-logo-selector\n4. Store draft for approval queue\n\nContent types:\n- stat: Aged inventory statistics, ROI data, costs\n- insight: Dealer patterns, industry observations, building in public\n- tip: Practical dealership marketing tactics, content frameworks\n\nResearch basis: Dealers are morning decision-makers, peak engagement 10am",
+      "skills": [],
+      "skill": null,
+      "model": null,
+      "provider": null,
+      "provider_snapshot": null,
+      "model_snapshot": null,
+      "base_url": null,
+      "script": "scripts/daily_pipeline.sh",
+      "no_agent": true,
+      "monitor_script": null,
+      "monitor_url": null,
+      "monitor_state": null,
+      "context_from": null,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 8 * * *",
+        "display": "0 8 * * *"
+      },
+      "schedule_display": "0 8 * * *",
+      "repeat": {
+        "times": null,
+        "completed": 0
+      },
+      "enabled": true,
+      "state": "scheduled",
+      "paused_at": null,
+      "paused_reason": null,
+      "created_at": "2026-09-28T13:56:22.581547-04:00",
+      "next_run_at": "2026-09-29T08:00:00-04:00",
+      "last_run_at": null,
+      "last_status": null,
+      "last_error": null,
+      "last_delivery_error": null,
+      "failure_streak": 0,
+      "deliver": "origin",
+      "origin": {
+        "platform": "telegram",
+        "chat_id": "___ID___",
+        "chat_name": "Andrew",
+        "thread_id": null,
+        "user_id": "___ID___"
+      },
+      "enabled_toolsets": null,
+      "workdir": "/home/herby/.hermes/lotsignal-social"
+    },
+    {
+      "id": "___ID___b0",
+      "name": "lotsignal-publisher-6pm",
+      "prompt": "",
+      "skills": [],
+      "skill": null,
+      "model": null,
+      "provider": null,
+      "provider_snapshot": null,
+      "model_snapshot": null,
+      "base_url": null,
+      "script": "publisher.sh",
+      "no_agent": true,
+      "monitor_script": null,
+      "monitor_url": null,
+      "monitor_state": null,
+      "context_from": null,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 10 * * *",
+        "display": "0 10 * * *"
+      },
+      "schedule_display": "0 10 * * *",
+      "repeat": {
+        "times": null,
+        "completed": 2
+      },
+      "enabled": true,
+      "state": "scheduled",
+      "paused_at": null,
+      "paused_reason": null,
+      "created_at": "2026-09-28T13:56:44.148485-04:00",
+      "next_run_at": "2026-09-29T10:00:00-04:00",
+      "last_run_at": "2026-09-28T20:06:23.034631-04:00",
+      "last_status": "error",
+      "last_error": "Script not found: /home/herby/.hermes/scripts/scripts/publisher.sh",
+      "last_delivery_error": null,
+      "failure_streak": 2,
+      "deliver": "origin",
+      "origin": {
+        "platform": "telegram",
+        "chat_id": "___ID___",
+        "chat_name": "Andrew",
+        "thread_id": null,
+        "user_id": "___ID___"
+      },
+      "enabled_toolsets": null,
+      "workdir": "/home/herby/.hermes/lotsignal-social",
+      "fire_claim": null
+    },
+    {
+      "id": "2f883ffe399f",
+      "name": "lotsignal-publisher-7pm",
+      "prompt": "",
+      "skills": [],
+      "skill": null,
+      "model": null,
+      "provider": null,
+      "provider_snapshot": null,
+      "model_snapshot": null,
+      "base_url": null,
+      "script": "publisher.sh",
+      "no_agent": true,
+      "monitor_script": null,
+      "monitor_url": null,
+      "monitor_state": null,
+      "context_from": null,
+      "schedule": {
+        "kind": "cron",
+        "expr": "30 12 * * *",
+        "display": "30 12 * * *"
+      },
+      "schedule_display": "30 12 * * *",
+      "repeat": {
+        "times": null,
+        "completed": 1
+      },
+      "enabled": true,
+      "state": "scheduled",
+      "paused_at": null,
+      "paused_reason": null,
+      "created_at": "2026-09-28T13:56:44.282571-04:00",
+      "next_run_at": "2026-09-29T12:30:00-04:00",
+      "last_run_at": "2026-09-28T19:00:50.128435-04:00",
+      "last_status": "error",
+      "last_error": "Script not found: /home/herby/.hermes/scripts/scripts/publisher.sh",
+      "last_delivery_error": null,
+      "failure_streak": 1,
+      "deliver": "origin",
+      "origin": {
+        "platform": "telegram",
+        "chat_id": "___ID___",
+        "chat_name": "Andrew",
+        "thread_id": null,
+        "user_id": "___ID___"
+      },
+      "enabled_toolsets": null,
+      "workdir": "/home/herby/.hermes/lotsignal-social",
+      "fire_claim": null
+    },
+    {
+      "id": "0083f9805afb",
+      "name": "lotsignal-publisher-8pm",
+      "prompt": "",
+      "skills": [],
+      "skill": null,
+      "model": null,
+      "provider": null,
+      "provider_snapshot": null,
+      "model_snapshot": null,
+      "base_url": null,
+      "script": "publisher.sh",
+      "no_agent": true,
+      "monitor_script": null,
+      "monitor_url": null,
+      "monitor_state": null,
+      "context_from": null,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 14 * * *",
+        "display": "0 14 * * *"
+      },
+      "schedule_display": "0 14 * * *",
+      "repeat": {
+        "times": null,
+        "completed": 1
+      },
+      "enabled": true,
+      "state": "scheduled",
+      "paused_at": null,
+      "paused_reason": null,
+      "created_at": "2026-09-28T13:56:44.416019-04:00",
+      "next_run_at": "2026-09-29T14:00:00-04:00",
+      "last_run_at": "2026-09-28T20:00:17.929726-04:00",
+      "last_status": "error",
+      "last_error": "Script not found: /home/herby/.hermes/scripts/scripts/publisher.sh",
+      "last_delivery_error": null,
+      "failure_streak": 1,
+      "deliver": "origin",
+      "origin": {
+        "platform": "telegram",
+        "chat_id": "___ID___",
+        "chat_name": "Andrew",
+        "thread_id": null,
+        "user_id": "___ID___"
+      },
+      "enabled_toolsets": null,
+      "workdir": "/home/herby/.hermes/lotsignal-social",
+      "fire_claim": null
     }
   ],
-  "updated_at": "2026-09-28T04:31:25.460280-04:00"
+  "updated_at": "2026-09-29T04:31:47.013233-04:00"
 }

@@ -49,7 +49,11 @@ trace each job's actual file dependency end to end rather than trusting the
 job's name/description — three daily crons were found doing exactly this on
 2026-09-17 and were removed.
 
-## Tales Untold Shorts — Verified Pitfalls (2026-09-26)
+## Tales Untold Shorts — Verified Pitfalls
+
+See linked references below for session-dated pitfall documents:
+- `references/tales-untold-pitfalls-2026-09-26.md` — Voice=Adam error, litterbox hosting, cron slot bugs, POYO key truncation
+- `references/tales-untold-pitfalls-2026-09-28.md` — Duration > 60s Buffer rejection, Gammell monochrome perceptual uniformity, Drive URL formats
 
 See `references/tales-untold-pitfalls-2026-09-26.md` for complete details.
 
