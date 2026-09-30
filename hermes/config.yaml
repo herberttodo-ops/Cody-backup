@@ -317,6 +317,12 @@ mcp_servers:
   buffer:
     url: https://mcp.buffer.com/mcp
     headers:
-      Authorization: bearer ___TOKEN___
+      Authorization: Bearer ftBYq3...IVOv
+  composio:
+    command: python3
+    args:
+      - /home/herby/.hermes/scripts/composio_mcp_server.py
+    timeout: 180
+    connect_timeout: 30
 plugins:
   enabled: []

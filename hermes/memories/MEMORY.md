@@ -8,7 +8,7 @@ Andrew expects verification before assumptions — video caption completeness vi
 §
 Buffer error "media issue / file too large or connection timeout" on YouTube Shorts submissions is often a misleading wrapper for the real issue: video duration exceeds YouTube Shorts' hard 60-second limit. Always ffprobe duration BEFORE scheduling.
 §
-AI image gen prompts must NEVER mention brand names (causes logo hallucination). Use generic prompts, clean bottom margin. Logo composited via auto-variant selection (bg luminance): dark→white logo, light→original.
+Claude Code console auth: paste ENTIRE browser string including #state suffix. Do NOT split on #. Logo compositing: AI prompts never mention brand names; auto-select logo variant by bg luminance (dark→white, light→original).
 §
 LotSignal social pipeline: Target = single-point franchise dealers (Owner/GM). Optimal schedule (Option A): LinkedIn 10am, Instagram 12:30pm, Facebook 2pm ET. Day rotation: Mon=stat, Tue=insight, Wed=tip, Thu=stat, Fri=insight, Sat=tip, Sun=rest.
 §
