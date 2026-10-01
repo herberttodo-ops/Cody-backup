@@ -25,7 +25,7 @@
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-04-05T17:06:06.321746-04:00",
-      "next_run_at": "2026-10-02T04:30:00-04:00",
+      "next_run_at": "2026-10-01T04:30:00-04:00",
       "last_run_at": "2026-09-30T04:31:28.863099-04:00",
       "last_status": "ok",
       "last_error": null,
@@ -37,10 +37,7 @@
         "thread_id": null
       },
       "last_delivery_error": null,
-      "fire_claim": {
-        "at": "2026-10-01T04:30:13.719969-04:00",
-        "by": "herby-Virtual-Machine:1222254:94d8a9bff9d141b0b5b7be22278b8258"
-      },
+      "fire_claim": null,
       "failure_streak": 0
     },
     {
@@ -63,15 +60,15 @@
       "schedule_display": "0 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 72
+        "completed": 71
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-14T09:53:18.644425-04:00",
-      "next_run_at": "2026-10-01T08:00:00-04:00",
-      "last_run_at": "2026-09-30T08:01:00.810062-04:00",
+      "next_run_at": "2026-09-30T08:00:00-04:00",
+      "last_run_at": "2026-09-29T08:00:47.430609-04:00",
       "last_status": "ok",
       "last_error": null,
       "deliver": "telegram",
@@ -311,15 +308,15 @@
       "schedule_display": "0 */4 * * *",
       "repeat": {
         "times": null,
-        "completed": 75
+        "completed": 69
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-18T18:37:03.954111-04:00",
-      "next_run_at": "2026-10-01T08:00:00-04:00",
-      "last_run_at": "2026-10-01T04:00:10.176742-04:00",
+      "next_run_at": "2026-09-30T08:00:00-04:00",
+      "last_run_at": "2026-09-30T04:00:40.795525-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -405,7 +402,7 @@
       "provider_snapshot": null,
       "model_snapshot": null,
       "base_url": null,
-      "script": "tales_auto_producer.sh",
+      "script": "scripts/auto_producer.py",
       "no_agent": true,
       "monitor_script": null,
       "monitor_url": null,
@@ -413,21 +410,21 @@
       "context_from": null,
       "schedule": {
         "kind": "cron",
-        "expr": "0 22 * * *",
-        "display": "0 22 * * *"
+        "expr": "0 8 * * *",
+        "display": "0 8 * * *"
       },
-      "schedule_display": "0 22 * * *",
+      "schedule_display": "0 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 5
+        "completed": 3
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-26T19:55:59.710569-04:00",
-      "next_run_at": "2026-10-01T22:00:00-04:00",
-      "last_run_at": "2026-09-30T08:11:00.981445-04:00",
+      "next_run_at": "2026-09-30T08:00:00-04:00",
+      "last_run_at": "2026-09-29T08:17:06.908968-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -457,7 +454,7 @@
       "provider_snapshot": null,
       "model_snapshot": null,
       "base_url": null,
-      "script": "tales_auto_producer.sh",
+      "script": "scripts/auto_producer.py",
       "no_agent": true,
       "monitor_script": null,
       "monitor_url": null,
@@ -465,21 +462,21 @@
       "context_from": null,
       "schedule": {
         "kind": "cron",
-        "expr": "0 23 * * *",
-        "display": "0 23 * * *"
+        "expr": "0 12 * * *",
+        "display": "0 12 * * *"
       },
-      "schedule_display": "0 23 * * *",
+      "schedule_display": "0 12 * * *",
       "repeat": {
         "times": null,
-        "completed": 6
+        "completed": 3
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-26T19:55:59.927469-04:00",
-      "next_run_at": "2026-10-01T23:00:00-04:00",
-      "last_run_at": "2026-09-30T23:05:30.184320-04:00",
+      "next_run_at": "2026-09-30T12:00:00-04:00",
+      "last_run_at": "2026-09-29T12:26:17.875104-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -509,7 +506,7 @@
       "provider_snapshot": null,
       "model_snapshot": null,
       "base_url": null,
-      "script": "tales_auto_producer.sh",
+      "script": "scripts/auto_producer.py",
       "no_agent": true,
       "monitor_script": null,
       "monitor_url": null,
@@ -517,21 +514,21 @@
       "context_from": null,
       "schedule": {
         "kind": "cron",
-        "expr": "0 0 * * *",
-        "display": "0 0 * * *"
+        "expr": "0 16 * * *",
+        "display": "0 16 * * *"
       },
-      "schedule_display": "0 0 * * *",
+      "schedule_display": "0 16 * * *",
       "repeat": {
         "times": null,
-        "completed": 6
+        "completed": 3
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-26T19:56:00.143843-04:00",
-      "next_run_at": "2026-10-02T00:00:00-04:00",
-      "last_run_at": "2026-10-01T00:05:47.529190-04:00",
+      "next_run_at": "2026-09-30T16:00:00-04:00",
+      "last_run_at": "2026-09-29T16:20:42.988588-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -559,7 +556,7 @@
       "provider_snapshot": null,
       "model_snapshot": null,
       "base_url": null,
-      "script": "lotsignal_daily_pipeline.sh",
+      "script": "scripts/daily_pipeline.sh",
       "no_agent": true,
       "monitor_script": null,
       "monitor_url": null,
@@ -573,19 +570,19 @@
       "schedule_display": "0 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 2
+        "completed": 1
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-28T13:56:22.581547-04:00",
-      "next_run_at": "2026-10-01T08:00:00-04:00",
-      "last_run_at": "2026-09-30T08:11:17.240508-04:00",
+      "next_run_at": "2026-09-30T08:00:00-04:00",
+      "last_run_at": "2026-09-29T08:17:08.417539-04:00",
       "last_status": "error",
-      "last_error": "Script exited with code 1\nstdout:\n[2026-09-30T08:11:02-04:00] === LotSignal Daily Pipeline ===\n[2026-09-30T08:11:02-04:00] Generating draft...",
+      "last_error": "Script not found: /home/herby/.hermes/scripts/scripts/daily_pipeline.sh",
       "last_delivery_error": null,
-      "failure_streak": 2,
+      "failure_streak": 1,
       "deliver": "origin",
       "origin": {
         "platform": "telegram",
@@ -609,7 +606,7 @@
       "provider_snapshot": null,
       "model_snapshot": null,
       "base_url": null,
-      "script": "lotsignal_publisher.sh",
+      "script": "publisher.sh",
       "no_agent": true,
       "monitor_script": null,
       "monitor_url": null,
@@ -623,19 +620,19 @@
       "schedule_display": "0 10 * * *",
       "repeat": {
         "times": null,
-        "completed": 5
+        "completed": 3
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-28T13:56:44.148485-04:00",
-      "next_run_at": "2026-10-01T10:00:00-04:00",
-      "last_run_at": "2026-09-30T10:00:07.256296-04:00",
-      "last_status": "ok",
-      "last_error": null,
+      "next_run_at": "2026-09-30T10:00:00-04:00",
+      "last_run_at": "2026-09-29T10:00:52.474263-04:00",
+      "last_status": "error",
+      "last_error": "Script not found: /home/herby/.hermes/scripts/publisher.sh",
       "last_delivery_error": null,
-      "failure_streak": 0,
+      "failure_streak": 3,
       "deliver": "origin",
       "origin": {
         "platform": "telegram",
@@ -659,7 +656,7 @@
       "provider_snapshot": null,
       "model_snapshot": null,
       "base_url": null,
-      "script": "lotsignal_publisher.sh",
+      "script": "publisher.sh",
       "no_agent": true,
       "monitor_script": null,
       "monitor_url": null,
@@ -673,19 +670,19 @@
       "schedule_display": "30 12 * * *",
       "repeat": {
         "times": null,
-        "completed": 4
+        "completed": 2
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-28T13:56:44.282571-04:00",
-      "next_run_at": "2026-10-01T12:30:00-04:00",
-      "last_run_at": "2026-09-30T12:30:41.258451-04:00",
-      "last_status": "ok",
-      "last_error": null,
+      "next_run_at": "2026-09-30T12:30:00-04:00",
+      "last_run_at": "2026-09-29T12:30:23.417383-04:00",
+      "last_status": "error",
+      "last_error": "Script not found: /home/herby/.hermes/scripts/publisher.sh",
       "last_delivery_error": null,
-      "failure_streak": 0,
+      "failure_streak": 2,
       "deliver": "origin",
       "origin": {
         "platform": "telegram",
@@ -709,7 +706,7 @@
       "provider_snapshot": null,
       "model_snapshot": null,
       "base_url": null,
-      "script": "lotsignal_publisher.sh",
+      "script": "publisher.sh",
       "no_agent": true,
       "monitor_script": null,
       "monitor_url": null,
@@ -723,19 +720,19 @@
       "schedule_display": "0 14 * * *",
       "repeat": {
         "times": null,
-        "completed": 4
+        "completed": 2
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-28T13:56:44.416019-04:00",
-      "next_run_at": "2026-10-01T14:00:00-04:00",
-      "last_run_at": "2026-09-30T14:01:00.230623-04:00",
-      "last_status": "ok",
-      "last_error": null,
+      "next_run_at": "2026-09-30T14:00:00-04:00",
+      "last_run_at": "2026-09-29T14:00:40.663000-04:00",
+      "last_status": "error",
+      "last_error": "Script not found: /home/herby/.hermes/scripts/publisher.sh",
       "last_delivery_error": null,
-      "failure_streak": 0,
+      "failure_streak": 2,
       "deliver": "origin",
       "origin": {
         "platform": "telegram",
@@ -747,56 +744,7 @@
       "enabled_toolsets": null,
       "workdir": "/home/herby/.hermes/lotsignal-social",
       "fire_claim": null
-    },
-    {
-      "id": "82dfb9b234c0",
-      "name": "tales-cryptid-research",
-      "prompt": "",
-      "skills": [],
-      "skill": null,
-      "model": null,
-      "provider": null,
-      "provider_snapshot": null,
-      "model_snapshot": null,
-      "base_url": null,
-      "script": "tales_cryptid_research.sh",
-      "no_agent": true,
-      "monitor_script": null,
-      "monitor_url": null,
-      "monitor_state": null,
-      "context_from": null,
-      "schedule": {
-        "kind": "cron",
-        "expr": "0 9 * * *",
-        "display": "0 9 * * *"
-      },
-      "schedule_display": "0 9 * * *",
-      "repeat": {
-        "times": null,
-        "completed": 0
-      },
-      "enabled": true,
-      "state": "scheduled",
-      "paused_at": null,
-      "paused_reason": null,
-      "created_at": "2026-09-30T10:43:30.605842-04:00",
-      "next_run_at": "2026-10-01T09:00:00-04:00",
-      "last_run_at": null,
-      "last_status": null,
-      "last_error": null,
-      "last_delivery_error": null,
-      "failure_streak": 0,
-      "deliver": "local",
-      "origin": {
-        "platform": "telegram",
-        "chat_id": "___ID___",
-        "chat_name": "Andrew",
-        "thread_id": null,
-        "user_id": "___ID___"
-      },
-      "enabled_toolsets": null,
-      "workdir": "/home/herby/.openclaw/workspace/tales-untold"
     }
   ],
-  "updated_at": "2026-10-01T04:30:13.720415-04:00"
+  "updated_at": "2026-09-30T05:21:11.284422-04:00"
 }

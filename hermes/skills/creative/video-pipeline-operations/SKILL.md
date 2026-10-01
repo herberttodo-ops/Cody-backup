@@ -54,8 +54,9 @@ job's name/description — three daily crons were found doing exactly this on
 See linked references below for session-dated pitfall documents:
 - `references/tales-untold-pitfalls-2026-09-26.md` — Voice=Adam error, litterbox hosting, cron slot bugs, POYO key truncation
 - `references/tales-untold-pitfalls-2026-09-28.md` — Duration > 60s Buffer rejection, Gammell monochrome perceptual uniformity, Drive URL formats
+- `references/composio-youtube-upload-schema.md` — Composio schema requirements, categoryId as string, publishAt rejection, working example
 
-See `references/tales-untold-pitfalls-2026-09-26.md` for complete details.
+See `references/tales-untold-pitfalls-2026-09-26.md` or `references/composio-youtube-upload-schema.md` for complete details.
 
 - **Voice is Ezekiel, not Adam.** Adam was incorrectly used until caught during user review. Audit any old pipeline/script for `"voice": "Adam"`.
 - **Buffer cannot read Google Drive URLs;** use `litterbox.catbox.moe` for hosting.

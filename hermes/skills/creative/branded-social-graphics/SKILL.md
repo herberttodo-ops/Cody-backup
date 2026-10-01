@@ -221,6 +221,8 @@ visual_description = TOPIC_VISUALS.get(topic, "abstract professional pattern")
 9. **Layout imbalance** → Test multiple variations, use vision analysis to evaluate
 10. **Missing API keys in subprocess/execute_code** → When running outside main Hermes context, `.env` files aren't auto-loaded. Use `load_env_file()` helper (see API Keys section)
 11. **Text clipped at edges** → Font size too large for headline with padding. Use `font_size = int(height * 0.07)` max (not 0.09). Add boundary constraints: `bar_x1 = max(0, x - padding)` and `bar_x2 = min(width, x + text_width + padding)`
+12. **AI-generated fake branding marks** → AI image generators (Ideogram, DALL-E, GPT-Image-1) often generate garbled brand-name text (e.g., "OptiIFP") at the bottom despite explicit prompt prohibitions. When the compositor then places the full logo (icon + wordmark) on top, the brand appears twice — once fake, once real — causing public embarrassment and undermining consistency.
+    - **Fix:** Use a two-layer defense: (1) Forcibly erase the bottom 28% of the AI-generated image with solid brand color before compositing; (2) Use an icon-only logo asset (no wordmark text) as the overlay. See `references/ai-generated-branding-marks-fix.md` for full reproduction code.
 
 ## Iteration Learnings (OptiRFP Case Study)
 
@@ -340,6 +342,11 @@ OptiRFP example:
 - Output: `~/.hermes/generated_images/`
 - Tool: `tools/logo_compositor_v3.py`
 - Tool: `tools/openrouter_image_tool.py`
+
+## References
+
+- `references/logo-cutoff-fix.md` — Social platform cropping margins
+- `references/ai-generated-branding-marks-fix.md` — Fake branding marks from AI generators and how to forcibly remove them
 
 ## API Keys & Implementation
 
