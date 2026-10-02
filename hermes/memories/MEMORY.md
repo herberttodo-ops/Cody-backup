@@ -12,4 +12,4 @@ LotSignal Composio: SDK = `composio` v0.24+ session-based (Composio().create(use
 §
 Tales Untold content strategy: Rotate fresh cryptids regularly — don't recycle the same 15 core entities. User wants variety. Expanded pool includes Kraken, Drop Bears, Yuki-onna, Teke Teke, Mapinguari, Leshy, Bunyip, Beast of Bray Road, etc.
 §
-OptiRFP image generation fix: compositor now forcibly erases bottom 28% to solid navy before adding icon-only logo. Prevents AI-generated fake word marks. Fixed Sep 30.
+Tales Untold voice preference: Use Cedric voice (ID: BQOei2tk6QCBMHQWPhbj), NOT Adam voice (ID: pNInz6obpgDQGcFmaJgB). This applies to all Tales Untold video production including shorts and anthology content.
