@@ -13,6 +13,16 @@ import io
 IDEOGRAM_API_KEY = os.getenv("IDEOGRAM_API_KEY", "___LONG_STRING___")
 LOGO_PATH = os.getenv("OPTIRFP_LOGO_PATH", "/home/herby/.hermes/assets/optirfp_logo.jpg")
 
+# Validate logo path at module load
+if not os.path.exists(LOGO_PATH):
+    raise FileNotFoundError(f"OptiRFP logo not found: {LOGO_PATH}")
+if 'icon' in Path(LOGO_PATH).name.lower() and 'logo' not in Path(LOGO_PATH).name.lower():
+    raise ValueError(
+        f"CRITICAL: Logo path points to icon-only file: {LOGO_PATH}\n"
+        f"Use the FULL logo: ~/.hermes/assets/optirfp_logo.jpg"
+    )
+print(f"[LogoCheck] ✓ Logo validated: {LOGO_PATH}")
+
 # Brand colors
 DARK_NAVY = "#0F172A"
 MINT_GREEN = "#40D395"

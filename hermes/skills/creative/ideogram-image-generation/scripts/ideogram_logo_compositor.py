@@ -68,7 +68,7 @@ def remove_white_background(image, tolerance=35):
 
 
 def find_logo_path(brand_name="optirfp"):
-    """Find logo file in standard locations."""
+    """Find logo file in standard locations. Validates it's the full logo, not icon."""
     extensions = [".png", ".jpg", ".jpeg", ".PNG", ".JPG"]
     base_paths = [
         Path.home() / ".hermes" / "assets",
@@ -77,15 +77,53 @@ def find_logo_path(brand_name="optirfp"):
     
     for base in base_paths:
         for ext in extensions:
+            # Prefer "_logo" files (full logo) over others
             logo_path = base / f"{brand_name}_logo{ext}"
             if logo_path.exists():
-                return str(logo_path)
-            # Try without underscore
+                # Validate it's the full logo
+                if _validate_logo_file(logo_path):
+                    return str(logo_path)
+            
+            # Try without underscore (but validate)
             logo_path = base / f"{brand_name}{ext}"
             if logo_path.exists():
-                return str(logo_path)
+                if _validate_logo_file(logo_path):
+                    return str(logo_path)
     
     return None
+
+
+def _validate_logo_file(logo_path: Path) -> bool:
+    """Validate that the logo file contains the full wordmark, not just the icon."""
+    # Check filename - reject files with "icon" in the name
+    if 'icon' in logo_path.name.lower() and 'logo' not in logo_path.name.lower():
+        print(f"[LogoCheck] ⚠ Rejecting icon-only file: {logo_path}")
+        return False
+    
+    # Check pixel count - full logo has ~100k dark pixels, icon has <10k
+    try:
+        img = Image.open(logo_path)
+        if img.mode == 'RGBA':
+            data = list(img.getdata())
+            dark_pixels = sum(1 for r, g, b, a in data if a > 100 and (r + g + b) / 3 < 200)
+        elif img.mode in ('RGB', 'L'):
+            data = list(img.getdata())
+            if len(data[0]) == 3:
+                dark_pixels = sum(1 for r, g, b in data if (r + g + b) / 3 < 200)
+            else:
+                dark_pixels = sum(1 for p in data if p < 200)
+        else:
+            return True  # Unknown mode, accept
+        
+        if dark_pixels < 15000:
+            print(f"[LogoCheck] ⚠ Rejecting file with only {dark_pixels} dark pixels (icon-only): {logo_path}")
+            return False
+        
+        print(f"[LogoCheck] ✓ Accepted full logo: {logo_path} ({dark_pixels} dark pixels)")
+        return True
+    except Exception as e:
+        print(f"[LogoCheck] ⚠ Validation error for {logo_path}: {e}")
+        return True  # On error, accept and let it fail later
 
 
 def composite_logo_on_image(

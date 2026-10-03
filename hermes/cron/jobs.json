@@ -18,15 +18,15 @@
       "schedule_display": "30 4 * * *",
       "repeat": {
         "times": null,
-        "completed": 118
+        "completed": 119
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-04-05T17:06:06.321746-04:00",
-      "next_run_at": "2026-10-03T04:30:00-04:00",
-      "last_run_at": "2026-10-01T04:31:26.762340-04:00",
+      "next_run_at": "2026-10-04T04:30:00-04:00",
+      "last_run_at": "2026-10-02T04:32:06.154626-04:00",
       "last_status": "ok",
       "last_error": null,
       "deliver": "telegram:___ID___",
@@ -38,8 +38,8 @@
       },
       "last_delivery_error": null,
       "fire_claim": {
-        "at": "2026-10-02T04:30:40.298289-04:00",
-        "by": "herby-Virtual-Machine:1222254:f6299d5f9c404ce88bfcc57498656f83"
+        "at": "2026-10-03T04:30:05.274992-04:00",
+        "by": "herby-Virtual-Machine:1222254:93e8dad3967343d3b814d6253cefa497"
       },
       "failure_streak": 0
     },
@@ -63,15 +63,15 @@
       "schedule_display": "0 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 73
+        "completed": 74
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-14T09:53:18.644425-04:00",
-      "next_run_at": "2026-10-02T08:00:00-04:00",
-      "last_run_at": "2026-10-01T08:00:25.237717-04:00",
+      "next_run_at": "2026-10-03T08:00:00-04:00",
+      "last_run_at": "2026-10-02T08:00:57.087861-04:00",
       "last_status": "ok",
       "last_error": null,
       "deliver": "telegram",
@@ -311,15 +311,15 @@
       "schedule_display": "0 */4 * * *",
       "repeat": {
         "times": null,
-        "completed": 81
+        "completed": 87
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-18T18:37:03.954111-04:00",
-      "next_run_at": "2026-10-02T08:00:00-04:00",
-      "last_run_at": "2026-10-02T04:00:35.965079-04:00",
+      "next_run_at": "2026-10-03T08:00:00-04:00",
+      "last_run_at": "2026-10-03T04:01:00.705995-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -419,15 +419,15 @@
       "schedule_display": "0 22 * * *",
       "repeat": {
         "times": null,
-        "completed": 6
+        "completed": 7
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-26T19:55:59.710569-04:00",
-      "next_run_at": "2026-10-02T22:00:00-04:00",
-      "last_run_at": "2026-10-01T22:05:18.618379-04:00",
+      "next_run_at": "2026-10-03T22:00:00-04:00",
+      "last_run_at": "2026-10-02T22:04:57.756263-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -471,19 +471,19 @@
       "schedule_display": "0 23 * * *",
       "repeat": {
         "times": null,
-        "completed": 7
+        "completed": 8
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-26T19:55:59.927469-04:00",
-      "next_run_at": "2026-10-02T23:00:00-04:00",
-      "last_run_at": "2026-10-01T23:04:53.463382-04:00",
-      "last_status": "ok",
-      "last_error": null,
+      "next_run_at": "2026-10-03T23:00:00-04:00",
+      "last_run_at": "2026-10-02T23:00:50.698440-04:00",
+      "last_status": "error",
+      "last_error": "Script exited with code 1\nstderr:\nTraceback (most recent call last):\n  File \"/home/herby/.openclaw/workspace/tales-untold/scripts/auto_producer.py\", line 475, in <module>\n    main()\n  File \"/home/herby/.openclaw/workspace/tales-untold/scripts/auto_producer.py\", line 417, in main\n    mp3, raw_dur = do_tts(name, story_text)\n                   ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/herby/.openclaw/workspace/tales-untold/scripts/auto_producer.py\", line 98, in do_tts\n    res = poll(tid)\n          ^^^^^^^^^\n  File \"/home/herby/.openclaw/workspace/tales-untold/scripts/auto_producer.py\", line 66, in poll\n    r.raise_for_status()\n  File \"/home/herby/.hermes/hermes-agent/venv/lib/python3.11/site-packages/requests/models.py\", line 1028, in raise_for_status\n    raise HTTPError(http_error_msg, response=self)\nrequests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://api.poyo.ai/api/generate/status/None\nstdout:\n============================================================\nPRODUCING mothman_second_visitor\n  slot: 6pm ET (next day)  due_at: 2026-10-03T22:00:00.000Z\n  variant: A  entity: Mothman\n  title: Mothman Among Us\n============================================================\n  TTS task None",
       "last_delivery_error": null,
-      "failure_streak": 0,
+      "failure_streak": 1,
       "deliver": "origin",
       "origin": {
         "platform": "telegram",
@@ -523,19 +523,19 @@
       "schedule_display": "0 0 * * *",
       "repeat": {
         "times": null,
-        "completed": 7
+        "completed": 8
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-26T19:56:00.143843-04:00",
-      "next_run_at": "2026-10-03T00:00:00-04:00",
-      "last_run_at": "2026-10-02T00:05:09.365292-04:00",
-      "last_status": "ok",
-      "last_error": null,
+      "next_run_at": "2026-10-04T00:00:00-04:00",
+      "last_run_at": "2026-10-03T00:00:08.952174-04:00",
+      "last_status": "error",
+      "last_error": "Script exited with code 1\nstderr:\nTraceback (most recent call last):\n  File \"/home/herby/.openclaw/workspace/tales-untold/scripts/auto_producer.py\", line 475, in <module>\n    main()\n  File \"/home/herby/.openclaw/workspace/tales-untold/scripts/auto_producer.py\", line 417, in main\n    mp3, raw_dur = do_tts(name, story_text)\n                   ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/herby/.openclaw/workspace/tales-untold/scripts/auto_producer.py\", line 98, in do_tts\n    res = poll(tid)\n          ^^^^^^^^^\n  File \"/home/herby/.openclaw/workspace/tales-untold/scripts/auto_producer.py\", line 66, in poll\n    r.raise_for_status()\n  File \"/home/herby/.hermes/hermes-agent/venv/lib/python3.11/site-packages/requests/models.py\", line 1028, in raise_for_status\n    raise HTTPError(http_error_msg, response=self)\nrequests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://api.poyo.ai/api/generate/status/None\nstdout:\n============================================================\nPRODUCING mothman_second_visitor\n  slot: 6pm ET (next day)  due_at: 2026-10-04T22:00:00.000Z\n  variant: A  entity: Mothman\n  title: They Don't Talk About Mothman\n============================================================\n  TTS task None",
       "last_delivery_error": null,
-      "failure_streak": 0,
+      "failure_streak": 1,
       "deliver": "origin",
       "origin": {
         "platform": "telegram",
@@ -573,19 +573,19 @@
       "schedule_display": "0 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 3
+        "completed": 4
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-28T13:56:22.581547-04:00",
-      "next_run_at": "2026-10-02T08:00:00-04:00",
-      "last_run_at": "2026-10-01T08:00:46.863579-04:00",
+      "next_run_at": "2026-10-03T08:00:00-04:00",
+      "last_run_at": "2026-10-02T08:01:14.013788-04:00",
       "last_status": "error",
-      "last_error": "Script exited with code 1\nstdout:\n[2026-10-01T08:00:31-04:00] === LotSignal Daily Pipeline ===\n[2026-10-01T08:00:31-04:00] Generating draft...",
+      "last_error": "Script exited with code 1\nstdout:\n[2026-10-02T08:01:00-04:00] === LotSignal Daily Pipeline ===\n[2026-10-02T08:01:00-04:00] Generating draft...",
       "last_delivery_error": null,
-      "failure_streak": 3,
+      "failure_streak": 4,
       "deliver": "origin",
       "origin": {
         "platform": "telegram",
@@ -623,15 +623,15 @@
       "schedule_display": "0 10 * * *",
       "repeat": {
         "times": null,
-        "completed": 6
+        "completed": 7
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-28T13:56:44.148485-04:00",
-      "next_run_at": "2026-10-02T10:00:00-04:00",
-      "last_run_at": "2026-10-01T10:00:29.907838-04:00",
+      "next_run_at": "2026-10-03T10:00:00-04:00",
+      "last_run_at": "2026-10-02T10:00:59.404333-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -673,15 +673,15 @@
       "schedule_display": "30 12 * * *",
       "repeat": {
         "times": null,
-        "completed": 5
+        "completed": 6
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-28T13:56:44.282571-04:00",
-      "next_run_at": "2026-10-02T12:30:00-04:00",
-      "last_run_at": "2026-10-01T12:30:06.112807-04:00",
+      "next_run_at": "2026-10-03T12:30:00-04:00",
+      "last_run_at": "2026-10-02T12:30:36.539995-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -723,15 +723,15 @@
       "schedule_display": "0 14 * * *",
       "repeat": {
         "times": null,
-        "completed": 5
+        "completed": 6
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-28T13:56:44.416019-04:00",
-      "next_run_at": "2026-10-02T14:00:00-04:00",
-      "last_run_at": "2026-10-01T14:00:25.279093-04:00",
+      "next_run_at": "2026-10-03T14:00:00-04:00",
+      "last_run_at": "2026-10-02T14:00:54.355527-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -773,15 +773,15 @@
       "schedule_display": "0 9 * * *",
       "repeat": {
         "times": null,
-        "completed": 1
+        "completed": 2
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-30T10:43:30.605842-04:00",
-      "next_run_at": "2026-10-02T09:00:00-04:00",
-      "last_run_at": "2026-10-01T09:12:30.011717-04:00",
+      "next_run_at": "2026-10-03T09:00:00-04:00",
+      "last_run_at": "2026-10-02T09:00:45.173287-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -799,5 +799,5 @@
       "fire_claim": null
     }
   ],
-  "updated_at": "2026-10-02T04:30:40.298583-04:00"
+  "updated_at": "2026-10-03T04:30:05.275274-04:00"
 }

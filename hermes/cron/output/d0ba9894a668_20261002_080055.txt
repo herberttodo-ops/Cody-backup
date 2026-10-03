@@ -1,0 +1,50 @@
+Cronjob Response: optirfp-linkedin-daily
+(job_id: d0ba9894a668)
+-------------
+
+Headline: The buyer remembers one thing.
+Topic: specificity
+Fri Oct  2 08:00:32 AM EDT 2026: Starting OptiRFP daily post with image (FIXED v2)...
+Fri Oct  2 08:00:32 AM EDT 2026: Generated headline: The buyer remembers one thing.
+Fri Oct  2 08:00:32 AM EDT 2026: Topic: specificity
+Fri Oct  2 08:00:32 AM EDT 2026: Generating image with FIXED compositor (clean bottom, no fake marks)...
+Fri Oct  2 08:00:48 AM EDT 2026: Image generated: /home/herby/.hermes/generated_images/optirfp_specificity____ID___.png
+Fri Oct  2 08:00:48 AM EDT 2026: Uploading to Drive...
+Fri Oct  2 08:00:53 AM EDT 2026: Drive URL: https://drive.google.com/uc?export=view&id=12s0MfW_uqrBIiuwOssx5Zg1oTr4SQBkD
+Fri Oct  2 08:00:53 AM EDT 2026: Posting to LinkedIn...
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"6abf9cf6b41a266eabf891eb\",\"allowedActions\":[\"publishPostNow\",\"updatePost\",\"movePostToDraft\",\"publishPostNext\",\"updatePostSchedule\",\"updatePostTags\",\"addPostNote\",\"duplicatePost\",\"deletePost\",\"updateShopGridLink\",\"createPostRecurrence\"],\"status\":\"scheduled\",\"text\":\"The buyer remembers one thing. Make it your differentiator.\\n\\nShow outcomes before process.\\n\\n#RFP #B2BSales #ProposalWriting\",\"channelId\":\"6a7f74bcb2d9d577437af9a4\",\"channelService\":\"linkedin\",\"dueAt\":\"2026-10-02T18:59:00.000Z\",\"sentAt\":null,\"schedulingType\":\"automatic\",\"shareMode\":\"addToQueue\",\"sharedNow\":false,\"isCustomScheduled\":false,\"createdAt\":\"2026-10-02T12:00:54.397Z\",\"updatedAt\":\"2026-10-02T12:00:54.459Z\",\"tags\":[],\"assets\":[{\"id\":null,\"type\":\"image\",\"mimeType\":\"image/jpeg\",\"source\":\"https://drive.google.com/uc?export=view&id=12s0MfW_uqrBIiuwOssx5Zg1oTr4SQBkD\",\"thumbnail\":\"https://drive.google.com/uc?export=view&id=12s0MfW_uqrBIiuwOssx5Zg1oTr4SQBkD\",\"image\":{\"width\":2048,\"height\":2048,\"altText\":\"The buyer remembers one thing. Make it your differentiator.\\n\\nShow outcomes before process.\\n\\n#RFP #B2\",\"isAnimated\":false,\"animatedThumbnail\":null,\"userTags\":null}}],\"error\":null,\"metadata\":{\"type\":\"post\",\"annotations\":[{\"type\":\"hashtag\",\"content\":\"#RFP\",\"indices\":[92,96],\"text\":\"#RFP\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=RFP\"},{\"type\":\"hashtag\",\"content\":\"#B2BSales\",\"indices\":[97,106],\"text\":\"#B2BSales\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=B2BSales\"},{\"type\":\"hashtag\",\"content\":\"#ProposalWriting\",\"indices\":[107,123],\"text\":\"#ProposalWriting\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=ProposalWriting\"}],\"firstComment\":null,\"linkAttachment\":null}}"
+      },
+      {
+        "type": "text",
+        "text": "{\"rateLimit\":[{\"remaining\":99,\"resetSeconds\":900},{\"remaining\":249,\"resetSeconds\":86400},{\"remaining\":2707,\"resetSeconds\":1036870}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+Fri Oct  2 08:00:54 AM EDT 2026: Posting to Facebook...
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"6abf9cf781e421bfcd7a4faa\",\"allowedActions\":[\"publishPostNow\",\"updatePost\",\"movePostToDraft\",\"publishPostNext\",\"updatePostSchedule\",\"updatePostTags\",\"addPostNote\",\"duplicatePost\",\"deletePost\",\"updateShopGridLink\",\"createPostRecurrence\"],\"status\":\"scheduled\",\"text\":\"The buyer remembers one thing. Make it your differentiator.\\n\\nShow outcomes before process.\\n\\n#RFP #B2BSales #ProposalWriting\",\"channelId\":\"6a7f7476b2d9d577437af67f\",\"channelService\":\"facebook\",\"dueAt\":\"2026-10-02T12:39:00.000Z\",\"sentAt\":null,\"schedulingType\":\"automatic\",\"shareMode\":\"addToQueue\",\"sharedNow\":false,\"isCustomScheduled\":false,\"createdAt\":\"2026-10-02T12:00:55.032Z\",\"updatedAt\":\"2026-10-02T12:00:55.096Z\",\"tags\":[],\"assets\":[{\"id\":null,\"type\":\"image\",\"mimeType\":\"image/jpeg\",\"source\":\"https://drive.google.com/uc?export=view&id=12s0MfW_uqrBIiuwOssx5Zg1oTr4SQBkD\",\"thumbnail\":\"https://drive.google.com/uc?export=view&id=12s0MfW_uqrBIiuwOssx5Zg1oTr4SQBkD\",\"image\":{\"width\":2048,\"height\":2048,\"altText\":\"The buyer remembers one thing. Make it your differentiator.\\n\\nShow outcomes before process.\\n\\n#RFP #B2\",\"isAnimated\":false,\"animatedThumbnail\":null,\"userTags\":null}}],\"error\":null,\"metadata\":{\"type\":\"post\",\"annotations\":[{\"type\":\"hashtag\",\"content\":\"#RFP\",\"indices\":[92,96],\"text\":\"#RFP\",\"url\":\"https://www.facebook.com/hashtag/RFP\"},{\"type\":\"hashtag\",\"content\":\"#B2BSales\",\"indices\":[97,106],\"text\":\"#B2BSales\",\"url\":\"https://www.facebook.com/hashtag/B2BSales\"},{\"type\":\"hashtag\",\"content\":\"#ProposalWriting\",\"indices\":[107,123],\"text\":\"#ProposalWriting\",\"url\":\"https://www.facebook.com/hashtag/ProposalWriting\"}],\"title\":null,\"firstComment\":null,\"linkAttachment\":null}}"
+      },
+      {
+        "type": "text",
+        "text": "{\"rateLimit\":[{\"remaining\":98,\"resetSeconds\":899},{\"remaining\":248,\"resetSeconds\":86399},{\"remaining\":2706,\"resetSeconds\":1036869}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+Fri Oct  2 08:00:55 AM EDT 2026: DONE
+
+To stop or manage this job, send me a new message (e.g. "stop reminder optirfp-linkedin-daily").
