@@ -55,9 +55,14 @@ See linked references below for session-dated pitfall documents:
 - `references/tales-untold-pitfalls-2026-09-26.md` — Voice=Adam error, litterbox hosting, cron slot bugs, POYO key truncation
 - `references/tales-untold-pitfalls-2026-09-28.md` — Duration > 60s Buffer rejection, Gammell monochrome perceptual uniformity, Drive URL formats
 - `references/composio-youtube-upload-schema.md` — Composio schema requirements, categoryId as string, publishAt rejection, working example
+- `references/pipeline-resilience-oct2026.md` — **Resource exhaustion: credit guards, upload ledger, resumable upload format, queue system, alert rate-limiting**
 
-See `references/tales-untold-pitfalls-2026-09-26.md` or `references/composio-youtube-upload-schema.md` for complete details.
+See `references/tales-untold-pitfalls-2026-09-26.md`, `references/composio-youtube-upload-schema.md`, or `references/pipeline-resilience-oct2026.md` for complete details.
 
+- **Resource exhaustion is NOT a retry problem.** POYO HTTP 402 "insufficient credits" and YouTube persistent 429s are permanent failures. Retry logic for these wastes time/credits and delays user notification. Build **resource guards** that halt production before spending retries.
+- **Track uploads with a dedicated ledger.** `pool_state.json` gets wiped. Use `upload_log.json` as the source of truth for "was this video uploaded?" Orphan rescue should consult the upload ledger first.
+- **Use resumable upload format.** `YOUTUBE_UPLOAD_VIDEO` costs ~500 API units vs ~1600 for `YOUTUBE_MULTIPART_UPLOAD_VIDEO`. Triples daily capacity on the same quota.
+- **Rate-limit alerts.** When resources are exhausted, every failed cron run should not spam alerts. One alert per hour per resource type is the correct UX.
 - **Voice is Ezekiel, not Adam.** Adam was incorrectly used until caught during user review. Audit any old pipeline/script for `"voice": "Adam"`.
 - **Buffer cannot read Google Drive URLs;** use `litterbox.catbox.moe` for hosting.
 - **BunnyCDN failed** (401 Unauthorized) — do not rely without verification.
