@@ -10,6 +10,6 @@ LotSignal social pipeline: Target = single-point franchise dealers (Owner/GM). O
 §
 LotSignal Composio: SDK = `composio` v0.24+ session-based (Composio().create(user_id=...)), NOT deprecated composio_core/ComposioToolSet (HTTP 410). Andrew signed up at dashboard.composio.dev: real Project API key, LinkedIn/FB/IG connected. Publishing held: LinkedIn managed auth only grants w_member_social (personal) — company-page org scopes need custom LinkedIn Developer App approval (days). No LotSignal FB Page exists so IG posting has no attach point; YouTube OAuth left INITIATED. Andrew rejects Buffer for LotSignal — firm preference.
 §
-Tales Untold content strategy: Rotate fresh cryptids regularly — don't recycle the same 15 core entities. User wants variety. Expanded pool includes Kraken, Drop Bears, Yuki-onna, Teke Teke, Mapinguari, Leshy, Bunyip, Beast of Bray Road, etc.
+Tales Untold content strategy: Rotate fresh cryptids — 200+ topic database at ~/.openclaw/workspace/tales-untold/data/folklore_cryptid_database.json, not ~15 entities. Producer auto-selects unproduced entries.
 §
 Tales Untold voice preference: Use Cedric voice (ID: BQOei2tk6QCBMHQWPhbj), NOT Adam voice (ID: pNInz6obpgDQGcFmaJgB). This applies to all Tales Untold video production including shorts and anthology content.

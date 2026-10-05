@@ -56,6 +56,8 @@ See linked references below for session-dated pitfall documents:
 - `references/tales-untold-pitfalls-2026-09-28.md` — Duration > 60s Buffer rejection, Gammell monochrome perceptual uniformity, Drive URL formats
 - `references/composio-youtube-upload-schema.md` — Composio schema requirements, categoryId as string, publishAt rejection, working example
 - `references/pipeline-resilience-oct2026.md` — **Resource exhaustion: credit guards, upload ledger, resumable upload format, queue system, alert rate-limiting**
+- `references/tales-untold-pitfalls-2026-10-04.md` — **Buffer MCP tool limitations (no publishPostNow), YouTube OAuth expiry, addToQueue auto-scheduling, crontab vs Hermes cron, word-count→duration mapping**
+- `references/composio-youtube-quota-pattern.md` — **ComposIO YouTube quota exhaustion detection, daily reset timing (midnight PT), resumable upload cost savings, Buffer vs ComposIO decision matrix for YouTube publishing**
 
 See `references/tales-untold-pitfalls-2026-09-26.md`, `references/composio-youtube-upload-schema.md`, or `references/pipeline-resilience-oct2026.md` for complete details.
 

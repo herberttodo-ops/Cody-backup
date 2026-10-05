@@ -5,14 +5,14 @@
     "created_by": null,
     "last_patched_at": "2026-09-10T08:34:14.093590+00:00",
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-10-04T08:30:41.141696+00:00",
-    "last_viewed_at": "2026-10-04T08:30:40.971126+00:00",
+    "last_used_at": "2026-10-05T08:31:24.951791+00:00",
+    "last_viewed_at": "2026-10-05T08:31:24.815980+00:00",
     "patch_count": 10,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 11,
-    "view_count": 11
+    "use_count": 12,
+    "view_count": 12
   },
   "agent-memory-management": {
     "archived_at": null,
@@ -221,14 +221,14 @@
     "created_by": null,
     "last_patched_at": "2026-09-16T01:05:15.754373+00:00",
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-10-02T15:59:53.394052+00:00",
-    "last_viewed_at": "2026-10-02T15:59:53.069213+00:00",
+    "last_used_at": "2026-10-05T01:21:41.249284+00:00",
+    "last_viewed_at": "2026-10-05T01:21:41.115355+00:00",
     "patch_count": 20,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 54,
-    "view_count": 54
+    "use_count": 55,
+    "view_count": 55
   },
   "bunnycdn-storage-integration": {
     "archived_at": null,
@@ -251,14 +251,14 @@
     "created_by": null,
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-10-04T05:24:03.933271+00:00",
-    "last_viewed_at": "2026-10-04T05:24:03.714577+00:00",
+    "last_used_at": "2026-10-04T18:16:28.824007+00:00",
+    "last_viewed_at": "2026-10-04T18:16:28.732223+00:00",
     "patch_count": 0,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 8,
-    "view_count": 8
+    "use_count": 9,
+    "view_count": 9
   },
   "claude-design": {
     "archived_at": null,
@@ -1467,14 +1467,14 @@
     "created_by": "agent",
     "last_patched_at": "2026-09-26T01:51:20.750427+00:00",
     "last_reused_patch_generation": 2,
-    "last_used_at": "2026-10-01T15:46:31.606048+00:00",
-    "last_viewed_at": "2026-10-01T15:46:31.036557+00:00",
+    "last_used_at": "2026-10-04T19:58:41.014091+00:00",
+    "last_viewed_at": "2026-10-04T19:58:40.939572+00:00",
     "patch_count": 32,
     "patch_generation": 2,
     "pinned": false,
     "state": "active",
-    "use_count": 40,
-    "view_count": 40
+    "use_count": 42,
+    "view_count": 42
   },
   "tales-untold-video-creator": {
     "archived_at": null,
@@ -1482,14 +1482,14 @@
     "created_by": null,
     "last_patched_at": "2026-09-15T21:12:41.827871+00:00",
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-10-03T19:54:09.289712+00:00",
-    "last_viewed_at": "2026-10-03T19:54:08.921735+00:00",
+    "last_used_at": "2026-10-05T02:10:54.865061+00:00",
+    "last_viewed_at": "2026-10-05T02:10:54.759364+00:00",
     "patch_count": 53,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 69,
-    "view_count": 69
+    "use_count": 73,
+    "view_count": 73
   },
   "teams-meeting-pipeline": {
     "archived_at": null,
@@ -1573,16 +1573,16 @@
     "archived_at": null,
     "created_at": "2026-09-16T11:33:36.119965+00:00",
     "created_by": "agent",
-    "last_patched_at": "2026-10-04T04:24:50.990104+00:00",
-    "last_reused_patch_generation": 7,
-    "last_used_at": "2026-10-04T04:23:33.663264+00:00",
-    "last_viewed_at": "2026-10-04T04:23:33.602162+00:00",
-    "patch_count": 8,
-    "patch_generation": 8,
+    "last_patched_at": "2026-10-05T02:26:39.230740+00:00",
+    "last_reused_patch_generation": 9,
+    "last_used_at": "2026-10-05T02:25:22.312419+00:00",
+    "last_viewed_at": "2026-10-05T02:25:22.247691+00:00",
+    "patch_count": 10,
+    "patch_generation": 10,
     "pinned": false,
     "state": "active",
-    "use_count": 52,
-    "view_count": 52
+    "use_count": 59,
+    "view_count": 59
   },
   "web-entertainment-research": {
     "archived_at": null,
