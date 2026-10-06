@@ -57,6 +57,8 @@ See linked references below for session-dated pitfall documents:
 - `references/composio-youtube-upload-schema.md` — Composio schema requirements, categoryId as string, publishAt rejection, working example
 - `references/pipeline-resilience-oct2026.md` — **Resource exhaustion: credit guards, upload ledger, resumable upload format, queue system, alert rate-limiting**
 - `references/tales-untold-pitfalls-2026-10-04.md` — **Buffer MCP tool limitations (no publishPostNow), YouTube OAuth expiry, addToQueue auto-scheduling, crontab vs Hermes cron, word-count→duration mapping**
+- `references/buffer-drive-url-fix-2026-10-05.md` — **Google Drive URL format fix for Buffer video ingest. `drive.google.com/uc?export=download` rejected; use `drive.usercontent.google.com/download?id=...&export=download&confirm=t`. Also Buffer MCP `delete_post` tool spec (snake_case, postId param).**
+- `references/___LONG_STRING___.md` — **Hardcoded STORY_SCENES vs 200+ folklore database anti-pattern. Always query `folklore_db.get_random_unproduced()` first, never default to the 14-entity hardcoded list.**
 - `references/composio-youtube-quota-pattern.md` — **ComposIO YouTube quota exhaustion detection, daily reset timing (midnight PT), resumable upload cost savings, Buffer vs ComposIO decision matrix for YouTube publishing**
 
 See `references/tales-untold-pitfalls-2026-09-26.md`, `references/composio-youtube-upload-schema.md`, or `references/pipeline-resilience-oct2026.md` for complete details.
@@ -66,7 +68,7 @@ See `references/tales-untold-pitfalls-2026-09-26.md`, `references/composio-youtu
 - **Use resumable upload format.** `YOUTUBE_UPLOAD_VIDEO` costs ~500 API units vs ~1600 for `YOUTUBE_MULTIPART_UPLOAD_VIDEO`. Triples daily capacity on the same quota.
 - **Rate-limit alerts.** When resources are exhausted, every failed cron run should not spam alerts. One alert per hour per resource type is the correct UX.
 - **Voice is Ezekiel, not Adam.** Adam was incorrectly used until caught during user review. Audit any old pipeline/script for `"voice": "Adam"`.
-- **Buffer cannot read Google Drive URLs;** use `litterbox.catbox.moe` for hosting.
+- **Buffer CAN read Google Drive URLs with correct format:** Use `drive.usercontent.google.com/download?id=FILE_ID&export=download&confirm=t`. The old `drive.google.com/uc?export=download` format returns HTTP 400 from Buffer. See `references/buffer-drive-url-fix-2026-10-05.md`.
 - **BunnyCDN failed** (401 Unauthorized) — do not rely without verification.
 - **Cron scheduling:** Create 3 separate hardcoded-slot cron jobs instead of trying time detection inside one prompt.
 - **POYO key truncation:** Shell `$POYO_API_KEY` expansion truncates to ~13 chars. Use Python `subprocess` with `env=` dict.
@@ -94,7 +96,7 @@ Monthly (90 shorts at 3/day): ~$20-30. Always provide when user asks about scali
 
 ## Upload → Schedule Workflow
 
-1. **Upload to Google Drive** → `uc?export=view&id=` URL
+1. **Upload to Google Drive** → `drive.usercontent.google.com/download?id=FILE_ID&export=download&confirm=t` URL
 2. **Buffer create_post** with video asset URL (not local paths)
 3. **Schedule at niche-optimized times** (verify with user)
 

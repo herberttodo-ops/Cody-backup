@@ -19,13 +19,15 @@
     "created_at": "2026-09-12T20:23:06.142469+00:00",
     "created_by": "agent",
     "last_patched_at": "2026-09-12T20:25:30.406510+00:00",
-    "last_used_at": null,
-    "last_viewed_at": null,
+    "last_reused_patch_generation": 0,
+    "last_used_at": "2026-10-06T00:15:46.039563+00:00",
+    "last_viewed_at": "2026-10-06T00:15:45.829895+00:00",
     "patch_count": 2,
+    "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 0,
-    "view_count": 0
+    "use_count": 1,
+    "view_count": 1
   },
   "ai-video-pipelines": {
     "archived_at": null,
@@ -404,14 +406,14 @@
     "created_by": null,
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-09-21T00:06:01.046650+00:00",
-    "last_viewed_at": "2026-09-21T00:06:00.900826+00:00",
+    "last_used_at": "2026-10-05T23:04:15.279533+00:00",
+    "last_viewed_at": "2026-10-05T23:04:15.113352+00:00",
     "patch_count": 0,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 2,
-    "view_count": 2
+    "use_count": 3,
+    "view_count": 3
   },
   "dashboard-content-intelligence": {
     "archived_at": null,
@@ -1080,14 +1082,14 @@
     "created_by": null,
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-09-18T13:36:34.221594+00:00",
-    "last_viewed_at": "2026-09-18T13:36:34.087489+00:00",
+    "last_used_at": "2026-10-05T23:03:42.703355+00:00",
+    "last_viewed_at": "2026-10-05T23:03:42.495857+00:00",
     "patch_count": 0,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 1,
-    "view_count": 1
+    "use_count": 2,
+    "view_count": 2
   },
   "ocr-and-documents": {
     "archived_at": null,
@@ -1411,14 +1413,14 @@
     "created_by": null,
     "last_patched_at": "2026-09-30T10:02:43.529420+00:00",
     "last_reused_patch_generation": 6,
-    "last_used_at": "2026-10-04T05:23:45.273960+00:00",
-    "last_viewed_at": "2026-10-04T05:23:45.198401+00:00",
+    "last_used_at": "2026-10-06T00:16:37.760431+00:00",
+    "last_viewed_at": "2026-10-06T00:16:37.382085+00:00",
     "patch_count": 16,
     "patch_generation": 6,
     "pinned": false,
     "state": "active",
-    "use_count": 112,
-    "view_count": 82
+    "use_count": 116,
+    "view_count": 86
   },
   "spike": {
     "archived_at": null,
@@ -1467,14 +1469,14 @@
     "created_by": "agent",
     "last_patched_at": "2026-09-26T01:51:20.750427+00:00",
     "last_reused_patch_generation": 2,
-    "last_used_at": "2026-10-04T19:58:41.014091+00:00",
-    "last_viewed_at": "2026-10-04T19:58:40.939572+00:00",
+    "last_used_at": "2026-10-05T23:30:21.024708+00:00",
+    "last_viewed_at": "2026-10-05T23:30:20.556716+00:00",
     "patch_count": 32,
     "patch_generation": 2,
     "pinned": false,
     "state": "active",
-    "use_count": 42,
-    "view_count": 42
+    "use_count": 43,
+    "view_count": 43
   },
   "tales-untold-video-creator": {
     "archived_at": null,
@@ -1482,14 +1484,14 @@
     "created_by": null,
     "last_patched_at": "2026-09-15T21:12:41.827871+00:00",
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-10-05T02:10:54.865061+00:00",
-    "last_viewed_at": "2026-10-05T02:10:54.759364+00:00",
+    "last_used_at": "2026-10-06T00:08:25.198889+00:00",
+    "last_viewed_at": "2026-10-06T00:08:24.755779+00:00",
     "patch_count": 53,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 73,
-    "view_count": 73
+    "use_count": 76,
+    "view_count": 76
   },
   "teams-meeting-pipeline": {
     "archived_at": null,
@@ -1573,16 +1575,16 @@
     "archived_at": null,
     "created_at": "2026-09-16T11:33:36.119965+00:00",
     "created_by": "agent",
-    "last_patched_at": "2026-10-05T02:26:39.230740+00:00",
-    "last_reused_patch_generation": 9,
-    "last_used_at": "2026-10-05T02:25:22.312419+00:00",
-    "last_viewed_at": "2026-10-05T02:25:22.247691+00:00",
-    "patch_count": 10,
-    "patch_generation": 10,
+    "last_patched_at": "2026-10-06T00:19:00.752752+00:00",
+    "last_reused_patch_generation": 12,
+    "last_used_at": "2026-10-06T00:22:15.785799+00:00",
+    "last_viewed_at": "2026-10-06T00:22:15.629611+00:00",
+    "patch_count": 12,
+    "patch_generation": 12,
     "pinned": false,
     "state": "active",
-    "use_count": 59,
-    "view_count": 59
+    "use_count": 64,
+    "view_count": 64
   },
   "web-entertainment-research": {
     "archived_at": null,
