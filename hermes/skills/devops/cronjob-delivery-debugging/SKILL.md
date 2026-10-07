@@ -86,6 +86,7 @@ If the manual run also fails to deliver, the issue is reproducible and likely a 
 | What happened | `last_status` | Logs show | Fix |
 |--------------|---------------|-----------|-----|
 | Job code crashed | `error` or `failed` | Traceback in cron output | Fix the prompt or code |
+| LLM/provider timeout | `error` | Cron output ends with `timed out after Ns`, no pipeline or traceback. File is unusually short (~489 lines vs ~520+ for a normal run) | Usually transient; manually re-run the job |
 | Job ran, delivery broke | `ok` | Gateway import/timeout error | Platform bug or network issue |
 | Job never triggered | `ok` but `last_run_at` is old | Nothing | Check schedule/timezone |
 

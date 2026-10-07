@@ -1,0 +1,111 @@
+Cronjob Response: spielberg-buffer-refill-daily
+(job_id: 7bb4ab80b2c2)
+-------------
+
+## Tales Untold Buffer Refill — Diagnostic Report
+
+**Run Time:** Tuesday, Oct 6, 8:08 PM ET (00:08 UTC Oct 7)
+
+---
+
+### Time Slot Determination
+
+| Your Spec | Actual Crontab | Status |
+|-----------|----------------|--------|
+| 8:00 AM ET → 22:00 UTC | 6:00 PM ET → 22:00 UTC | **MISMATCH** |
+| 12:00 PM ET → 23:00 UTC | 7:00 PM ET → 23:00 UTC | **MISMATCH** |
+| 4:00 PM ET → 00:00+1 UTC | 8:00 PM ET → 00:00 UTC | **MISMATCH** |
+
+**Discrepancy:** Your instruction specifies 8am/12pm/4pm ET, but the active crontab (`crontab -l`) shows jobs at **6pm, 7pm, and 8pm ET** (22:00, 23:00, 00:00 UTC). The UTC mappings in your instruction are also incorrect for the stated ET times.
+
+Current run at 8:08 PM ET closest maps to the **8:00 PM ET slot** (00:00 UTC).
+
+---
+
+### Buffer Scheduled Posts Status
+
+**Total Scheduled:** 1 of 10 cap — **NOT at cap**
+
+| Post ID | Title | Due At | Video Source | Risk |
+|---------|-------|--------|--------------|------|
+| `6ac2ae4863761da98b5a8a9e` | The Wendigo: What Algonquian Elders Refuse to Explain | Oct 7, 6:00 PM ET | Google Drive direct URL | **HIGH** — Ref docs state Google Drive URLs do NOT work for Buffer video ingestion |
+
+**Next available slots:**
+- Oct 7 @ 7:00 PM ET and 8:00 PM ET are open
+- Oct 8 @ 6:00 PM ET, 7:00 PM ET, 8:00 PM ET are open
+
+---
+
+### Cron Health — CRITICAL FAILURE
+
+**Status:** The cron pipeline is **non-functional**. 
+
+Recent logs show `tales_v3_producer.sh` failing with:
+
+```
+./tales_v3_producer.sh: line 58: The ${ENTITY_NAME//_/ }: ${REGION}'s ${CATEGORY.title()}: bad substitution
+```
+
+**Root cause:** Line 58 of `tales_v3_producer.sh` contains `${CATEGORY.title()}` — this is **Python syntax embedded in bash**. Bash has no `.title()` string method. This kills the script before it can call `pipeline_v3.py`.
+
+**Failure timeline:**
+| Slot | Date | Result |
+|------|------|--------|
+| 8:00 PM ET | Oct 5 | **Failed** — bad substitution |
+| 7:00 PM ET | Oct 5 | **Failed** — bad substitution |
+| 6:00 PM ET | Oct 5 | Produced output but pipeline rejected story (128 words > 120 max) |
+| 8:00 PM ET | Oct 4 | Likely failed (log truncated, same pattern visible) |
+
+** Successful recent runs (MANUAL, not cron):**
+- Oct 6, 12:30 PM — `jersey_devil_pine_barrens` — 120 words, variant B — **Success**
+- Oct 6, 8:13 AM — `phantom_hiker_appalachian` — 108 words, variant B — **Success**
+
+These were run manually outside the cron flow.
+
+---
+
+### Queue State
+
+**Pending in `queue/`:**
+- `33_last_photo.txt` — Generic horror story about grandmother's photographs. **No named folklore entity.** Per Spielberg v3.0 policy, this is Tier 3/generic content (ZERO TOLERANCE). It should be deleted.
+
+**Recently completed in `queue_done/` (folklore-compliant):**
+- `jersey_devil_pine_barrens` (Oct 6)
+- `phantom_hiker_appalachian` (Oct 6)
+- `aqrabuamelu_mesopotamia` (Oct 5)
+- `siguanaba_el_salvador` (Oct 5)
+- `el_silbon_venezuela` (Oct 5)
+- `mothman_point_pleasant` (Oct 5)
+- `bell_witch` (Oct 4)
+- `baba_yaga` (Oct 4)
+- `beast_gevaudan` (Oct 4)
+- `wendigo_algonquian_v2` (Oct 4)
+- `wendigo_algonquian` (Oct 4)
+
+---
+
+### Pipeline Enforcement
+
+`pipeline_v3.py` is correctly enforcing the 120-word hard cap. The cron-generated story on Oct 5 hit 128 words and was **rejected** with:
+```
+ERROR | REJECTED: Story has 128 words (max 120).
+ERROR | Trim 8 words to hit 40-55s duration target.
+```
+
+Manual runs on Oct 6 (108 and 120 words) passed.
+
+---
+
+### Summary & Action Items
+
+| Issue | Severity | Action Required |
+|-------|----------|-----------------|
+| `tales_v3_producer.sh` line 58 — `${CATEGORY.title()}` is Python, not bash | **CRITICAL** | Fix title generation — replace `.title()` with a bash or Python helper call |
+| Crontab times (6/7/8pm) don't match your spec (8am/12pm/4pm) | **HIGH** | Clarify intended schedule and reinstall crons if needed |
+| Buffer post uses Google Drive URL — likely fails on publish | **HIGH** | The Oct 7 Wendigo post may not publish. Consider migrating to litterbox.catbox.moe per ref docs |
+| `queue/33_last_photo.txt` is generic horror, non-compliant | **MEDIUM** | Delete or move out of queue — violates Tier 1-only policy |
+| 1 scheduled post / 10 cap | **LOW** | Normal. 9 slots available for refill. |
+
+**Bottom line:** The automation has been silently failing due to the bash syntax bug. Recent folklore shorts were produced manually and successfully. The cron pipeline needs the title-generation fix before it will work autonomously.
+
+To stop or manage this job, send me a new message (e.g. "stop reminder spielberg-buffer-refill-daily").
