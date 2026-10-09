@@ -230,14 +230,14 @@ HEADLINE TEXT - POSITIONING IS CRITICAL:
 LAYOUT ZONES - FOLLOW EXACTLY:
 Zone 1 (Top 0-40%): Headline text, centered, prominent
 Zone 2 (Middle 40-75%): Visual elements ({visual}), supporting the message
-Zone 3 (Bottom 75-100%): Clean dark navy area with NO elements whatsoever
+Zone 3 (Bottom 75-100%): Visual elements may extend naturally here with smooth fading. NO extra text, NO fake logos or branding marks anywhere. Do NOT create a solid color block, bar, or abrupt cutoff in this zone. Let artwork flow freely to the bottom edge.
 
 CRITICAL LAYOUT RULES:
 - The headline text MUST be centered in the upper portion of the image
 - Visual elements in the middle should frame and support the centered text
-- The bottom area should naturally fade to solid navy - NO hard edges, NO rectangular blocks
 - The overall composition should feel balanced with the text as the clear focal point
-- NO navy-colored rectangles, blocks, or bars anywhere - smooth gradients only
+- NO navy-colored rectangles, blocks, or bars anywhere
+- NO hard edges or abrupt cutoffs between visual areas - smooth flowing gradients only
 
 VISUAL STYLE:
 - Dark navy blue background (#0F172A) with smooth, subtle gradients
@@ -340,7 +340,7 @@ def generate_optirfp_post_with_logo(
     topic: str = "general",
     aspect_ratio: str = "square",
     logo_path: str = None,
-    logo_size_percent: float = 0.18
+    logo_size_percent: float = 0.30
 ) -> dict:
     """
     Complete workflow: Generate with Ideogram + composite exact logo.
@@ -373,7 +373,7 @@ def generate_optirfp_post_with_logo(
         base_image_path=ideogram_result["local_path"],
         logo_path=logo_path,
         logo_size_percent=logo_size_percent,
-        position="bottom_center"
+        position="bottom_right"
     )
     
     print(f"Final image saved: {final_path}")

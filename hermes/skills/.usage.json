@@ -208,14 +208,14 @@
     "created_by": "agent",
     "last_patched_at": "2026-09-30T15:13:30.415689+00:00",
     "last_reused_patch_generation": 2,
-    "last_used_at": "2026-10-02T15:59:53.561522+00:00",
-    "last_viewed_at": "2026-10-02T15:59:53.285995+00:00",
+    "last_used_at": "2026-10-08T19:20:37.253062+00:00",
+    "last_viewed_at": "2026-10-08T19:20:37.093071+00:00",
     "patch_count": 2,
     "patch_generation": 2,
     "pinned": false,
     "state": "active",
-    "use_count": 13,
-    "view_count": 13
+    "use_count": 17,
+    "view_count": 17
   },
   "buffer-api": {
     "archived_at": null,
@@ -223,14 +223,14 @@
     "created_by": null,
     "last_patched_at": "2026-09-16T01:05:15.754373+00:00",
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-10-07T16:01:30.121335+00:00",
-    "last_viewed_at": "2026-10-07T16:01:30.049044+00:00",
+    "last_used_at": "2026-10-08T20:02:17.335098+00:00",
+    "last_viewed_at": "2026-10-08T20:02:17.234772+00:00",
     "patch_count": 20,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 60,
-    "view_count": 60
+    "use_count": 67,
+    "view_count": 67
   },
   "bunnycdn-storage-integration": {
     "archived_at": null,
@@ -827,14 +827,14 @@
     "created_by": null,
     "last_patched_at": "2026-09-14T18:20:00.267572+00:00",
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-09-20T13:24:13.616632+00:00",
-    "last_viewed_at": "2026-09-20T13:24:13.543490+00:00",
+    "last_used_at": "2026-10-08T19:20:58.685304+00:00",
+    "last_viewed_at": "2026-10-08T19:20:58.565852+00:00",
     "patch_count": 62,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 79,
-    "view_count": 43
+    "use_count": 80,
+    "view_count": 44
   },
   "imessage": {
     "archived_at": null,
@@ -920,16 +920,16 @@
     "archived_at": null,
     "created_at": "2026-08-12T23:05:33.617369+00:00",
     "created_by": "agent",
-    "last_patched_at": "2026-10-02T16:17:22.428682+00:00",
-    "last_reused_patch_generation": 1,
-    "last_used_at": "2026-10-02T16:17:47.748796+00:00",
-    "last_viewed_at": "2026-10-02T16:17:47.389793+00:00",
-    "patch_count": 1,
-    "patch_generation": 1,
+    "last_patched_at": "2026-10-08T19:08:34.310160+00:00",
+    "last_reused_patch_generation": 2,
+    "last_used_at": "2026-10-08T19:08:57.323515+00:00",
+    "last_viewed_at": "2026-10-08T19:08:57.188154+00:00",
+    "patch_count": 2,
+    "patch_generation": 2,
     "pinned": false,
     "state": "active",
-    "use_count": 12,
-    "view_count": 12
+    "use_count": 16,
+    "view_count": 16
   },
   "manim-video": {
     "archived_at": null,
@@ -1415,14 +1415,14 @@
     "created_by": null,
     "last_patched_at": "2026-09-30T10:02:43.529420+00:00",
     "last_reused_patch_generation": 6,
-    "last_used_at": "2026-10-07T20:00:02.341021+00:00",
-    "last_viewed_at": "2026-10-07T01:20:59.529361+00:00",
+    "last_used_at": "2026-10-08T20:00:45.122971+00:00",
+    "last_viewed_at": "2026-10-08T12:01:53.956426+00:00",
     "patch_count": 16,
     "patch_generation": 6,
     "pinned": false,
     "state": "active",
-    "use_count": 128,
-    "view_count": 91
+    "use_count": 133,
+    "view_count": 93
   },
   "spike": {
     "archived_at": null,
@@ -1456,13 +1456,13 @@
     "created_by": null,
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-10-01T15:47:21.741145+00:00",
+    "last_used_at": "2026-10-08T13:00:51.673328+00:00",
     "last_viewed_at": "2026-10-01T15:47:21.572051+00:00",
     "patch_count": 0,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 3,
+    "use_count": 4,
     "view_count": 1
   },
   "tales-untold-horror-shorts": {
