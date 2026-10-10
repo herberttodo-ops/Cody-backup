@@ -5,14 +5,14 @@
     "created_by": null,
     "last_patched_at": "2026-09-10T08:34:14.093590+00:00",
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-10-08T08:31:00.419080+00:00",
-    "last_viewed_at": "2026-10-08T08:31:00.336743+00:00",
+    "last_used_at": "2026-10-10T08:31:13.553012+00:00",
+    "last_viewed_at": "2026-10-10T08:31:13.482158+00:00",
     "patch_count": 10,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 13,
-    "view_count": 13
+    "use_count": 14,
+    "view_count": 14
   },
   "agent-memory-management": {
     "archived_at": null,
@@ -223,14 +223,14 @@
     "created_by": null,
     "last_patched_at": "2026-09-16T01:05:15.754373+00:00",
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-10-08T20:02:17.335098+00:00",
-    "last_viewed_at": "2026-10-08T20:02:17.234772+00:00",
+    "last_used_at": "2026-10-09T20:01:35.983452+00:00",
+    "last_viewed_at": "2026-10-09T20:01:35.774601+00:00",
     "patch_count": 20,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 67,
-    "view_count": 67
+    "use_count": 72,
+    "view_count": 72
   },
   "bunnycdn-storage-integration": {
     "archived_at": null,
@@ -963,14 +963,14 @@
     "created_by": null,
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-09-30T00:48:08.896273+00:00",
-    "last_viewed_at": "2026-09-30T00:48:08.807675+00:00",
+    "last_used_at": "2026-10-09T16:04:52.344220+00:00",
+    "last_viewed_at": "2026-10-09T16:04:52.282946+00:00",
     "patch_count": 0,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 2,
-    "view_count": 2
+    "use_count": 3,
+    "view_count": 3
   },
   "meeting-action-items": {
     "archived_at": null,
@@ -1017,14 +1017,14 @@
     "created_by": null,
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-09-30T10:07:54.945229+00:00",
-    "last_viewed_at": "2026-09-30T10:07:54.815627+00:00",
+    "last_used_at": "2026-10-09T16:04:30.609614+00:00",
+    "last_viewed_at": "2026-10-09T16:04:30.478930+00:00",
     "patch_count": 0,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 5,
-    "view_count": 5
+    "use_count": 6,
+    "view_count": 6
   },
   "nextjs-dashboard-integration": {
     "archived_at": null,
@@ -1415,13 +1415,13 @@
     "created_by": null,
     "last_patched_at": "2026-09-30T10:02:43.529420+00:00",
     "last_reused_patch_generation": 6,
-    "last_used_at": "2026-10-08T20:00:45.122971+00:00",
+    "last_used_at": "2026-10-09T20:00:38.572843+00:00",
     "last_viewed_at": "2026-10-08T12:01:53.956426+00:00",
     "patch_count": 16,
     "patch_generation": 6,
     "pinned": false,
     "state": "active",
-    "use_count": 133,
+    "use_count": 136,
     "view_count": 93
   },
   "spike": {
