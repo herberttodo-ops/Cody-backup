@@ -208,6 +208,30 @@ TOPIC_VISUALS = {
 visual_description = TOPIC_VISUALS.get(topic, "abstract professional pattern")
 ```
 
+## Pre-Flight Checklist (REQUIRED)
+
+Before posting any branded graphic, verify:
+
+### 1. Text Proofreading
+- [ ] Headline text has been read aloud
+- [ ] No spelling errors (watch for: "reas" vs "read", "the" vs "teh")
+- [ ] No duplicate lines or repeated text
+- [ ] Punctuation is correct
+- [ ] Copy matches intended message exactly
+
+### 2. Visual Quality
+- [ ] Logo is the exact file (not AI-generated)
+- [ ] No fake brand text/watermarks from AI in background
+- [ ] Text does not overlap visual elements
+- [ ] Logo positioned at bottom with proper margins
+- [ ] Colors match brand guidelines
+
+### 3. Export Verification
+- [ ] Open final image and re-read all text
+- [ ] Check crop safety zones for social platforms
+
+**Note:** Typos in brand posts are unacceptable. The "reas" typo should never have shipped.
+
 ## Common Pitfalls
 
 1. **Text overlapping visuals** → Use zone-based layout (Text 0-35%, Visuals 35-75%)
