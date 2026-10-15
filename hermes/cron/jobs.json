@@ -18,15 +18,15 @@
       "schedule_display": "30 4 * * *",
       "repeat": {
         "times": null,
-        "completed": 130
+        "completed": 131
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-04-05T17:06:06.321746-04:00",
-      "next_run_at": "2026-10-15T04:30:00-04:00",
-      "last_run_at": "2026-10-13T04:32:07.640414-04:00",
+      "next_run_at": "2026-10-16T04:30:00-04:00",
+      "last_run_at": "2026-10-14T04:32:34.022654-04:00",
       "last_status": "ok",
       "last_error": null,
       "deliver": "telegram:___ID___",
@@ -38,8 +38,8 @@
       },
       "last_delivery_error": null,
       "fire_claim": {
-        "at": "2026-10-14T04:31:40.857492-04:00",
-        "by": "herby-Virtual-Machine:1222254:5ac4c1c6482e4bbfb2c91b23f58ecc63"
+        "at": "2026-10-15T04:31:17.904660-04:00",
+        "by": "herby-Virtual-Machine:1222254:3ce7a45f676a4515b3c7a1b2db9c4a16"
       },
       "failure_streak": 0
     },
@@ -54,7 +54,7 @@
       "model": null,
       "provider": null,
       "base_url": null,
-      "script": "optirfp_daily_post.sh",
+      "script": "optirfp_daily_post_v2.sh",
       "schedule": {
         "kind": "cron",
         "expr": "0 8 * * *",
@@ -63,15 +63,15 @@
       "schedule_display": "0 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 85
+        "completed": 86
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-14T09:53:18.644425-04:00",
-      "next_run_at": "2026-10-14T08:00:00-04:00",
-      "last_run_at": "2026-10-13T08:01:08.137418-04:00",
+      "next_run_at": "2026-10-15T08:00:00-04:00",
+      "last_run_at": "2026-10-14T08:00:46.304709-04:00",
       "last_status": "ok",
       "last_error": null,
       "deliver": "telegram",
@@ -136,7 +136,7 @@
     {
       "id": "7bb4ab80b2c2",
       "name": "spielberg-buffer-refill-daily",
-      "prompt": "Tales Untold Shorts Buffer Refill — Folklore/Cryptid Pivot (3x/Day)\n\nGOAL: Produce exactly 1 folklore/cryptid short per run and schedule it to Buffer. The cron runs 3 times daily (8am, 12pm, 4pm ET) targeting 3 different time slots.\n\n## Time Slot Logic (DETERMINE VIA CURRENT TIME)\n1. Check current time using `date` command\n2. Determine your slot based on time:\n   - If time is ~08:00-10:00 ET → target slot: **22:00 UTC (6pm ET)**\n   - If time is ~12:00-14:00 ET → target slot: **23:00 UTC (7pm ET)**\n   - If time is ~16:00-18:00 ET → target slot: **00:00+1 UTC (8pm ET, next day)**\n\n## Date Selection\n- Check Buffer scheduled posts for the Tales Untold organization\n- Find the earliest date that does NOT already have a post at your assigned time slot\n- Schedule your video for that date + your assigned time\n\n## Content\n- ONLY Tier 1 named folklore/cryptid entities\n- Entity name MUST appear in first sentence of story\n- 140-180 words\n- Title format: \"[Entity]: [Specific Angle]\" — no \"| Tales Untold\" suffix\n\n## After Production\n- Produce 1 video via Spielberg pipeline\n- Upload to Google Drive\n- Schedule to Buffer at the determined date/time\n- Report: Title, Entity, Due At, Buffer Post ID, Drive URL\n\n## Buffer Cap\n- 10 scheduled posts maximum\n- If cap is hit, report \"at cap\" and skip production\n- The next run will check again",
+      "prompt": "Tales Untold Shorts Buffer Refill - Folklore/Cryptid Pivot (3x/Day) v3.1\n\nGOAL: Produce exactly 1 folklore/cryptid short video and schedule via Buffer for evening slots (6pm, 7pm, 8pm ET).\n\nSTEPS:\n1. Load approved folklore/cryptid entity from database\n2. Run tales_v3_producer_v3.1.sh with appropriate due time:\n   - 8am run -> due=18:00 (6pm same day)\n   - 12pm run -> due=19:00 (7pm same day)\n   - 4pm run -> due=20:00 (8pm same day)\n3. The script automatically calculates correct date (today before 6pm, tomorrow after)\n4. On failure: Retry up to 2 times with 5min delay\n5. Log all results to logs/cron_v3_$(date).log\n\nCRITICAL FIX v3.1:\n- Before 6pm ET: schedules for TODAY\n- After 6pm ET: schedules for TOMORROW\n- Fixes the historical bug that over-scheduled to wrong dates\n\nREPORT:\n- Video title and entity name\n- Scheduled time (formatted ET)\n- Buffer confirmation\n- Error details if failed\n",
       "skills": [
         "spielberg"
       ],
@@ -157,15 +157,15 @@
       "schedule_display": "0 8,12,16 * * *",
       "repeat": {
         "times": null,
-        "completed": 46
+        "completed": 50
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-15T19:55:41.454702-04:00",
-      "next_run_at": "2026-10-14T08:00:00-04:00",
-      "last_run_at": "2026-10-13T16:24:55.821479-04:00",
+      "next_run_at": "2026-10-15T08:00:00-04:00",
+      "last_run_at": "2026-10-14T21:52:12.218463-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -311,15 +311,15 @@
       "schedule_display": "0 */4 * * *",
       "repeat": {
         "times": null,
-        "completed": 153
+        "completed": 159
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-18T18:37:03.954111-04:00",
-      "next_run_at": "2026-10-14T08:00:00-04:00",
-      "last_run_at": "2026-10-14T04:00:34.889085-04:00",
+      "next_run_at": "2026-10-15T08:00:00-04:00",
+      "last_run_at": "2026-10-15T04:00:14.021317-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -417,19 +417,19 @@
       "schedule_display": "0 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 15
+        "completed": 16
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-28T13:56:22.581547-04:00",
-      "next_run_at": "2026-10-14T08:00:00-04:00",
-      "last_run_at": "2026-10-13T08:20:51.471208-04:00",
+      "next_run_at": "2026-10-15T08:00:00-04:00",
+      "last_run_at": "2026-10-14T08:12:10.680562-04:00",
       "last_status": "error",
-      "last_error": "Script exited with code 1\nstdout:\n[2026-10-13T08:20:32-04:00] === LotSignal Daily Pipeline ===\n[2026-10-13T08:20:32-04:00] Generating draft...\n[2026-10-13T08:20:47-04:00] Draft generated: draft_20261013_082032\n[2026-10-13T08:20:47-04:00] Running compliance check...\n[2026-10-13T08:20:48-04:00] Compliance result: PASS\n[2026-10-13T08:20:48-04:00] Sending approval notification...",
+      "last_error": "Script exited with code 1\nstdout:\n[2026-10-14T08:11:54-04:00] === LotSignal Daily Pipeline ===\n[2026-10-14T08:11:54-04:00] Generating draft...\n[2026-10-14T08:12:07-04:00] Draft generated: draft_20261014_081154\n[2026-10-14T08:12:07-04:00] Running compliance check...\n[2026-10-14T08:12:07-04:00] Compliance result: PASS\n[2026-10-14T08:12:07-04:00] Sending approval notification...",
       "last_delivery_error": null,
-      "failure_streak": 15,
+      "failure_streak": 16,
       "deliver": "origin",
       "origin": {
         "platform": "telegram",
@@ -467,15 +467,15 @@
       "schedule_display": "0 10 * * *",
       "repeat": {
         "times": null,
-        "completed": 18
+        "completed": 19
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-28T13:56:44.148485-04:00",
-      "next_run_at": "2026-10-14T10:00:00-04:00",
-      "last_run_at": "2026-10-13T10:00:18.186780-04:00",
+      "next_run_at": "2026-10-15T10:00:00-04:00",
+      "last_run_at": "2026-10-14T10:00:55.273961-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -517,15 +517,15 @@
       "schedule_display": "30 12 * * *",
       "repeat": {
         "times": null,
-        "completed": 17
+        "completed": 18
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-28T13:56:44.282571-04:00",
-      "next_run_at": "2026-10-14T12:30:00-04:00",
-      "last_run_at": "2026-10-13T12:31:31.359595-04:00",
+      "next_run_at": "2026-10-15T12:30:00-04:00",
+      "last_run_at": "2026-10-14T12:39:07.088392-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -567,15 +567,15 @@
       "schedule_display": "0 14 * * *",
       "repeat": {
         "times": null,
-        "completed": 17
+        "completed": 18
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-28T13:56:44.416019-04:00",
-      "next_run_at": "2026-10-14T14:00:00-04:00",
-      "last_run_at": "2026-10-13T14:00:25.554447-04:00",
+      "next_run_at": "2026-10-15T14:00:00-04:00",
+      "last_run_at": "2026-10-14T14:00:50.460702-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -617,15 +617,15 @@
       "schedule_display": "0 9 * * *",
       "repeat": {
         "times": null,
-        "completed": 13
+        "completed": 14
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-30T10:43:30.605842-04:00",
-      "next_run_at": "2026-10-14T09:00:00-04:00",
-      "last_run_at": "2026-10-13T09:00:03.070105-04:00",
+      "next_run_at": "2026-10-15T09:00:00-04:00",
+      "last_run_at": "2026-10-14T09:00:39.370496-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -667,15 +667,15 @@
       "schedule_display": "0 */2 * * *",
       "repeat": {
         "times": null,
-        "completed": 88
+        "completed": 101
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-10-06T21:26:33.721625-04:00",
-      "next_run_at": "2026-10-14T06:00:00-04:00",
-      "last_run_at": "2026-10-14T04:00:34.672072-04:00",
+      "next_run_at": "2026-10-15T06:00:00-04:00",
+      "last_run_at": "2026-10-15T04:00:13.126728-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -693,5 +693,5 @@
       "fire_claim": null
     }
   ],
-  "updated_at": "2026-10-14T04:31:40.858163-04:00"
+  "updated_at": "2026-10-15T04:31:17.904997-04:00"
 }
