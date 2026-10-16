@@ -1432,13 +1432,13 @@
     "created_by": null,
     "last_patched_at": "2026-09-30T10:02:43.529420+00:00",
     "last_reused_patch_generation": 6,
-    "last_used_at": "2026-10-15T01:54:11.797243+00:00",
+    "last_used_at": "2026-10-15T20:00:11.177443+00:00",
     "last_viewed_at": "2026-10-15T01:54:11.701901+00:00",
     "patch_count": 16,
     "patch_generation": 6,
     "pinned": false,
     "state": "active",
-    "use_count": 159,
+    "use_count": 162,
     "view_count": 100
   },
   "spike": {
@@ -1473,13 +1473,13 @@
     "created_by": null,
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-10-08T13:00:51.673328+00:00",
+    "last_used_at": "2026-10-15T13:00:28.348540+00:00",
     "last_viewed_at": "2026-10-01T15:47:21.572051+00:00",
     "patch_count": 0,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 4,
+    "use_count": 5,
     "view_count": 1
   },
   "tales-untold-horror-shorts": {
