@@ -18,15 +18,15 @@
       "schedule_display": "30 4 * * *",
       "repeat": {
         "times": null,
-        "completed": 132
+        "completed": 134
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-04-05T17:06:06.321746-04:00",
-      "next_run_at": "2026-10-17T04:30:00-04:00",
-      "last_run_at": "2026-10-15T04:32:10.733672-04:00",
+      "next_run_at": "2026-10-19T04:30:00-04:00",
+      "last_run_at": "2026-10-17T04:31:52.464036-04:00",
       "last_status": "ok",
       "last_error": null,
       "deliver": "telegram:___ID___",
@@ -38,8 +38,8 @@
       },
       "last_delivery_error": null,
       "fire_claim": {
-        "at": "2026-10-16T04:30:02.101772-04:00",
-        "by": "herby-Virtual-Machine:1222254:542bcec3f2344a0284f32b0d7e45a6e8"
+        "at": "2026-10-18T04:31:12.440331-04:00",
+        "by": "herby-Virtual-Machine:1222254:51ccd___ID___cee3dcbb6f4b"
       },
       "failure_streak": 0
     },
@@ -63,15 +63,15 @@
       "schedule_display": "0 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 87
+        "completed": 89
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-14T09:53:18.644425-04:00",
-      "next_run_at": "2026-10-16T08:00:00-04:00",
-      "last_run_at": "2026-10-15T08:00:35.953984-04:00",
+      "next_run_at": "2026-10-18T08:00:00-04:00",
+      "last_run_at": "2026-10-17T08:00:50.188702-04:00",
       "last_status": "ok",
       "last_error": null,
       "deliver": "telegram",
@@ -136,11 +136,9 @@
     {
       "id": "7bb4ab80b2c2",
       "name": "spielberg-buffer-refill-daily",
-      "prompt": "Tales Untold Shorts Buffer Refill - Folklore/Cryptid Pivot (3x/Day) v3.1\n\nGOAL: Produce exactly 1 folklore/cryptid short video and schedule via Buffer for evening slots (6pm, 7pm, 8pm ET).\n\nSTEPS:\n1. Load approved folklore/cryptid entity from database\n2. Run tales_v3_producer_v3.1.sh with appropriate due time:\n   - 8am run -> due=18:00 (6pm same day)\n   - 12pm run -> due=19:00 (7pm same day)\n   - 4pm run -> due=20:00 (8pm same day)\n3. The script automatically calculates correct date (today before 6pm, tomorrow after)\n4. On failure: Retry up to 2 times with 5min delay\n5. Log all results to logs/cron_v3_$(date).log\n\nCRITICAL FIX v3.1:\n- Before 6pm ET: schedules for TODAY\n- After 6pm ET: schedules for TOMORROW\n- Fixes the historical bug that over-scheduled to wrong dates\n\nREPORT:\n- Video title and entity name\n- Scheduled time (formatted ET)\n- Buffer confirmation\n- Error details if failed\n",
-      "skills": [
-        "spielberg"
-      ],
-      "skill": "spielberg",
+      "prompt": "Tales Untold 4-arm test runner. Produce exactly ONE scheduled short. Do not improvise stories, do not use other producer scripts.\n\nPick DUE by current ET hour: 8am run -> 18:00:00, 12pm run -> 19:00:00, 4pm run -> 20:00:00.\nRun: cd /home/herby/.openclaw/workspace/tales-untold && /home/herby/.hermes/hermes-agent/venv/bin/python3 run_arm_slot.py <DUE>\nTakes ~10 minutes. Exit codes: 0 ok; 2 = no story scheduled for that slot (do NOT fall back to anything, report it); 3 = slot already produced (report, do nothing); other = failure (retry once after 5 min, then report log tail).\nThe pipeline has a caption gate. If it fails with CAPTION GATE FAILED, report it and do not upload.\nAfter success: confirm data/arm_log.json has the new entry with status scheduled. Then extract one frame at 15s from the output FINAL file and confirm text is visible in the bottom third.\nREPORT (short): arm, title, scheduled time ET, duration, caption check result, or the error. Alert-only on failures; success is a one-line report.",
+      "skills": [],
+      "skill": null,
       "model": null,
       "provider": null,
       "provider_snapshot": "openrouter",
@@ -157,15 +155,15 @@
       "schedule_display": "0 8,12,16 * * *",
       "repeat": {
         "times": null,
-        "completed": 53
+        "completed": 59
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-15T19:55:41.454702-04:00",
-      "next_run_at": "2026-10-16T08:00:00-04:00",
-      "last_run_at": "2026-10-15T16:16:06.209874-04:00",
+      "next_run_at": "2026-10-18T08:00:00-04:00",
+      "last_run_at": "2026-10-17T16:07:44.625172-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -311,15 +309,15 @@
       "schedule_display": "0 */4 * * *",
       "repeat": {
         "times": null,
-        "completed": 165
+        "completed": 177
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-18T18:37:03.954111-04:00",
-      "next_run_at": "2026-10-16T08:00:00-04:00",
-      "last_run_at": "2026-10-16T04:00:57.415791-04:00",
+      "next_run_at": "2026-10-18T08:00:00-04:00",
+      "last_run_at": "2026-10-18T04:00:07.235040-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -417,19 +415,19 @@
       "schedule_display": "0 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 17
+        "completed": 19
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-28T13:56:22.581547-04:00",
-      "next_run_at": "2026-10-16T08:00:00-04:00",
-      "last_run_at": "2026-10-15T08:28:00.181186-04:00",
+      "next_run_at": "2026-10-18T08:00:00-04:00",
+      "last_run_at": "2026-10-17T08:08:23.816545-04:00",
       "last_status": "error",
-      "last_error": "Script exited with code 1\nstdout:\n[2026-10-15T08:27:44-04:00] === LotSignal Daily Pipeline ===\n[2026-10-15T08:27:44-04:00] Generating draft...\n[2026-10-15T08:27:56-04:00] Draft generated: draft_20261015_082744\n[2026-10-15T08:27:56-04:00] Running compliance check...\n[2026-10-15T08:27:56-04:00] Compliance result: PASS\n[2026-10-15T08:27:56-04:00] Sending approval notification...",
+      "last_error": "Script exited with code 1\nstdout:\n[2026-10-17T08:08:06-04:00] === LotSignal Daily Pipeline ===\n[2026-10-17T08:08:06-04:00] Generating draft...\n[2026-10-17T08:08:20-04:00] Draft generated: draft_20261017_080806\n[2026-10-17T08:08:20-04:00] Running compliance check...\n[2026-10-17T08:08:20-04:00] Compliance result: PASS\n[2026-10-17T08:08:20-04:00] Sending approval notification...",
       "last_delivery_error": null,
-      "failure_streak": 17,
+      "failure_streak": 19,
       "deliver": "origin",
       "origin": {
         "platform": "telegram",
@@ -467,15 +465,15 @@
       "schedule_display": "0 10 * * *",
       "repeat": {
         "times": null,
-        "completed": 20
+        "completed": 22
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-28T13:56:44.148485-04:00",
-      "next_run_at": "2026-10-16T10:00:00-04:00",
-      "last_run_at": "2026-10-15T10:00:41.708860-04:00",
+      "next_run_at": "2026-10-18T10:00:00-04:00",
+      "last_run_at": "2026-10-17T10:00:57.275066-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -517,15 +515,15 @@
       "schedule_display": "30 12 * * *",
       "repeat": {
         "times": null,
-        "completed": 19
+        "completed": 21
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-28T13:56:44.282571-04:00",
-      "next_run_at": "2026-10-16T12:30:00-04:00",
-      "last_run_at": "2026-10-15T12:30:13.756339-04:00",
+      "next_run_at": "2026-10-18T12:30:00-04:00",
+      "last_run_at": "2026-10-17T12:30:30.211835-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -567,15 +565,15 @@
       "schedule_display": "0 14 * * *",
       "repeat": {
         "times": null,
-        "completed": 19
+        "completed": 21
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-28T13:56:44.416019-04:00",
-      "next_run_at": "2026-10-16T14:00:00-04:00",
-      "last_run_at": "2026-10-15T14:00:40.839664-04:00",
+      "next_run_at": "2026-10-18T14:00:00-04:00",
+      "last_run_at": "2026-10-17T14:00:50.770780-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -617,15 +615,15 @@
       "schedule_display": "0 9 * * *",
       "repeat": {
         "times": null,
-        "completed": 15
+        "completed": 17
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-30T10:43:30.605842-04:00",
-      "next_run_at": "2026-10-16T09:00:00-04:00",
-      "last_run_at": "2026-10-15T09:02:24.236850-04:00",
+      "next_run_at": "2026-10-18T09:00:00-04:00",
+      "last_run_at": "2026-10-17T09:00:41.323086-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -667,15 +665,15 @@
       "schedule_display": "0 */2 * * *",
       "repeat": {
         "times": null,
-        "completed": 113
+        "completed": 137
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-10-06T21:26:33.721625-04:00",
-      "next_run_at": "2026-10-16T06:00:00-04:00",
-      "last_run_at": "2026-10-16T04:00:57.007370-04:00",
+      "next_run_at": "2026-10-18T06:00:00-04:00",
+      "last_run_at": "2026-10-18T04:00:05.699780-04:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -693,5 +691,5 @@
       "fire_claim": null
     }
   ],
-  "updated_at": "2026-10-16T04:30:02.102074-04:00"
+  "updated_at": "2026-10-18T04:31:12.440613-04:00"
 }

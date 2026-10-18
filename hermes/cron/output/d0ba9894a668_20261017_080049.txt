@@ -1,0 +1,53 @@
+Cronjob Response: optirfp-linkedin-daily
+(job_id: d0ba9894a668)
+-------------
+
+Headline: Find three claims needing proof
+Topic: winning
+Content library: 43 headlines, 12 templates
+Generated at: 2026-10-17T08:00:27.597266
+Sat Oct 17 08:00:27 AM EDT 2026: Starting OptiRFP daily post v2.0 (expanded content)...
+Sat Oct 17 08:00:27 AM EDT 2026: Generated headline: Find three claims needing proof
+Sat Oct 17 08:00:27 AM EDT 2026: Topic: winning
+Sat Oct 17 08:00:27 AM EDT 2026: Using expanded content library v2.0
+Sat Oct 17 08:00:27 AM EDT 2026: Generating image with compositor...
+Sat Oct 17 08:00:43 AM EDT 2026: Image generated: /home/herby/.hermes/generated_images/optirfp_winning____ID___.png
+Sat Oct 17 08:00:43 AM EDT 2026: Uploading to Drive...
+Sat Oct 17 08:00:47 AM EDT 2026: Drive URL: https://drive.google.com/uc?export=view&id=1bxQqBJgO0rJ9zgUjC1221pak44oDGMTH
+Sat Oct 17 08:00:47 AM EDT 2026: Posting to LinkedIn...
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"6ad363700a208cb3231b7a29\",\"allowedActions\":[\"publishPostNow\",\"updatePost\",\"movePostToDraft\",\"publishPostNext\",\"updatePostSchedule\",\"updatePostTags\",\"addPostNote\",\"duplicatePost\",\"deletePost\",\"updateShopGridLink\",\"createPostRecurrence\"],\"status\":\"scheduled\",\"text\":\"Find three claims needing proof\\n\\n'Best-in-class' means nothing. '20% faster' means something. '20% faster validated by ClientCo' means everything.\\n\\nSpecificity builds credibility. Numbers build trust. Names build confidence.\\n\\nGeneric claims don't win competitive RFPs.\\n\\n#RFP #ProposalManagement #SalesEnablement #B2BSales #WinMore\",\"channelId\":\"6a7f74bcb2d9d577437af9a4\",\"channelService\":\"linkedin\",\"dueAt\":\"2026-10-17T12:41:00.000Z\",\"sentAt\":null,\"schedulingType\":\"automatic\",\"shareMode\":\"addToQueue\",\"sharedNow\":false,\"isCustomScheduled\":false,\"createdAt\":\"2026-10-17T12:00:48.304Z\",\"updatedAt\":\"2026-10-17T12:00:48.321Z\",\"tags\":[],\"assets\":[{\"id\":null,\"type\":\"image\",\"mimeType\":\"image/jpeg\",\"source\":\"https://drive.google.com/uc?export=view&id=1bxQqBJgO0rJ9zgUjC1221pak44oDGMTH\",\"thumbnail\":\"https://drive.google.com/uc?export=view&id=1bxQqBJgO0rJ9zgUjC1221pak44oDGMTH\",\"image\":{\"width\":2048,\"height\":2048,\"altText\":\"Find three claims needing proof\\n\\n'Best-in-class' means nothing. '20% faster' means something. '20% f\",\"isAnimated\":false,\"animatedThumbnail\":null,\"userTags\":null}}],\"error\":null,\"metadata\":{\"type\":\"post\",\"annotations\":[{\"type\":\"hashtag\",\"content\":\"#RFP\",\"indices\":[270,274],\"text\":\"#RFP\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=RFP\"},{\"type\":\"hashtag\",\"content\":\"#ProposalManagement\",\"indices\":[275,294],\"text\":\"#ProposalManagement\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=ProposalManagement\"},{\"type\":\"hashtag\",\"content\":\"#SalesEnablement\",\"indices\":[295,311],\"text\":\"#SalesEnablement\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=SalesEnablement\"},{\"type\":\"hashtag\",\"content\":\"#B2BSales\",\"indices\":[312,321],\"text\":\"#B2BSales\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=B2BSales\"},{\"type\":\"hashtag\",\"content\":\"#WinMore\",\"indices\":[322,330],\"text\":\"#WinMore\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=WinMore\"}],\"firstComment\":null,\"linkAttachment\":null}}"
+      },
+      {
+        "type": "text",
+        "text": "{\"rateLimit\":[{\"remaining\":96,\"resetSeconds\":630},{\"remaining\":212,\"resetSeconds\":30329},{\"remaining\":2828,\"resetSeconds\":2333466}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+Sat Oct 17 08:00:48 AM EDT 2026: Posting to Facebook...
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"6ad36370ae173d6e00b51822\",\"allowedActions\":[\"publishPostNow\",\"updatePost\",\"movePostToDraft\",\"publishPostNext\",\"updatePostSchedule\",\"updatePostTags\",\"addPostNote\",\"duplicatePost\",\"deletePost\",\"updateShopGridLink\",\"createPostRecurrence\"],\"status\":\"scheduled\",\"text\":\"Find three claims needing proof\\n\\n'Best-in-class' means nothing. '20% faster' means something. '20% faster validated by ClientCo' means everything.\\n\\nSpecificity builds credibility. Numbers build trust. Names build confidence.\\n\\nGeneric claims don't win competitive RFPs.\\n\\n#RFP #ProposalManagement #SalesEnablement #B2BSales #WinMore\",\"channelId\":\"6a7f7476b2d9d577437af67f\",\"channelService\":\"facebook\",\"dueAt\":\"2026-10-18T02:32:00.000Z\",\"sentAt\":null,\"schedulingType\":\"automatic\",\"shareMode\":\"addToQueue\",\"sharedNow\":false,\"isCustomScheduled\":false,\"createdAt\":\"2026-10-17T12:00:48.692Z\",\"updatedAt\":\"2026-10-17T12:00:48.707Z\",\"tags\":[],\"assets\":[{\"id\":null,\"type\":\"image\",\"mimeType\":\"image/jpeg\",\"source\":\"https://drive.google.com/uc?export=view&id=1bxQqBJgO0rJ9zgUjC1221pak44oDGMTH\",\"thumbnail\":\"https://drive.google.com/uc?export=view&id=1bxQqBJgO0rJ9zgUjC1221pak44oDGMTH\",\"image\":{\"width\":2048,\"height\":2048,\"altText\":\"Find three claims needing proof\\n\\n'Best-in-class' means nothing. '20% faster' means something. '20% f\",\"isAnimated\":false,\"animatedThumbnail\":null,\"userTags\":null}}],\"error\":null,\"metadata\":{\"type\":\"post\",\"annotations\":[{\"type\":\"hashtag\",\"content\":\"#RFP\",\"indices\":[270,274],\"text\":\"#RFP\",\"url\":\"https://www.facebook.com/hashtag/RFP\"},{\"type\":\"hashtag\",\"content\":\"#ProposalManagement\",\"indices\":[275,294],\"text\":\"#ProposalManagement\",\"url\":\"https://www.facebook.com/hashtag/ProposalManagement\"},{\"type\":\"hashtag\",\"content\":\"#SalesEnablement\",\"indices\":[295,311],\"text\":\"#SalesEnablement\",\"url\":\"https://www.facebook.com/hashtag/SalesEnablement\"},{\"type\":\"hashtag\",\"content\":\"#B2BSales\",\"indices\":[312,321],\"text\":\"#B2BSales\",\"url\":\"https://www.facebook.com/hashtag/B2BSales\"},{\"type\":\"hashtag\",\"content\":\"#WinMore\",\"indices\":[322,330],\"text\":\"#WinMore\",\"url\":\"https://www.facebook.com/hashtag/WinMore\"}],\"title\":null,\"firstComment\":null,\"linkAttachment\":null}}"
+      },
+      {
+        "type": "text",
+        "text": "{\"rateLimit\":[{\"remaining\":95,\"resetSeconds\":629},{\"remaining\":211,\"resetSeconds\":30328},{\"remaining\":2827,\"resetSeconds\":2333464}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+Sat Oct 17 08:00:48 AM EDT 2026: DONE - Posted with expanded content variety
+
+To stop or manage this job, send me a new message (e.g. "stop reminder optirfp-linkedin-daily").

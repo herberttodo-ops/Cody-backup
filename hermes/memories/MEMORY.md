@@ -8,6 +8,8 @@ Andrew expects verification before assumptions — video caption completeness vi
 §
 LotSignal social pipeline: Target = single-point franchise dealers (Owner/GM). Optimal schedule (Option A): LinkedIn 10am, Instagram 12:30pm, Facebook 2pm ET. Day rotation: Mon=stat, Tue=insight, Wed=tip, Thu=stat, Fri=insight, Sat=tip, Sun=rest.
 §
-LotSignal Composio: SDK = `composio` v0.24+ session-based (Composio().create(user_id=...)), NOT deprecated composio_core/ComposioToolSet (HTTP 410). Andrew signed up at dashboard.composio.dev: real Project API key, LinkedIn/FB/IG connected. Publishing held: LinkedIn managed auth only grants w_member_social (personal) — company-page org scopes need custom LinkedIn Developer App approval (days). No LotSignal FB Page exists so IG posting has no attach point; YouTube OAuth left INITIATED. Andrew rejects Buffer for LotSignal — firm preference.
+LotSignal Composio: SDK = `composio` v0.24+ session-based (Composio().create(user_id=...)), not deprecated ComposioToolSet. LinkedIn/FB/IG connected but publishing held (LinkedIn org scopes need custom app; no FB Page for IG). Andrew firmly rejects Buffer for LotSignal.
 §
 Tales Untold pipeline (Oct 6 fixed): Single Hermes cron 7bb4ab80b2c2 produces 3x/day at 8am/12pm/4pm ET for 6/7/8pm Buffer slots. Watchdog d9cbff5d6e8a runs every 2h, alerts on missed slots. Native crontab removed; tales_v3_producer.sh bash bug ${CATEGORY.title()} fixed. 200+ cryptid database. Cedric voice only. Alert-only mode.
+§
+Tales Untold analytics: Andrew wants live data before any 'working' claim. Public: yt-dlp /shorts + per-video. Private: Composio YOUTUBE_QUERY_ANALYTICS (--account youtube_trader-relink) works though Data API hits quotaExceeded; no impressions/CTR, viewed-vs-swiped only via Studio mobile screenshot. Andrew open to creepypasta and non-folklore scary stories, not wedded to folklore.
