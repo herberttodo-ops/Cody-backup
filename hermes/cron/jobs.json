@@ -38,7 +38,7 @@
       },
       "last_delivery_error": null,
       "fire_claim": {
-        "at": "2026-10-18T04:31:12.440331-04:00",
+        "at": "2026-10-18T04:43:13.731162-04:00",
         "by": "herby-Virtual-Machine:1222254:51ccd___ID___cee3dcbb6f4b"
       },
       "failure_streak": 0
@@ -691,5 +691,5 @@
       "fire_claim": null
     }
   ],
-  "updated_at": "2026-10-18T04:31:12.440613-04:00"
+  "updated_at": "2026-10-18T04:43:13.731459-04:00"
 }
