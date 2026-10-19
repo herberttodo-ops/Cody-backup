@@ -1,0 +1,53 @@
+Cronjob Response: optirfp-linkedin-daily
+(job_id: d0ba9894a668)
+-------------
+
+Headline: Readers scan. Evaluators decide.
+Topic: page-one
+Content library: 43 headlines, 12 templates
+Generated at: 2026-10-18T08:01:01.277764
+Sun Oct 18 08:01:01 AM EDT 2026: Starting OptiRFP daily post v2.0 (expanded content)...
+Sun Oct 18 08:01:01 AM EDT 2026: Generated headline: Readers scan. Evaluators decide.
+Sun Oct 18 08:01:01 AM EDT 2026: Topic: page-one
+Sun Oct 18 08:01:01 AM EDT 2026: Using expanded content library v2.0
+Sun Oct 18 08:01:01 AM EDT 2026: Generating image with compositor...
+Sun Oct 18 08:01:13 AM EDT 2026: Image generated: /home/herby/.hermes/generated_images/optirfp_page-one____ID___.png
+Sun Oct 18 08:01:13 AM EDT 2026: Uploading to Drive...
+Sun Oct 18 08:01:17 AM EDT 2026: Drive URL: https://drive.google.com/uc?export=view&id=1lBmaT7PQ59pIHob3yRV9aHBn_EpAz6V6
+Sun Oct 18 08:01:17 AM EDT 2026: Posting to LinkedIn...
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"6ad4b50e938409f1d0cbf589\",\"allowedActions\":[\"publishPostNow\",\"updatePost\",\"movePostToDraft\",\"publishPostNext\",\"updatePostSchedule\",\"updatePostTags\",\"addPostNote\",\"duplicatePost\",\"deletePost\",\"updateShopGridLink\",\"createPostRecurrence\"],\"status\":\"scheduled\",\"text\":\"Readers scan. Evaluators decide.\\n\\n#RFP evaluators have seen it all. Generic claims, recycled language, obvious templates.\\n\\nThe winners? They prove every claim. Specific metrics. Real outcomes. Names you can verify.\\n\\nStand out by standing up to scrutiny.\\n\\n#RFP #ProposalManagement #SalesEnablement #B2BSales #WinMore\",\"channelId\":\"6a7f74bcb2d9d577437af9a4\",\"channelService\":\"linkedin\",\"dueAt\":\"2026-10-19T02:49:00.000Z\",\"sentAt\":null,\"schedulingType\":\"automatic\",\"shareMode\":\"addToQueue\",\"sharedNow\":false,\"isCustomScheduled\":false,\"createdAt\":\"2026-10-18T12:01:18.829Z\",\"updatedAt\":\"2026-10-18T12:01:18.857Z\",\"tags\":[],\"assets\":[{\"id\":null,\"type\":\"image\",\"mimeType\":\"image/jpeg\",\"source\":\"https://drive.google.com/uc?export=view&id=1lBmaT7PQ59pIHob3yRV9aHBn_EpAz6V6\",\"thumbnail\":\"https://drive.google.com/uc?export=view&id=1lBmaT7PQ59pIHob3yRV9aHBn_EpAz6V6\",\"image\":{\"width\":2560,\"height\":1440,\"altText\":\"Readers scan. Evaluators decide.\\n\\n#RFP evaluators have seen it all. Generic claims, recycled languag\",\"isAnimated\":false,\"animatedThumbnail\":null,\"userTags\":null}}],\"error\":null,\"metadata\":{\"type\":\"post\",\"annotations\":[{\"type\":\"hashtag\",\"content\":\"#RFP\",\"indices\":[34,38],\"text\":\"#RFP\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=RFP\"},{\"type\":\"hashtag\",\"content\":\"#RFP\",\"indices\":[255,259],\"text\":\"#RFP\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=RFP\"},{\"type\":\"hashtag\",\"content\":\"#ProposalManagement\",\"indices\":[260,279],\"text\":\"#ProposalManagement\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=ProposalManagement\"},{\"type\":\"hashtag\",\"content\":\"#SalesEnablement\",\"indices\":[280,296],\"text\":\"#SalesEnablement\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=SalesEnablement\"},{\"type\":\"hashtag\",\"content\":\"#B2BSales\",\"indices\":[297,306],\"text\":\"#B2BSales\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=B2BSales\"},{\"type\":\"hashtag\",\"content\":\"#WinMore\",\"indices\":[307,315],\"text\":\"#WinMore\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=WinMore\"}],\"firstComment\":null,\"linkAttachment\":null}}"
+      },
+      {
+        "type": "text",
+        "text": "{\"rateLimit\":[{\"remaining\":98,\"resetSeconds\":599},{\"remaining\":215,\"resetSeconds\":32104},{\"remaining\":2772,\"resetSeconds\":2247035}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+Sun Oct 18 08:01:19 AM EDT 2026: Posting to Facebook...
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"6ad4b50f938409f1d0cbf6f4\",\"allowedActions\":[\"publishPostNow\",\"updatePost\",\"movePostToDraft\",\"publishPostNext\",\"updatePostSchedule\",\"updatePostTags\",\"addPostNote\",\"duplicatePost\",\"deletePost\",\"updateShopGridLink\",\"createPostRecurrence\"],\"status\":\"scheduled\",\"text\":\"Readers scan. Evaluators decide.\\n\\n#RFP evaluators have seen it all. Generic claims, recycled language, obvious templates.\\n\\nThe winners? They prove every claim. Specific metrics. Real outcomes. Names you can verify.\\n\\nStand out by standing up to scrutiny.\\n\\n#RFP #ProposalManagement #SalesEnablement #B2BSales #WinMore\",\"channelId\":\"6a7f7476b2d9d577437af67f\",\"channelService\":\"facebook\",\"dueAt\":\"2026-10-18T13:10:00.000Z\",\"sentAt\":null,\"schedulingType\":\"automatic\",\"shareMode\":\"addToQueue\",\"sharedNow\":false,\"isCustomScheduled\":false,\"createdAt\":\"2026-10-18T12:01:19.218Z\",\"updatedAt\":\"2026-10-18T12:01:19.239Z\",\"tags\":[],\"assets\":[{\"id\":null,\"type\":\"image\",\"mimeType\":\"image/jpeg\",\"source\":\"https://drive.google.com/uc?export=view&id=1lBmaT7PQ59pIHob3yRV9aHBn_EpAz6V6\",\"thumbnail\":\"https://drive.google.com/uc?export=view&id=1lBmaT7PQ59pIHob3yRV9aHBn_EpAz6V6\",\"image\":{\"width\":2560,\"height\":1440,\"altText\":\"Readers scan. Evaluators decide.\\n\\n#RFP evaluators have seen it all. Generic claims, recycled languag\",\"isAnimated\":false,\"animatedThumbnail\":null,\"userTags\":null}}],\"error\":null,\"metadata\":{\"type\":\"post\",\"annotations\":[{\"type\":\"hashtag\",\"content\":\"#RFP\",\"indices\":[34,38],\"text\":\"#RFP\",\"url\":\"https://www.facebook.com/hashtag/RFP\"},{\"type\":\"hashtag\",\"content\":\"#RFP\",\"indices\":[255,259],\"text\":\"#RFP\",\"url\":\"https://www.facebook.com/hashtag/RFP\"},{\"type\":\"hashtag\",\"content\":\"#ProposalManagement\",\"indices\":[260,279],\"text\":\"#ProposalManagement\",\"url\":\"https://www.facebook.com/hashtag/ProposalManagement\"},{\"type\":\"hashtag\",\"content\":\"#SalesEnablement\",\"indices\":[280,296],\"text\":\"#SalesEnablement\",\"url\":\"https://www.facebook.com/hashtag/SalesEnablement\"},{\"type\":\"hashtag\",\"content\":\"#B2BSales\",\"indices\":[297,306],\"text\":\"#B2BSales\",\"url\":\"https://www.facebook.com/hashtag/B2BSales\"},{\"type\":\"hashtag\",\"content\":\"#WinMore\",\"indices\":[307,315],\"text\":\"#WinMore\",\"url\":\"https://www.facebook.com/hashtag/WinMore\"}],\"title\":null,\"firstComment\":null,\"linkAttachment\":null}}"
+      },
+      {
+        "type": "text",
+        "text": "{\"rateLimit\":[{\"remaining\":97,\"resetSeconds\":598},{\"remaining\":214,\"resetSeconds\":32102},{\"remaining\":2771,\"resetSeconds\":2247034}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+Sun Oct 18 08:01:19 AM EDT 2026: DONE - Posted with expanded content variety
+
+To stop or manage this job, send me a new message (e.g. "stop reminder optirfp-linkedin-daily").
