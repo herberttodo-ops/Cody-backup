@@ -132,6 +132,10 @@ summaries:
 3. [ ] Auto-summarize after semi/complex modes
 4. [ ] Next session: load latest summary first
 
+## TTS Cost Analysis
+
+See [`references/tts-cost-analysis-framework.md`](references/tts-cost-analysis-framework.md) for framework comparing cloud TTS (ElevenLabs) vs local alternatives (VoiceStudio, etc.) including break-even calculations and migration decision matrix.
+
 ## Related
 
 - [[project-state]] — active projects
