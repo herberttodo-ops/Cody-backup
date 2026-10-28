@@ -1,0 +1,55 @@
+Cronjob Response: optirfp-linkedin-daily
+(job_id: d0ba9894a668)
+-------------
+
+Headline: Mirror their language. Win their trust.
+Topic: mirror-language
+Content library: 43 headlines, 12 templates
+Generated at: 2026-10-27T08:00:43.565392
+Tue Oct 27 08:00:43 AM EDT 2026: Starting OptiRFP daily post v2.0 (expanded content)...
+Tue Oct 27 08:00:43 AM EDT 2026: Generated headline: Mirror their language. Win their trust.
+Tue Oct 27 08:00:43 AM EDT 2026: Topic: mirror-language
+Tue Oct 27 08:00:43 AM EDT 2026: Using expanded content library v2.0
+Tue Oct 27 08:00:43 AM EDT 2026: Generating image with compositor...
+Tue Oct 27 08:00:57 AM EDT 2026: Image generated: /home/herby/.hermes/generated_images/optirfp_mirror-language____ID___.png
+Tue Oct 27 08:00:57 AM EDT 2026: Uploading to Drive...
+/home/herby/.hermes/hermes-agent/venv/lib/python3.11/site-packages/google/api_core/_python_version_support.py:273: FutureWarning: You are using a Python version (3.11.16) which Google will stop supporting in new releases of google.api_core once it reaches its end of life (2027-10-24). Please upgrade to the latest Python version, or at least Python 3.12, to continue receiving updates for google.api_core past that date.
+  warnings.warn(message, FutureWarning)
+Tue Oct 27 08:01:09 AM EDT 2026: Drive URL: https://drive.google.com/uc?export=view&id=1YMCExfkjHvtK7sd4rrXSTLePeEymKIH5
+Tue Oct 27 08:01:09 AM EDT 2026: Posting to LinkedIn...
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"6ae___ID___ac5ae2f5c1\",\"allowedActions\":[\"publishPostNow\",\"updatePost\",\"movePostToDraft\",\"publishPostNext\",\"updatePostSchedule\",\"updatePostTags\",\"addPostNote\",\"duplicatePost\",\"deletePost\",\"updateShopGridLink\",\"createPostRecurrence\"],\"status\":\"scheduled\",\"text\":\"Mirror their language. Win their trust.\\n\\nThe evaluators made their decision on page one. Whether they knew it or not.\\n\\nYour first impression is your only impression. Make it count.\\n\\nLead with impact. Mirror their priorities. Make them want page two.\\n\\n#RFPResponse #SalesTips #WinningProposals #B2BSales #GovCon\",\"channelId\":\"6a7f74bcb2d9d577437af9a4\",\"channelService\":\"linkedin\",\"dueAt\":\"2026-10-28T01:10:00.000Z\",\"sentAt\":null,\"schedulingType\":\"automatic\",\"shareMode\":\"addToQueue\",\"sharedNow\":false,\"isCustomScheduled\":false,\"createdAt\":\"2026-10-27T12:01:10.478Z\",\"updatedAt\":\"2026-10-27T12:01:10.516Z\",\"tags\":[],\"assets\":[{\"__typename\":\"ImageAsset\",\"id\":null,\"type\":\"image\",\"mimeType\":\"image/jpeg\",\"source\":\"https://drive.google.com/uc?export=view&id=1YMCExfkjHvtK7sd4rrXSTLePeEymKIH5\",\"thumbnail\":\"https://drive.google.com/uc?export=view&id=1YMCExfkjHvtK7sd4rrXSTLePeEymKIH5\",\"image\":{\"width\":2560,\"height\":1440,\"altText\":\"Mirror their language. Win their trust.\\n\\nThe evaluators made their decision on page one. Whether the\",\"isAnimated\":false,\"animatedThumbnail\":null,\"userTags\":null}}],\"error\":null,\"metadata\":{\"__typename\":\"LinkedInPostMetadata\",\"type\":\"post\",\"annotations\":[{\"type\":\"hashtag\",\"content\":\"#RFPResponse\",\"indices\":[251,263],\"text\":\"#RFPResponse\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=RFPResponse\"},{\"type\":\"hashtag\",\"content\":\"#SalesTips\",\"indices\":[264,274],\"text\":\"#SalesTips\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=SalesTips\"},{\"type\":\"hashtag\",\"content\":\"#WinningProposals\",\"indices\":[275,292],\"text\":\"#WinningProposals\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=WinningProposals\"},{\"type\":\"hashtag\",\"content\":\"#B2BSales\",\"indices\":[293,302],\"text\":\"#B2BSales\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=B2BSales\"},{\"type\":\"hashtag\",\"content\":\"#GovCon\",\"indices\":[303,310],\"text\":\"#GovCon\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=GovCon\"}],\"firstComment\":null,\"linkAttachment\":null}}"
+      },
+      {
+        "type": "text",
+        "text": "{\"rateLimit\":[{\"remaining\":98,\"resetSeconds\":627},{\"remaining\":218,\"resetSeconds\":37536},{\"remaining\":2242,\"resetSeconds\":1469443}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+Tue Oct 27 08:01:10 AM EDT 2026: Posting to Facebook...
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"6ae09286b0b2e5b596a6c59f\",\"allowedActions\":[\"publishPostNow\",\"updatePost\",\"movePostToDraft\",\"publishPostNext\",\"updatePostSchedule\",\"updatePostTags\",\"addPostNote\",\"duplicatePost\",\"deletePost\",\"updateShopGridLink\",\"createPostRecurrence\"],\"status\":\"scheduled\",\"text\":\"Mirror their language. Win their trust.\\n\\nThe evaluators made their decision on page one. Whether they knew it or not.\\n\\nYour first impression is your only impression. Make it count.\\n\\nLead with impact. Mirror their priorities. Make them want page two.\\n\\n#RFPResponse #SalesTips #WinningProposals #B2BSales #GovCon\",\"channelId\":\"6a7f7476b2d9d577437af67f\",\"channelService\":\"facebook\",\"dueAt\":\"2026-10-27T12:19:00.000Z\",\"sentAt\":null,\"schedulingType\":\"automatic\",\"shareMode\":\"addToQueue\",\"sharedNow\":false,\"isCustomScheduled\":false,\"createdAt\":\"2026-10-27T12:01:10.948Z\",\"updatedAt\":\"2026-10-27T12:01:10.991Z\",\"tags\":[],\"assets\":[{\"__typename\":\"ImageAsset\",\"id\":null,\"type\":\"image\",\"mimeType\":\"image/jpeg\",\"source\":\"https://drive.google.com/uc?export=view&id=1YMCExfkjHvtK7sd4rrXSTLePeEymKIH5\",\"thumbnail\":\"https://drive.google.com/uc?export=view&id=1YMCExfkjHvtK7sd4rrXSTLePeEymKIH5\",\"image\":{\"width\":2560,\"height\":1440,\"altText\":\"Mirror their language. Win their trust.\\n\\nThe evaluators made their decision on page one. Whether the\",\"isAnimated\":false,\"animatedThumbnail\":null,\"userTags\":null}}],\"error\":null,\"metadata\":{\"__typename\":\"FacebookPostMetadata\",\"type\":\"post\",\"annotations\":[{\"type\":\"hashtag\",\"content\":\"#RFPResponse\",\"indices\":[251,263],\"text\":\"#RFPResponse\",\"url\":\"https://www.facebook.com/hashtag/RFPResponse\"},{\"type\":\"hashtag\",\"content\":\"#SalesTips\",\"indices\":[264,274],\"text\":\"#SalesTips\",\"url\":\"https://www.facebook.com/hashtag/SalesTips\"},{\"type\":\"hashtag\",\"content\":\"#WinningProposals\",\"indices\":[275,292],\"text\":\"#WinningProposals\",\"url\":\"https://www.facebook.com/hashtag/WinningProposals\"},{\"type\":\"hashtag\",\"content\":\"#B2BSales\",\"indices\":[293,302],\"text\":\"#B2BSales\",\"url\":\"https://www.facebook.com/hashtag/B2BSales\"},{\"type\":\"hashtag\",\"content\":\"#GovCon\",\"indices\":[303,310],\"text\":\"#GovCon\",\"url\":\"https://www.facebook.com/hashtag/GovCon\"}],\"title\":null,\"firstComment\":null,\"linkAttachment\":null}}"
+      },
+      {
+        "type": "text",
+        "text": "{\"rateLimit\":[{\"remaining\":97,\"resetSeconds\":626},{\"remaining\":217,\"resetSeconds\":37534},{\"remaining\":2241,\"resetSeconds\":1469442}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+Tue Oct 27 08:01:11 AM EDT 2026: DONE - Posted with expanded content variety
+
+To stop or manage this job, send me a new message (e.g. "stop reminder optirfp-linkedin-daily").
