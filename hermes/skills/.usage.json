@@ -29,6 +29,21 @@
     "use_count": 1,
     "view_count": 1
   },
+  "ai-sales-agents": {
+    "archived_at": null,
+    "created_at": "2026-10-28T18:54:08.926999+00:00",
+    "created_by": "agent",
+    "last_patched_at": null,
+    "last_reused_patch_generation": 0,
+    "last_used_at": null,
+    "last_viewed_at": null,
+    "patch_count": 0,
+    "patch_generation": 0,
+    "pinned": false,
+    "state": "active",
+    "use_count": 0,
+    "view_count": 0
+  },
   "ai-video-pipelines": {
     "archived_at": null,
     "created_at": "2026-09-13T18:53:56.093501+00:00",
@@ -285,14 +300,14 @@
     "created_by": null,
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-10-04T18:16:28.824007+00:00",
-    "last_viewed_at": "2026-10-04T18:16:28.732223+00:00",
+    "last_used_at": "2026-10-28T18:52:11.411867+00:00",
+    "last_viewed_at": "2026-10-28T18:52:11.341250+00:00",
     "patch_count": 0,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 9,
-    "view_count": 9
+    "use_count": 11,
+    "view_count": 11
   },
   "claude-design": {
     "archived_at": null,
