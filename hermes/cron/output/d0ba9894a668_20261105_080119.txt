@@ -1,0 +1,55 @@
+Cronjob Response: optirfp-linkedin-daily
+(job_id: d0ba9894a668)
+-------------
+
+Headline: Templates that everyone uses... everyone ignores
+Topic: specificity
+Content library: 43 headlines, 12 templates
+Generated at: 2026-11-05T08:00:59.643093
+Thu Nov  5 08:00:59 AM EST 2026: Starting OptiRFP daily post v2.0 (expanded content)...
+Thu Nov  5 08:00:59 AM EST 2026: Generated headline: Templates that everyone uses... everyone ignores
+Thu Nov  5 08:00:59 AM EST 2026: Topic: specificity
+Thu Nov  5 08:00:59 AM EST 2026: Using expanded content library v2.0
+Thu Nov  5 08:00:59 AM EST 2026: Generating image with compositor...
+Thu Nov  5 08:01:14 AM EST 2026: Image generated: /home/herby/.hermes/generated_images/optirfp_specificity____ID___.png
+Thu Nov  5 08:01:14 AM EST 2026: Uploading to Drive...
+/home/herby/.hermes/hermes-agent/venv/lib/python3.11/site-packages/google/api_core/_python_version_support.py:273: FutureWarning: You are using a Python version (3.11.16) which Google will stop supporting in new releases of google.api_core once it reaches its end of life (2027-10-24). Please upgrade to the latest Python version, or at least Python 3.12, to continue receiving updates for google.api_core past that date.
+  warnings.warn(message, FutureWarning)
+Thu Nov  5 08:01:17 AM EST 2026: Drive URL: https://drive.google.com/uc?export=view&id=1IIJzJ2mMEb2LoX_o7hKSen7Vvm77uqYz
+Thu Nov  5 08:01:17 AM EST 2026: Posting to LinkedIn...
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"6aec7e1fe26be26f731fdcb3\",\"allowedActions\":[\"publishPostNow\",\"updatePost\",\"movePostToDraft\",\"publishPostNext\",\"updatePostSchedule\",\"updatePostTags\",\"addPostNote\",\"duplicatePost\",\"deletePost\",\"updateShopGridLink\",\"createPostRecurrence\"],\"status\":\"scheduled\",\"text\":\"Templates that everyone uses... everyone ignores\\n\\nMost RFP responses bury the value under features.\\n\\nFlip it. Lead with outcomes. Lead with proof. Lead with the transformation they actually care about.\\n\\nThe 'so what' is what wins.\\n\\n#RFPResponse #GovTech #B2B #SalesStrategy #ProposalTips\",\"channelId\":\"6a7f74bcb2d9d577437af9a4\",\"channelService\":\"linkedin\",\"dueAt\":\"2026-11-05T18:09:00.000Z\",\"sentAt\":null,\"schedulingType\":\"automatic\",\"shareMode\":\"addToQueue\",\"sharedNow\":false,\"isCustomScheduled\":false,\"createdAt\":\"2026-11-05T13:01:18.989Z\",\"updatedAt\":\"2026-11-05T13:01:19.023Z\",\"tags\":[],\"assets\":[{\"__typename\":\"ImageAsset\",\"id\":null,\"type\":\"image\",\"mimeType\":\"image/png\",\"source\":\"https://drive.google.com/uc?export=view&id=1IIJzJ2mMEb2LoX_o7hKSen7Vvm77uqYz\",\"thumbnail\":\"https://drive.google.com/uc?export=view&id=1IIJzJ2mMEb2LoX_o7hKSen7Vvm77uqYz\",\"image\":{\"width\":2560,\"height\":1440,\"altText\":\"Templates that everyone uses... everyone ignores\\n\\nMost RFP responses bury the value under features.\\n\",\"isAnimated\":false,\"animatedThumbnail\":null,\"userTags\":null}}],\"error\":null,\"metadata\":{\"__typename\":\"LinkedInPostMetadata\",\"type\":\"post\",\"annotations\":[{\"type\":\"hashtag\",\"content\":\"#RFPResponse\",\"indices\":[232,244],\"text\":\"#RFPResponse\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=RFPResponse\"},{\"type\":\"hashtag\",\"content\":\"#GovTech\",\"indices\":[245,253],\"text\":\"#GovTech\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=GovTech\"},{\"type\":\"hashtag\",\"content\":\"#B2B\",\"indices\":[254,258],\"text\":\"#B2B\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=B2B\"},{\"type\":\"hashtag\",\"content\":\"#SalesStrategy\",\"indices\":[259,273],\"text\":\"#SalesStrategy\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=SalesStrategy\"},{\"type\":\"hashtag\",\"content\":\"#ProposalTips\",\"indices\":[274,287],\"text\":\"#ProposalTips\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=ProposalTips\"}],\"firstComment\":null,\"linkAttachment\":null}}"
+      },
+      {
+        "type": "text",
+        "text": "{\"rateLimit\":[{\"remaining\":148,\"resetSeconds\":662},{\"remaining\":570,\"resetSeconds\":41135},{\"remaining\":735,\"resetSeconds\":688235}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+Thu Nov  5 08:01:19 AM EST 2026: Posting to Facebook...
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"6aec7e1fa84fbbc2d3849ad7\",\"allowedActions\":[\"publishPostNow\",\"updatePost\",\"movePostToDraft\",\"publishPostNext\",\"updatePostSchedule\",\"updatePostTags\",\"addPostNote\",\"duplicatePost\",\"deletePost\",\"updateShopGridLink\",\"createPostRecurrence\"],\"status\":\"scheduled\",\"text\":\"Templates that everyone uses... everyone ignores\\n\\nMost RFP responses bury the value under features.\\n\\nFlip it. Lead with outcomes. Lead with proof. Lead with the transformation they actually care about.\\n\\nThe 'so what' is what wins.\\n\\n#RFPResponse #GovTech #B2B #SalesStrategy #ProposalTips\",\"channelId\":\"6a7f7476b2d9d577437af67f\",\"channelService\":\"facebook\",\"dueAt\":\"2026-11-05T13:14:00.000Z\",\"sentAt\":null,\"schedulingType\":\"automatic\",\"shareMode\":\"addToQueue\",\"sharedNow\":false,\"isCustomScheduled\":false,\"createdAt\":\"2026-11-05T13:01:19.456Z\",\"updatedAt\":\"2026-11-05T13:01:19.484Z\",\"tags\":[],\"assets\":[{\"__typename\":\"ImageAsset\",\"id\":null,\"type\":\"image\",\"mimeType\":\"image/png\",\"source\":\"https://drive.google.com/uc?export=view&id=1IIJzJ2mMEb2LoX_o7hKSen7Vvm77uqYz\",\"thumbnail\":\"https://drive.google.com/uc?export=view&id=1IIJzJ2mMEb2LoX_o7hKSen7Vvm77uqYz\",\"image\":{\"width\":2560,\"height\":1440,\"altText\":\"Templates that everyone uses... everyone ignores\\n\\nMost RFP responses bury the value under features.\\n\",\"isAnimated\":false,\"animatedThumbnail\":null,\"userTags\":null}}],\"error\":null,\"metadata\":{\"__typename\":\"FacebookPostMetadata\",\"type\":\"post\",\"annotations\":[{\"type\":\"hashtag\",\"content\":\"#RFPResponse\",\"indices\":[232,244],\"text\":\"#RFPResponse\",\"url\":\"https://www.facebook.com/hashtag/RFPResponse\"},{\"type\":\"hashtag\",\"content\":\"#GovTech\",\"indices\":[245,253],\"text\":\"#GovTech\",\"url\":\"https://www.facebook.com/hashtag/GovTech\"},{\"type\":\"hashtag\",\"content\":\"#B2B\",\"indices\":[254,258],\"text\":\"#B2B\",\"url\":\"https://www.facebook.com/hashtag/B2B\"},{\"type\":\"hashtag\",\"content\":\"#SalesStrategy\",\"indices\":[259,273],\"text\":\"#SalesStrategy\",\"url\":\"https://www.facebook.com/hashtag/SalesStrategy\"},{\"type\":\"hashtag\",\"content\":\"#ProposalTips\",\"indices\":[274,287],\"text\":\"#ProposalTips\",\"url\":\"https://www.facebook.com/hashtag/ProposalTips\"}],\"title\":null,\"firstComment\":null,\"linkAttachment\":null}}"
+      },
+      {
+        "type": "text",
+        "text": "{\"rateLimit\":[{\"remaining\":147,\"resetSeconds\":660},{\"remaining\":569,\"resetSeconds\":41133},{\"remaining\":734,\"resetSeconds\":688234}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+Thu Nov  5 08:01:19 AM EST 2026: DONE - Posted with expanded content variety
+
+To stop or manage this job, send me a new message (e.g. "stop reminder optirfp-linkedin-daily").
