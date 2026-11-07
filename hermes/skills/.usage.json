@@ -270,14 +270,14 @@
     "created_by": null,
     "last_patched_at": "2026-09-16T01:05:15.754373+00:00",
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-11-06T01:29:46.107085+00:00",
-    "last_viewed_at": "2026-11-06T01:29:45.911333+00:00",
+    "last_used_at": "2026-11-06T16:21:42.597274+00:00",
+    "last_viewed_at": "2026-11-06T16:21:42.513412+00:00",
     "patch_count": 20,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 91,
-    "view_count": 91
+    "use_count": 92,
+    "view_count": 92
   },
   "bunnycdn-storage-integration": {
     "archived_at": null,
@@ -1529,20 +1529,35 @@
     "use_count": 54,
     "view_count": 54
   },
+  "tales-untold-operations": {
+    "archived_at": null,
+    "created_at": "2026-11-07T00:14:31.759148+00:00",
+    "created_by": null,
+    "last_patched_at": null,
+    "last_reused_patch_generation": 0,
+    "last_used_at": null,
+    "last_viewed_at": null,
+    "patch_count": 0,
+    "patch_generation": 0,
+    "pinned": false,
+    "state": "active",
+    "use_count": 0,
+    "view_count": 0
+  },
   "tales-untold-video-creator": {
     "archived_at": null,
     "created_at": "2026-09-14T14:43:47.682615+00:00",
     "created_by": null,
     "last_patched_at": "2026-09-15T21:12:41.827871+00:00",
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-10-13T12:02:49.532447+00:00",
-    "last_viewed_at": "2026-10-13T12:02:49.430961+00:00",
+    "last_used_at": "2026-11-07T00:07:16.511610+00:00",
+    "last_viewed_at": "2026-11-07T00:07:16.245032+00:00",
     "patch_count": 53,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 78,
-    "view_count": 78
+    "use_count": 79,
+    "view_count": 79
   },
   "teams-meeting-pipeline": {
     "archived_at": null,
@@ -1626,16 +1641,16 @@
     "archived_at": null,
     "created_at": "2026-09-16T11:33:36.119965+00:00",
     "created_by": "agent",
-    "last_patched_at": "2026-10-15T01:17:22.654516+00:00",
-    "last_reused_patch_generation": 14,
-    "last_used_at": "2026-10-19T14:58:37.923381+00:00",
-    "last_viewed_at": "2026-10-19T14:58:37.851308+00:00",
-    "patch_count": 14,
-    "patch_generation": 14,
+    "last_patched_at": "2026-11-07T00:07:40.723086+00:00",
+    "last_reused_patch_generation": 17,
+    "last_used_at": "2026-11-07T00:07:21.295614+00:00",
+    "last_viewed_at": "2026-11-07T00:07:21.169566+00:00",
+    "patch_count": 18,
+    "patch_generation": 18,
     "pinned": false,
     "state": "active",
-    "use_count": 70,
-    "view_count": 70
+    "use_count": 79,
+    "view_count": 79
   },
   "web-entertainment-research": {
     "archived_at": null,
