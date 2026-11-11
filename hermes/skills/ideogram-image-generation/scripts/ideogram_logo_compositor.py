@@ -116,8 +116,8 @@ def generate_ideogram_image(prompt: str, aspect_ratio: str = "ASPECT_1_1", model
     }
 
 
-def composite_logo(image_data: bytes, logo_path: str = None, logo_height: int = 60) -> Image.Image:
-    """Composite the OptiRFP logo at the bottom of the image."""
+def composite_logo(image_data: bytes, logo_path: str = None, logo_height: int = None) -> Image.Image:
+    """Composite the OptiRFP logo at the bottom RIGHT of the image (per brand spec)."""
     
     # Load the generated image
     img = Image.open(io.BytesIO(image_data))
@@ -135,18 +135,20 @@ def composite_logo(image_data: bytes, logo_path: str = None, logo_height: int = 
         if logo.mode != 'RGBA':
             logo = logo.convert('RGBA')
         
-        # Calculate logo size
+        # Resize logo - 30% of image width per OptiRFP brand spec
+        target_width = int(img.width * 0.30)
         aspect_ratio = logo.width / logo.height
-        new_height = logo_height
-        new_width = int(new_height * aspect_ratio)
+        new_height = int(target_width / aspect_ratio)
+        new_width = target_width
         
-        # Resize logo
         logo = logo.resize((new_width, new_height), Image.Resampling.LANCZOS)
         
-        # Calculate position (bottom center with padding)
-        padding = 40
-        logo_x = (img.width - new_width) // 2
-        logo_y = img.height - new_height - padding
+        # Position at BOTTOM RIGHT with 150px fixed margins (per brand spec)
+        # Fixed margins prevent social platform cropping issues
+        MARGIN_RIGHT = 150
+        MARGIN_BOTTOM = 150
+        logo_x = img.width - new_width - MARGIN_RIGHT
+        logo_y = img.height - new_height - MARGIN_BOTTOM
         
         # Paste logo onto image
         img.paste(logo, (logo_x, logo_y), logo)

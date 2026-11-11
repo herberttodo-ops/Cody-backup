@@ -140,14 +140,18 @@ def composite_logo(image_data: bytes, logo_path: str = LOGO_PATH) -> Image.Image
             new_data.append(item)
     logo.putdata(new_data)
 
-    # Resize logo
-    logo_height = 55
+    # Resize logo - 30% of image width per OptiRFP brand spec
+    target_width = int(img.width * 0.30)
     aspect = logo.width / logo.height
-    logo = logo.resize((int(logo_height * aspect), logo_height), Image.Resampling.LANCZOS)
+    logo = logo.resize((target_width, int(target_width / aspect)), Image.Resampling.LANCZOS)
 
-    # Paste centered at bottom
-    position = ((img.width - logo.width) // 2, img.height - logo.height - 40)
-    img.paste(logo, position, logo)
+    # Position at BOTTOM RIGHT with 150px fixed margins (per brand spec)
+    # Fixed margins prevent social platform cropping issues
+    MARGIN_RIGHT = 150
+    MARGIN_BOTTOM = 150
+    x_right = img.width - logo.width - MARGIN_RIGHT
+    y_bottom = img.height - logo.height - MARGIN_BOTTOM
+    img.paste(logo, (x_right, y_bottom), logo)
 
     return img
 
