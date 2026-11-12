@@ -1,0 +1,55 @@
+Cronjob Response: optirfp-linkedin-daily
+(job_id: d0ba9894a668)
+-------------
+
+Headline: 80% of losing RFPs are copy-pasted
+Topic: copy-paste
+Content library: 43 headlines, 12 templates
+Generated at: 2026-11-11T08:00:06.391956
+Wed Nov 11 08:00:06 AM EST 2026: Starting OptiRFP daily post v2.0 (expanded content)...
+Wed Nov 11 08:00:06 AM EST 2026: Generated headline: 80% of losing RFPs are copy-pasted
+Wed Nov 11 08:00:06 AM EST 2026: Topic: copy-paste
+Wed Nov 11 08:00:06 AM EST 2026: Using expanded content library v2.0
+Wed Nov 11 08:00:06 AM EST 2026: Generating image with compositor...
+Wed Nov 11 08:00:20 AM EST 2026: Image generated: /home/herby/.hermes/generated_images/optirfp_copy-paste____ID___.png
+Wed Nov 11 08:00:20 AM EST 2026: Uploading to Drive...
+/home/herby/.hermes/hermes-agent/venv/lib/python3.11/site-packages/google/api_core/_python_version_support.py:273: FutureWarning: You are using a Python version (3.11.16) which Google will stop supporting in new releases of google.api_core once it reaches its end of life (2027-10-24). Please upgrade to the latest Python version, or at least Python 3.12, to continue receiving updates for google.api_core past that date.
+  warnings.warn(message, FutureWarning)
+Wed Nov 11 08:00:24 AM EST 2026: Drive URL: https://drive.google.com/uc?export=view&id=1FAa94UQz8q03NkTZbAyeuw2usz3jmv85
+Wed Nov 11 08:00:24 AM EST 2026: Posting to LinkedIn...
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"6af466e9de9478ed27943e5c\",\"allowedActions\":[\"publishPostNow\",\"updatePost\",\"movePostToDraft\",\"publishPostNext\",\"updatePostSchedule\",\"updatePostTags\",\"addPostNote\",\"duplicatePost\",\"deletePost\",\"updateShopGridLink\",\"createPostRecurrence\"],\"status\":\"scheduled\",\"text\":\"80% of losing RFPs are copy-pasted\\n\\nGood RFP responses answer the questions asked.\\n\\nWinning RFP responses answer the questions behind the questions. The unspoken concerns. The hidden priorities. The real decision criteria.\\n\\nRead between the lines.\\n\\n#RFP #B2BSales #ProposalWriting #SalesTips #WinRate\",\"channelId\":\"6a7f74bcb2d9d577437af9a4\",\"channelService\":\"linkedin\",\"dueAt\":\"2026-11-11T21:25:00.000Z\",\"sentAt\":null,\"schedulingType\":\"automatic\",\"shareMode\":\"addToQueue\",\"sharedNow\":false,\"isCustomScheduled\":false,\"createdAt\":\"2026-11-11T13:00:25.409Z\",\"updatedAt\":\"2026-11-11T13:00:25.440Z\",\"tags\":[],\"assets\":[{\"__typename\":\"ImageAsset\",\"id\":null,\"type\":\"image\",\"mimeType\":\"image/png\",\"source\":\"https://drive.google.com/uc?export=view&id=1FAa94UQz8q03NkTZbAyeuw2usz3jmv85\",\"thumbnail\":\"https://drive.google.com/uc?export=view&id=1FAa94UQz8q03NkTZbAyeuw2usz3jmv85\",\"image\":{\"width\":2560,\"height\":1440,\"altText\":\"80% of losing RFPs are copy-pasted\\n\\nGood RFP responses answer the questions asked.\\n\\nWinning RFP resp\",\"isAnimated\":false,\"animatedThumbnail\":null,\"userTags\":null}}],\"error\":null,\"metadata\":{\"__typename\":\"LinkedInPostMetadata\",\"type\":\"post\",\"annotations\":[{\"type\":\"hashtag\",\"content\":\"#RFP\",\"indices\":[249,253],\"text\":\"#RFP\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=RFP\"},{\"type\":\"hashtag\",\"content\":\"#B2BSales\",\"indices\":[254,263],\"text\":\"#B2BSales\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=B2BSales\"},{\"type\":\"hashtag\",\"content\":\"#ProposalWriting\",\"indices\":[264,280],\"text\":\"#ProposalWriting\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=ProposalWriting\"},{\"type\":\"hashtag\",\"content\":\"#SalesTips\",\"indices\":[281,291],\"text\":\"#SalesTips\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=SalesTips\"},{\"type\":\"hashtag\",\"content\":\"#WinRate\",\"indices\":[292,300],\"text\":\"#WinRate\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=WinRate\"}],\"firstComment\":null,\"linkAttachment\":null}}"
+      },
+      {
+        "type": "text",
+        "text": "{\"rateLimit\":[{\"remaining\":148,\"resetSeconds\":741},{\"remaining\":571,\"resetSeconds\":43045},{\"remaining\":399,\"resetSeconds\":169888}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+Wed Nov 11 08:00:25 AM EST 2026: Posting to Facebook...
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"6af466ea758538aa15878de7\",\"allowedActions\":[\"publishPostNow\",\"updatePost\",\"movePostToDraft\",\"publishPostNext\",\"updatePostSchedule\",\"updatePostTags\",\"addPostNote\",\"duplicatePost\",\"deletePost\",\"updateShopGridLink\",\"createPostRecurrence\"],\"status\":\"scheduled\",\"text\":\"80% of losing RFPs are copy-pasted\\n\\nGood RFP responses answer the questions asked.\\n\\nWinning RFP responses answer the questions behind the questions. The unspoken concerns. The hidden priorities. The real decision criteria.\\n\\nRead between the lines.\\n\\n#RFP #B2BSales #ProposalWriting #SalesTips #WinRate\",\"channelId\":\"6a7f7476b2d9d577437af67f\",\"channelService\":\"facebook\",\"dueAt\":\"2026-11-11T13:54:00.000Z\",\"sentAt\":null,\"schedulingType\":\"automatic\",\"shareMode\":\"addToQueue\",\"sharedNow\":false,\"isCustomScheduled\":false,\"createdAt\":\"2026-11-11T13:00:25.996Z\",\"updatedAt\":\"2026-11-11T13:00:26.049Z\",\"tags\":[],\"assets\":[{\"__typename\":\"ImageAsset\",\"id\":null,\"type\":\"image\",\"mimeType\":\"image/png\",\"source\":\"https://drive.google.com/uc?export=view&id=1FAa94UQz8q03NkTZbAyeuw2usz3jmv85\",\"thumbnail\":\"https://drive.google.com/uc?export=view&id=1FAa94UQz8q03NkTZbAyeuw2usz3jmv85\",\"image\":{\"width\":2560,\"height\":1440,\"altText\":\"80% of losing RFPs are copy-pasted\\n\\nGood RFP responses answer the questions asked.\\n\\nWinning RFP resp\",\"isAnimated\":false,\"animatedThumbnail\":null,\"userTags\":null}}],\"error\":null,\"metadata\":{\"__typename\":\"FacebookPostMetadata\",\"type\":\"post\",\"annotations\":[{\"type\":\"hashtag\",\"content\":\"#RFP\",\"indices\":[249,253],\"text\":\"#RFP\",\"url\":\"https://www.facebook.com/hashtag/RFP\"},{\"type\":\"hashtag\",\"content\":\"#B2BSales\",\"indices\":[254,263],\"text\":\"#B2BSales\",\"url\":\"https://www.facebook.com/hashtag/B2BSales\"},{\"type\":\"hashtag\",\"content\":\"#ProposalWriting\",\"indices\":[264,280],\"text\":\"#ProposalWriting\",\"url\":\"https://www.facebook.com/hashtag/ProposalWriting\"},{\"type\":\"hashtag\",\"content\":\"#SalesTips\",\"indices\":[281,291],\"text\":\"#SalesTips\",\"url\":\"https://www.facebook.com/hashtag/SalesTips\"},{\"type\":\"hashtag\",\"content\":\"#WinRate\",\"indices\":[292,300],\"text\":\"#WinRate\",\"url\":\"https://www.facebook.com/hashtag/WinRate\"}],\"title\":null,\"firstComment\":null,\"linkAttachment\":null}}"
+      },
+      {
+        "type": "text",
+        "text": "{\"rateLimit\":[{\"remaining\":147,\"resetSeconds\":740},{\"remaining\":570,\"resetSeconds\":43044},{\"remaining\":398,\"resetSeconds\":169887}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+Wed Nov 11 08:00:26 AM EST 2026: DONE - Posted with expanded content variety
+
+To stop or manage this job, send me a new message (e.g. "stop reminder optirfp-linkedin-daily").
