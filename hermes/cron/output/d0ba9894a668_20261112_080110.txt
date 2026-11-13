@@ -1,0 +1,55 @@
+Cronjob Response: optirfp-linkedin-daily
+(job_id: d0ba9894a668)
+-------------
+
+Headline: The halo effect works both ways
+Topic: winning
+Content library: 43 headlines, 12 templates
+Generated at: 2026-11-12T08:00:46.573171
+Thu Nov 12 08:00:45 AM EST 2026: Starting OptiRFP daily post v2.0 (expanded content)...
+Thu Nov 12 08:00:46 AM EST 2026: Generated headline: The halo effect works both ways
+Thu Nov 12 08:00:46 AM EST 2026: Topic: winning
+Thu Nov 12 08:00:46 AM EST 2026: Using expanded content library v2.0
+Thu Nov 12 08:00:46 AM EST 2026: Generating image with compositor...
+Thu Nov 12 08:01:03 AM EST 2026: Image generated: /home/herby/.hermes/generated_images/optirfp_winning____ID___.png
+Thu Nov 12 08:01:03 AM EST 2026: Uploading to Drive...
+/home/herby/.hermes/hermes-agent/venv/lib/python3.11/site-packages/google/api_core/_python_version_support.py:273: FutureWarning: You are using a Python version (3.11.16) which Google will stop supporting in new releases of google.api_core once it reaches its end of life (2027-10-24). Please upgrade to the latest Python version, or at least Python 3.12, to continue receiving updates for google.api_core past that date.
+  warnings.warn(message, FutureWarning)
+Thu Nov 12 08:01:08 AM EST 2026: Drive URL: https://drive.google.com/uc?export=view&id=1HriSzXw1XeeJj4rv8UmXqPJPmnxBOymy
+Thu Nov 12 08:01:08 AM EST 2026: Posting to LinkedIn...
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"6af5b89493c___ID___f75\",\"allowedActions\":[\"publishPostNow\",\"updatePost\",\"movePostToDraft\",\"publishPostNext\",\"updatePostSchedule\",\"updatePostTags\",\"addPostNote\",\"duplicatePost\",\"deletePost\",\"updateShopGridLink\",\"createPostRecurrence\"],\"status\":\"scheduled\",\"text\":\"The halo effect works both ways\\n\\nPeople trust what looks familiar. It's cognitive bias, and it's your advantage.\\n\\nMirror their terminology. Reflect their priorities. Use their language like it was your first.\\n\\nThe closer you match their mental model, the easier you are to select.\\n\\n#RFP #B2BSales #ProposalWriting #SalesTips #WinRate\",\"channelId\":\"6a7f74bcb2d9d577437af9a4\",\"channelService\":\"linkedin\",\"dueAt\":\"2026-11-12T18:09:00.000Z\",\"sentAt\":null,\"schedulingType\":\"automatic\",\"shareMode\":\"addToQueue\",\"sharedNow\":false,\"isCustomScheduled\":false,\"createdAt\":\"2026-11-12T13:01:08.957Z\",\"updatedAt\":\"2026-11-12T13:01:09.004Z\",\"tags\":[],\"assets\":[{\"__typename\":\"ImageAsset\",\"id\":null,\"type\":\"image\",\"mimeType\":\"image/png\",\"source\":\"https://drive.google.com/uc?export=view&id=1HriSzXw1XeeJj4rv8UmXqPJPmnxBOymy\",\"thumbnail\":\"https://drive.google.com/uc?export=view&id=1HriSzXw1XeeJj4rv8UmXqPJPmnxBOymy\",\"image\":{\"width\":1792,\"height\":2240,\"altText\":\"The halo effect works both ways\\n\\nPeople trust what looks familiar. It's cognitive bias, and it's you\",\"isAnimated\":false,\"animatedThumbnail\":null,\"userTags\":null}}],\"error\":null,\"metadata\":{\"__typename\":\"LinkedInPostMetadata\",\"type\":\"post\",\"annotations\":[{\"type\":\"hashtag\",\"content\":\"#RFP\",\"indices\":[282,286],\"text\":\"#RFP\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=RFP\"},{\"type\":\"hashtag\",\"content\":\"#B2BSales\",\"indices\":[287,296],\"text\":\"#B2BSales\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=B2BSales\"},{\"type\":\"hashtag\",\"content\":\"#ProposalWriting\",\"indices\":[297,313],\"text\":\"#ProposalWriting\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=ProposalWriting\"},{\"type\":\"hashtag\",\"content\":\"#SalesTips\",\"indices\":[314,324],\"text\":\"#SalesTips\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=SalesTips\"},{\"type\":\"hashtag\",\"content\":\"#WinRate\",\"indices\":[325,333],\"text\":\"#WinRate\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=WinRate\"}],\"firstComment\":null,\"linkAttachment\":null}}"
+      },
+      {
+        "type": "text",
+        "text": "{\"rateLimit\":[{\"remaining\":148,\"resetSeconds\":672},{\"remaining\":571,\"resetSeconds\":43008},{\"remaining\":343,\"resetSeconds\":83444}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+Thu Nov 12 08:01:09 AM EST 2026: Posting to Facebook...
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"6af5b89537794f4dae3cac3b\",\"allowedActions\":[\"publishPostNow\",\"updatePost\",\"movePostToDraft\",\"publishPostNext\",\"updatePostSchedule\",\"updatePostTags\",\"addPostNote\",\"duplicatePost\",\"deletePost\",\"updateShopGridLink\",\"createPostRecurrence\"],\"status\":\"scheduled\",\"text\":\"The halo effect works both ways\\n\\nPeople trust what looks familiar. It's cognitive bias, and it's your advantage.\\n\\nMirror their terminology. Reflect their priorities. Use their language like it was your first.\\n\\nThe closer you match their mental model, the easier you are to select.\\n\\n#RFP #B2BSales #ProposalWriting #SalesTips #WinRate\",\"channelId\":\"6a7f7476b2d9d577437af67f\",\"channelService\":\"facebook\",\"dueAt\":\"2026-11-12T13:14:00.000Z\",\"sentAt\":null,\"schedulingType\":\"automatic\",\"shareMode\":\"addToQueue\",\"sharedNow\":false,\"isCustomScheduled\":false,\"createdAt\":\"2026-11-12T13:01:09.499Z\",\"updatedAt\":\"2026-11-12T13:01:09.530Z\",\"tags\":[],\"assets\":[{\"__typename\":\"ImageAsset\",\"id\":null,\"type\":\"image\",\"mimeType\":\"image/png\",\"source\":\"https://drive.google.com/uc?export=view&id=1HriSzXw1XeeJj4rv8UmXqPJPmnxBOymy\",\"thumbnail\":\"https://drive.google.com/uc?export=view&id=1HriSzXw1XeeJj4rv8UmXqPJPmnxBOymy\",\"image\":{\"width\":1792,\"height\":2240,\"altText\":\"The halo effect works both ways\\n\\nPeople trust what looks familiar. It's cognitive bias, and it's you\",\"isAnimated\":false,\"animatedThumbnail\":null,\"userTags\":null}}],\"error\":null,\"metadata\":{\"__typename\":\"FacebookPostMetadata\",\"type\":\"post\",\"annotations\":[{\"type\":\"hashtag\",\"content\":\"#RFP\",\"indices\":[282,286],\"text\":\"#RFP\",\"url\":\"https://www.facebook.com/hashtag/RFP\"},{\"type\":\"hashtag\",\"content\":\"#B2BSales\",\"indices\":[287,296],\"text\":\"#B2BSales\",\"url\":\"https://www.facebook.com/hashtag/B2BSales\"},{\"type\":\"hashtag\",\"content\":\"#ProposalWriting\",\"indices\":[297,313],\"text\":\"#ProposalWriting\",\"url\":\"https://www.facebook.com/hashtag/ProposalWriting\"},{\"type\":\"hashtag\",\"content\":\"#SalesTips\",\"indices\":[314,324],\"text\":\"#SalesTips\",\"url\":\"https://www.facebook.com/hashtag/SalesTips\"},{\"type\":\"hashtag\",\"content\":\"#WinRate\",\"indices\":[325,333],\"text\":\"#WinRate\",\"url\":\"https://www.facebook.com/hashtag/WinRate\"}],\"title\":null,\"firstComment\":null,\"linkAttachment\":null}}"
+      },
+      {
+        "type": "text",
+        "text": "{\"rateLimit\":[{\"remaining\":147,\"resetSeconds\":671},{\"remaining\":570,\"resetSeconds\":43007},{\"remaining\":342,\"resetSeconds\":83444}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+Thu Nov 12 08:01:09 AM EST 2026: DONE - Posted with expanded content variety
+
+To stop or manage this job, send me a new message (e.g. "stop reminder optirfp-linkedin-daily").
