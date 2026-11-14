@@ -1,0 +1,55 @@
+Cronjob Response: optirfp-linkedin-daily
+(job_id: d0ba9894a668)
+-------------
+
+Headline: Mirror their language. Win their trust.
+Topic: mirror-language
+Content library: 43 headlines, 12 templates
+Generated at: 2026-11-13T08:00:12.963442
+Fri Nov 13 08:00:12 AM EST 2026: Starting OptiRFP daily post v2.0 (expanded content)...
+Fri Nov 13 08:00:12 AM EST 2026: Generated headline: Mirror their language. Win their trust.
+Fri Nov 13 08:00:12 AM EST 2026: Topic: mirror-language
+Fri Nov 13 08:00:12 AM EST 2026: Using expanded content library v2.0
+Fri Nov 13 08:00:12 AM EST 2026: Generating image with compositor...
+Fri Nov 13 08:00:28 AM EST 2026: Image generated: /home/herby/.hermes/generated_images/optirfp_mirror-language____ID___.png
+Fri Nov 13 08:00:28 AM EST 2026: Uploading to Drive...
+/home/herby/.hermes/hermes-agent/venv/lib/python3.11/site-packages/google/api_core/_python_version_support.py:273: FutureWarning: You are using a Python version (3.11.16) which Google will stop supporting in new releases of google.api_core once it reaches its end of life (2027-10-24). Please upgrade to the latest Python version, or at least Python 3.12, to continue receiving updates for google.api_core past that date.
+  warnings.warn(message, FutureWarning)
+Fri Nov 13 08:00:32 AM EST 2026: Drive URL: https://drive.google.com/uc?export=view&id=1HUW-sN6nq7LUV84FeNOO0iH9a3wFsbBU
+Fri Nov 13 08:00:32 AM EST 2026: Posting to LinkedIn...
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"6af709f166ff9797d8835e86\",\"allowedActions\":[\"publishPostNow\",\"updatePost\",\"movePostToDraft\",\"publishPostNext\",\"updatePostSchedule\",\"updatePostTags\",\"addPostNote\",\"duplicatePost\",\"deletePost\",\"updateShopGridLink\",\"createPostRecurrence\"],\"status\":\"scheduled\",\"text\":\"Mirror their language. Win their trust.\\n\\nAI-generated responses all sound the same. Confident, polished, and hollow.\\n\\nEvaluators feel it. They can't quite say why, but they know.\\n\\nHuman insight beats algorithmic fluency every time.\\n\\n#RFPResponse #SalesTips #WinningProposals #B2BSales #GovCon\",\"channelId\":\"6a7f74bcb2d9d577437af9a4\",\"channelService\":\"linkedin\",\"dueAt\":\"2026-11-13T19:59:00.000Z\",\"sentAt\":null,\"schedulingType\":\"automatic\",\"shareMode\":\"addToQueue\",\"sharedNow\":false,\"isCustomScheduled\":false,\"createdAt\":\"2026-11-13T13:00:33.509Z\",\"updatedAt\":\"2026-11-13T13:00:33.535Z\",\"tags\":[],\"assets\":[{\"__typename\":\"ImageAsset\",\"id\":null,\"type\":\"image\",\"mimeType\":\"image/png\",\"source\":\"https://drive.google.com/uc?export=view&id=1HUW-sN6nq7LUV84FeNOO0iH9a3wFsbBU\",\"thumbnail\":\"https://drive.google.com/uc?export=view&id=1HUW-sN6nq7LUV84FeNOO0iH9a3wFsbBU\",\"image\":{\"width\":2560,\"height\":1440,\"altText\":\"Mirror their language. Win their trust.\\n\\nAI-generated responses all sound the same. Confident, polis\",\"isAnimated\":false,\"animatedThumbnail\":null,\"userTags\":null}}],\"error\":null,\"metadata\":{\"__typename\":\"LinkedInPostMetadata\",\"type\":\"post\",\"annotations\":[{\"type\":\"hashtag\",\"content\":\"#RFPResponse\",\"indices\":[233,245],\"text\":\"#RFPResponse\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=RFPResponse\"},{\"type\":\"hashtag\",\"content\":\"#SalesTips\",\"indices\":[246,256],\"text\":\"#SalesTips\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=SalesTips\"},{\"type\":\"hashtag\",\"content\":\"#WinningProposals\",\"indices\":[257,274],\"text\":\"#WinningProposals\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=WinningProposals\"},{\"type\":\"hashtag\",\"content\":\"#B2BSales\",\"indices\":[275,284],\"text\":\"#B2BSales\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=B2BSales\"},{\"type\":\"hashtag\",\"content\":\"#GovCon\",\"indices\":[285,292],\"text\":\"#GovCon\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=GovCon\"}],\"firstComment\":null,\"linkAttachment\":null}}"
+      },
+      {
+        "type": "text",
+        "text": "{\"rateLimit\":[{\"remaining\":148,\"resetSeconds\":748},{\"remaining\":571,\"resetSeconds\":43046},{\"remaining\":1997,\"resetSeconds\":2590051}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+Fri Nov 13 08:00:33 AM EST 2026: Posting to Facebook...
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"6af709f2bd1182b0d3f4b6e9\",\"allowedActions\":[\"publishPostNow\",\"updatePost\",\"movePostToDraft\",\"publishPostNext\",\"updatePostSchedule\",\"updatePostTags\",\"addPostNote\",\"duplicatePost\",\"deletePost\",\"updateShopGridLink\",\"createPostRecurrence\"],\"status\":\"scheduled\",\"text\":\"Mirror their language. Win their trust.\\n\\nAI-generated responses all sound the same. Confident, polished, and hollow.\\n\\nEvaluators feel it. They can't quite say why, but they know.\\n\\nHuman insight beats algorithmic fluency every time.\\n\\n#RFPResponse #SalesTips #WinningProposals #B2BSales #GovCon\",\"channelId\":\"6a7f7476b2d9d577437af67f\",\"channelService\":\"facebook\",\"dueAt\":\"2026-11-13T13:39:00.000Z\",\"sentAt\":null,\"schedulingType\":\"automatic\",\"shareMode\":\"addToQueue\",\"sharedNow\":false,\"isCustomScheduled\":false,\"createdAt\":\"2026-11-13T13:00:34.024Z\",\"updatedAt\":\"2026-11-13T13:00:34.041Z\",\"tags\":[],\"assets\":[{\"__typename\":\"ImageAsset\",\"id\":null,\"type\":\"image\",\"mimeType\":\"image/png\",\"source\":\"https://drive.google.com/uc?export=view&id=1HUW-sN6nq7LUV84FeNOO0iH9a3wFsbBU\",\"thumbnail\":\"https://drive.google.com/uc?export=view&id=1HUW-sN6nq7LUV84FeNOO0iH9a3wFsbBU\",\"image\":{\"width\":2560,\"height\":1440,\"altText\":\"Mirror their language. Win their trust.\\n\\nAI-generated responses all sound the same. Confident, polis\",\"isAnimated\":false,\"animatedThumbnail\":null,\"userTags\":null}}],\"error\":null,\"metadata\":{\"__typename\":\"FacebookPostMetadata\",\"type\":\"post\",\"annotations\":[{\"type\":\"hashtag\",\"content\":\"#RFPResponse\",\"indices\":[233,245],\"text\":\"#RFPResponse\",\"url\":\"https://www.facebook.com/hashtag/RFPResponse\"},{\"type\":\"hashtag\",\"content\":\"#SalesTips\",\"indices\":[246,256],\"text\":\"#SalesTips\",\"url\":\"https://www.facebook.com/hashtag/SalesTips\"},{\"type\":\"hashtag\",\"content\":\"#WinningProposals\",\"indices\":[257,274],\"text\":\"#WinningProposals\",\"url\":\"https://www.facebook.com/hashtag/WinningProposals\"},{\"type\":\"hashtag\",\"content\":\"#B2BSales\",\"indices\":[275,284],\"text\":\"#B2BSales\",\"url\":\"https://www.facebook.com/hashtag/B2BSales\"},{\"type\":\"hashtag\",\"content\":\"#GovCon\",\"indices\":[285,292],\"text\":\"#GovCon\",\"url\":\"https://www.facebook.com/hashtag/GovCon\"}],\"title\":null,\"firstComment\":null,\"linkAttachment\":null}}"
+      },
+      {
+        "type": "text",
+        "text": "{\"rateLimit\":[{\"remaining\":147,\"resetSeconds\":747},{\"remaining\":570,\"resetSeconds\":43045},{\"remaining\":1996,\"resetSeconds\":2590050}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+Fri Nov 13 08:00:34 AM EST 2026: DONE - Posted with expanded content variety
+
+To stop or manage this job, send me a new message (e.g. "stop reminder optirfp-linkedin-daily").
