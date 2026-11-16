@@ -1,0 +1,55 @@
+Cronjob Response: optirfp-linkedin-daily
+(job_id: d0ba9894a668)
+-------------
+
+Headline: Familiarity breeds confidence
+Topic: mirror-language
+Content library: 43 headlines, 12 templates
+Generated at: 2026-11-15T08:00:17.727196
+Sun Nov 15 08:00:17 AM EST 2026: Starting OptiRFP daily post v2.0 (expanded content)...
+Sun Nov 15 08:00:17 AM EST 2026: Generated headline: Familiarity breeds confidence
+Sun Nov 15 08:00:17 AM EST 2026: Topic: mirror-language
+Sun Nov 15 08:00:17 AM EST 2026: Using expanded content library v2.0
+Sun Nov 15 08:00:17 AM EST 2026: Generating image with compositor...
+Sun Nov 15 08:00:33 AM EST 2026: Image generated: /home/herby/.hermes/generated_images/optirfp_mirror-language____ID___.png
+Sun Nov 15 08:00:33 AM EST 2026: Uploading to Drive...
+/home/herby/.hermes/hermes-agent/venv/lib/python3.11/site-packages/google/api_core/_python_version_support.py:273: FutureWarning: You are using a Python version (3.11.16) which Google will stop supporting in new releases of google.api_core once it reaches its end of life (2027-10-24). Please upgrade to the latest Python version, or at least Python 3.12, to continue receiving updates for google.api_core past that date.
+  warnings.warn(message, FutureWarning)
+Sun Nov 15 08:00:36 AM EST 2026: Drive URL: https://drive.google.com/uc?export=view&id=10LERubfzHsnPkOPcj60GGdb-OWhfhujP
+Sun Nov 15 08:00:36 AM EST 2026: Posting to LinkedIn...
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"6af9acf5918fe79d2ee3acc1\",\"allowedActions\":[\"publishPostNow\",\"updatePost\",\"movePostToDraft\",\"publishPostNext\",\"updatePostSchedule\",\"updatePostTags\",\"addPostNote\",\"duplicatePost\",\"deletePost\",\"updateShopGridLink\",\"createPostRecurrence\"],\"status\":\"scheduled\",\"text\":\"Familiarity breeds confidence\\n\\nTemplates save time. They also scream 'bulk send.'\\n\\nEvery boilerplate paragraph is a signal: This wasn't written for you.\\n\\nCut the generic. Add the specific. One custom detail outweighs ten recycled features.\\n\\n#RFP #B2BSales #ProposalWriting #SalesTips #WinRate\",\"channelId\":\"6a7f74bcb2d9d577437af9a4\",\"channelService\":\"linkedin\",\"dueAt\":\"2026-11-16T03:49:00.000Z\",\"sentAt\":null,\"schedulingType\":\"automatic\",\"shareMode\":\"addToQueue\",\"sharedNow\":false,\"isCustomScheduled\":false,\"createdAt\":\"2026-11-15T13:00:37.277Z\",\"updatedAt\":\"2026-11-15T13:00:37.295Z\",\"tags\":[],\"assets\":[{\"__typename\":\"ImageAsset\",\"id\":null,\"type\":\"image\",\"mimeType\":\"image/png\",\"source\":\"https://drive.google.com/uc?export=view&id=10LERubfzHsnPkOPcj60GGdb-OWhfhujP\",\"thumbnail\":\"https://drive.google.com/uc?export=view&id=10LERubfzHsnPkOPcj60GGdb-OWhfhujP\",\"image\":{\"width\":2560,\"height\":1440,\"altText\":\"Familiarity breeds confidence\\n\\nTemplates save time. They also scream 'bulk send.'\\n\\nEvery boilerplate\",\"isAnimated\":false,\"animatedThumbnail\":null,\"userTags\":null}}],\"error\":null,\"metadata\":{\"__typename\":\"LinkedInPostMetadata\",\"type\":\"post\",\"annotations\":[{\"type\":\"hashtag\",\"content\":\"#RFP\",\"indices\":[241,245],\"text\":\"#RFP\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=RFP\"},{\"type\":\"hashtag\",\"content\":\"#B2BSales\",\"indices\":[246,255],\"text\":\"#B2BSales\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=B2BSales\"},{\"type\":\"hashtag\",\"content\":\"#ProposalWriting\",\"indices\":[256,272],\"text\":\"#ProposalWriting\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=ProposalWriting\"},{\"type\":\"hashtag\",\"content\":\"#SalesTips\",\"indices\":[273,283],\"text\":\"#SalesTips\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=SalesTips\"},{\"type\":\"hashtag\",\"content\":\"#WinRate\",\"indices\":[284,292],\"text\":\"#WinRate\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=WinRate\"}],\"firstComment\":null,\"linkAttachment\":null}}"
+      },
+      {
+        "type": "text",
+        "text": "{\"rateLimit\":[{\"remaining\":148,\"resetSeconds\":746},{\"remaining\":572,\"resetSeconds\":43198},{\"remaining\":1883,\"resetSeconds\":2417248}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+Sun Nov 15 08:00:37 AM EST 2026: Posting to Facebook...
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"6af9acf5e5a113497aea5a7c\",\"allowedActions\":[\"publishPostNow\",\"updatePost\",\"movePostToDraft\",\"publishPostNext\",\"updatePostSchedule\",\"updatePostTags\",\"addPostNote\",\"duplicatePost\",\"deletePost\",\"updateShopGridLink\",\"createPostRecurrence\"],\"status\":\"scheduled\",\"text\":\"Familiarity breeds confidence\\n\\nTemplates save time. They also scream 'bulk send.'\\n\\nEvery boilerplate paragraph is a signal: This wasn't written for you.\\n\\nCut the generic. Add the specific. One custom detail outweighs ten recycled features.\\n\\n#RFP #B2BSales #ProposalWriting #SalesTips #WinRate\",\"channelId\":\"6a7f7476b2d9d577437af67f\",\"channelService\":\"facebook\",\"dueAt\":\"2026-11-15T14:10:00.000Z\",\"sentAt\":null,\"schedulingType\":\"automatic\",\"shareMode\":\"addToQueue\",\"sharedNow\":false,\"isCustomScheduled\":false,\"createdAt\":\"2026-11-15T13:00:37.679Z\",\"updatedAt\":\"2026-11-15T13:00:37.729Z\",\"tags\":[],\"assets\":[{\"__typename\":\"ImageAsset\",\"id\":null,\"type\":\"image\",\"mimeType\":\"image/png\",\"source\":\"https://drive.google.com/uc?export=view&id=10LERubfzHsnPkOPcj60GGdb-OWhfhujP\",\"thumbnail\":\"https://drive.google.com/uc?export=view&id=10LERubfzHsnPkOPcj60GGdb-OWhfhujP\",\"image\":{\"width\":2560,\"height\":1440,\"altText\":\"Familiarity breeds confidence\\n\\nTemplates save time. They also scream 'bulk send.'\\n\\nEvery boilerplate\",\"isAnimated\":false,\"animatedThumbnail\":null,\"userTags\":null}}],\"error\":null,\"metadata\":{\"__typename\":\"FacebookPostMetadata\",\"type\":\"post\",\"annotations\":[{\"type\":\"hashtag\",\"content\":\"#RFP\",\"indices\":[241,245],\"text\":\"#RFP\",\"url\":\"https://www.facebook.com/hashtag/RFP\"},{\"type\":\"hashtag\",\"content\":\"#B2BSales\",\"indices\":[246,255],\"text\":\"#B2BSales\",\"url\":\"https://www.facebook.com/hashtag/B2BSales\"},{\"type\":\"hashtag\",\"content\":\"#ProposalWriting\",\"indices\":[256,272],\"text\":\"#ProposalWriting\",\"url\":\"https://www.facebook.com/hashtag/ProposalWriting\"},{\"type\":\"hashtag\",\"content\":\"#SalesTips\",\"indices\":[273,283],\"text\":\"#SalesTips\",\"url\":\"https://www.facebook.com/hashtag/SalesTips\"},{\"type\":\"hashtag\",\"content\":\"#WinRate\",\"indices\":[284,292],\"text\":\"#WinRate\",\"url\":\"https://www.facebook.com/hashtag/WinRate\"}],\"title\":null,\"firstComment\":null,\"linkAttachment\":null}}"
+      },
+      {
+        "type": "text",
+        "text": "{\"rateLimit\":[{\"remaining\":147,\"resetSeconds\":745},{\"remaining\":571,\"resetSeconds\":43197},{\"remaining\":1882,\"resetSeconds\":2417247}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+Sun Nov 15 08:00:37 AM EST 2026: DONE - Posted with expanded content variety
+
+To stop or manage this job, send me a new message (e.g. "stop reminder optirfp-linkedin-daily").
