@@ -1,0 +1,55 @@
+Cronjob Response: optirfp-linkedin-daily
+(job_id: d0ba9894a668)
+-------------
+
+Headline: Page one impressions: you get one
+Topic: page-one
+Content library: 43 headlines, 12 templates
+Generated at: 2026-11-16T08:00:33.672570
+Mon Nov 16 08:00:33 AM EST 2026: Starting OptiRFP daily post v2.0 (expanded content)...
+Mon Nov 16 08:00:33 AM EST 2026: Generated headline: Page one impressions: you get one
+Mon Nov 16 08:00:33 AM EST 2026: Topic: page-one
+Mon Nov 16 08:00:33 AM EST 2026: Using expanded content library v2.0
+Mon Nov 16 08:00:33 AM EST 2026: Generating image with compositor...
+Mon Nov 16 08:00:47 AM EST 2026: Image generated: /home/herby/.hermes/generated_images/optirfp_page-one____ID___.png
+Mon Nov 16 08:00:47 AM EST 2026: Uploading to Drive...
+/home/herby/.hermes/hermes-agent/venv/lib/python3.11/site-packages/google/api_core/_python_version_support.py:273: FutureWarning: You are using a Python version (3.11.16) which Google will stop supporting in new releases of google.api_core once it reaches its end of life (2027-10-24). Please upgrade to the latest Python version, or at least Python 3.12, to continue receiving updates for google.api_core past that date.
+  warnings.warn(message, FutureWarning)
+Mon Nov 16 08:00:52 AM EST 2026: Drive URL: https://drive.google.com/uc?export=view&id=1Tn9tt8Sen1hbgXFEcSzrt_eQanAp3XE1
+Mon Nov 16 08:00:52 AM EST 2026: Posting to LinkedIn...
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"6afafe854a8979ce14f30f0f\",\"allowedActions\":[\"publishPostNow\",\"updatePost\",\"movePostToDraft\",\"publishPostNext\",\"updatePostSchedule\",\"updatePostTags\",\"addPostNote\",\"duplicatePost\",\"deletePost\",\"updateShopGridLink\",\"createPostRecurrence\"],\"status\":\"scheduled\",\"text\":\"Page one impressions: you get one\\n\\nThe evaluators made their decision on page one. Whether they knew it or not.\\n\\nYour first impression is your only impression. Make it count.\\n\\nLead with impact. Mirror their priorities. Make them want page two.\\n\\n#RFPWriting #BusinessDevelopment #SalesProcess #ProposalTips #B2B\",\"channelId\":\"6a7f74bcb2d9d577437af9a4\",\"channelService\":\"linkedin\",\"dueAt\":\"2026-11-17T02:41:00.000Z\",\"sentAt\":null,\"schedulingType\":\"automatic\",\"shareMode\":\"addToQueue\",\"sharedNow\":false,\"isCustomScheduled\":false,\"createdAt\":\"2026-11-16T13:00:53.119Z\",\"updatedAt\":\"2026-11-16T13:00:53.151Z\",\"tags\":[],\"assets\":[{\"__typename\":\"ImageAsset\",\"id\":null,\"type\":\"image\",\"mimeType\":\"image/png\",\"source\":\"https://drive.google.com/uc?export=view&id=1Tn9tt8Sen1hbgXFEcSzrt_eQanAp3XE1\",\"thumbnail\":\"https://drive.google.com/uc?export=view&id=1Tn9tt8Sen1hbgXFEcSzrt_eQanAp3XE1\",\"image\":{\"width\":2560,\"height\":1440,\"altText\":\"Page one impressions: you get one\\n\\nThe evaluators made their decision on page one. Whether they knew\",\"isAnimated\":false,\"animatedThumbnail\":null,\"userTags\":null}}],\"error\":null,\"metadata\":{\"__typename\":\"LinkedInPostMetadata\",\"type\":\"post\",\"annotations\":[{\"type\":\"hashtag\",\"content\":\"#RFPWriting\",\"indices\":[245,256],\"text\":\"#RFPWriting\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=RFPWriting\"},{\"type\":\"hashtag\",\"content\":\"#BusinessDevelopment\",\"indices\":[257,277],\"text\":\"#BusinessDevelopment\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=BusinessDevelopment\"},{\"type\":\"hashtag\",\"content\":\"#SalesProcess\",\"indices\":[278,291],\"text\":\"#SalesProcess\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=SalesProcess\"},{\"type\":\"hashtag\",\"content\":\"#ProposalTips\",\"indices\":[292,305],\"text\":\"#ProposalTips\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=ProposalTips\"},{\"type\":\"hashtag\",\"content\":\"#B2B\",\"indices\":[306,310],\"text\":\"#B2B\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=B2B\"}],\"firstComment\":null,\"linkAttachment\":null}}"
+      },
+      {
+        "type": "text",
+        "text": "{\"rateLimit\":[{\"remaining\":148,\"resetSeconds\":745},{\"remaining\":572,\"resetSeconds\":43185},{\"remaining\":1827,\"resetSeconds\":2330832}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+Mon Nov 16 08:00:53 AM EST 2026: Posting to Facebook...
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"6afafe___ID___b13b2406\",\"allowedActions\":[\"publishPostNow\",\"updatePost\",\"movePostToDraft\",\"publishPostNext\",\"updatePostSchedule\",\"updatePostTags\",\"addPostNote\",\"duplicatePost\",\"deletePost\",\"updateShopGridLink\",\"createPostRecurrence\"],\"status\":\"scheduled\",\"text\":\"Page one impressions: you get one\\n\\nThe evaluators made their decision on page one. Whether they knew it or not.\\n\\nYour first impression is your only impression. Make it count.\\n\\nLead with impact. Mirror their priorities. Make them want page two.\\n\\n#RFPWriting #BusinessDevelopment #SalesProcess #ProposalTips #B2B\",\"channelId\":\"6a7f7476b2d9d577437af67f\",\"channelService\":\"facebook\",\"dueAt\":\"2026-11-17T12:03:00.000Z\",\"sentAt\":null,\"schedulingType\":\"automatic\",\"shareMode\":\"addToQueue\",\"sharedNow\":false,\"isCustomScheduled\":false,\"createdAt\":\"2026-11-16T13:00:53.691Z\",\"updatedAt\":\"2026-11-16T13:00:53.732Z\",\"tags\":[],\"assets\":[{\"__typename\":\"ImageAsset\",\"id\":null,\"type\":\"image\",\"mimeType\":\"image/png\",\"source\":\"https://drive.google.com/uc?export=view&id=1Tn9tt8Sen1hbgXFEcSzrt_eQanAp3XE1\",\"thumbnail\":\"https://drive.google.com/uc?export=view&id=1Tn9tt8Sen1hbgXFEcSzrt_eQanAp3XE1\",\"image\":{\"width\":2560,\"height\":1440,\"altText\":\"Page one impressions: you get one\\n\\nThe evaluators made their decision on page one. Whether they knew\",\"isAnimated\":false,\"animatedThumbnail\":null,\"userTags\":null}}],\"error\":null,\"metadata\":{\"__typename\":\"FacebookPostMetadata\",\"type\":\"post\",\"annotations\":[{\"type\":\"hashtag\",\"content\":\"#RFPWriting\",\"indices\":[245,256],\"text\":\"#RFPWriting\",\"url\":\"https://www.facebook.com/hashtag/RFPWriting\"},{\"type\":\"hashtag\",\"content\":\"#BusinessDevelopment\",\"indices\":[257,277],\"text\":\"#BusinessDevelopment\",\"url\":\"https://www.facebook.com/hashtag/BusinessDevelopment\"},{\"type\":\"hashtag\",\"content\":\"#SalesProcess\",\"indices\":[278,291],\"text\":\"#SalesProcess\",\"url\":\"https://www.facebook.com/hashtag/SalesProcess\"},{\"type\":\"hashtag\",\"content\":\"#ProposalTips\",\"indices\":[292,305],\"text\":\"#ProposalTips\",\"url\":\"https://www.facebook.com/hashtag/ProposalTips\"},{\"type\":\"hashtag\",\"content\":\"#B2B\",\"indices\":[306,310],\"text\":\"#B2B\",\"url\":\"https://www.facebook.com/hashtag/B2B\"}],\"title\":null,\"firstComment\":null,\"linkAttachment\":null}}"
+      },
+      {
+        "type": "text",
+        "text": "{\"rateLimit\":[{\"remaining\":147,\"resetSeconds\":744},{\"remaining\":571,\"resetSeconds\":43184},{\"remaining\":1826,\"resetSeconds\":2330831}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+Mon Nov 16 08:00:53 AM EST 2026: DONE - Posted with expanded content variety
+
+To stop or manage this job, send me a new message (e.g. "stop reminder optirfp-linkedin-daily").
