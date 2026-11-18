@@ -55,7 +55,7 @@
     "patch_count": 34,
     "patch_generation": 6,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 52,
     "view_count": 52
   },
@@ -245,7 +245,7 @@
     "patch_count": 3,
     "patch_generation": 3,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 19,
     "view_count": 19
   },
@@ -415,7 +415,7 @@
     "patch_count": 3,
     "patch_generation": 3,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 12,
     "view_count": 12
   },
@@ -622,7 +622,7 @@
     "patch_count": 11,
     "patch_generation": 0,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 13,
     "view_count": 13
   },
@@ -1089,7 +1089,7 @@
     "view_count": 7
   },
   "node-inspect-debugger": {
-    "archived_at": null,
+    "archived_at": "2026-11-17T23:49:47.316022+00:00",
     "created_at": "2026-08-11T18:12:43.318022+00:00",
     "created_by": null,
     "last_patched_at": null,
@@ -1097,7 +1097,7 @@
     "last_viewed_at": "2026-08-19T11:39:09.587299+00:00",
     "patch_count": 0,
     "pinned": false,
-    "state": "stale",
+    "state": "archived",
     "use_count": 1,
     "view_count": 1
   },
@@ -1535,13 +1535,13 @@
     "created_by": null,
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-11-16T21:00:33.059043+00:00",
+    "last_used_at": "2026-11-17T21:00:28.638586+00:00",
     "last_viewed_at": "2026-11-16T00:34:56.875344+00:00",
     "patch_count": 0,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 35,
+    "use_count": 38,
     "view_count": 5
   },
   "tales-untold-video-creator": {
@@ -1748,7 +1748,7 @@
     "view_count": 0
   },
   "xurl": {
-    "archived_at": null,
+    "archived_at": "2026-11-17T23:49:47.499224+00:00",
     "created_at": "2026-08-11T18:12:45.201583+00:00",
     "created_by": null,
     "last_patched_at": null,
@@ -1756,7 +1756,7 @@
     "last_viewed_at": "2026-08-13T12:10:46.000332+00:00",
     "patch_count": 0,
     "pinned": false,
-    "state": "stale",
+    "state": "archived",
     "use_count": 1,
     "view_count": 1
   },
@@ -1771,7 +1771,7 @@
     "patch_count": 7,
     "patch_generation": 3,
     "pinned": false,
-    "state": "active",
+    "state": "stale",
     "use_count": 23,
     "view_count": 23
   },

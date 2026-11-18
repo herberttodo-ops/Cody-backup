@@ -30,6 +30,7 @@ llm-wiki
 manim-video
 maps
 nano-pdf
+node-inspect-debugger
 notion
 ocr-and-documents
 opencode
@@ -51,3 +52,4 @@ teams-meeting-pipeline
 test-driven-development
 touchdesigner-mcp
 weights-and-biases
+xurl

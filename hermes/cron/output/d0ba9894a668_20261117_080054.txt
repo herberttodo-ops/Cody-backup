@@ -1,0 +1,55 @@
+Cronjob Response: optirfp-linkedin-daily
+(job_id: d0ba9894a668)
+-------------
+
+Headline: What questions did they forget to ask?
+Topic: winning
+Content library: 43 headlines, 12 templates
+Generated at: 2026-11-17T08:00:34.900667
+Tue Nov 17 08:00:34 AM EST 2026: Starting OptiRFP daily post v2.0 (expanded content)...
+Tue Nov 17 08:00:34 AM EST 2026: Generated headline: What questions did they forget to ask?
+Tue Nov 17 08:00:34 AM EST 2026: Topic: winning
+Tue Nov 17 08:00:34 AM EST 2026: Using expanded content library v2.0
+Tue Nov 17 08:00:34 AM EST 2026: Generating image with compositor...
+Tue Nov 17 08:00:48 AM EST 2026: Image generated: /home/herby/.hermes/generated_images/optirfp_winning____ID___.png
+Tue Nov 17 08:00:48 AM EST 2026: Uploading to Drive...
+/home/herby/.hermes/hermes-agent/venv/lib/python3.11/site-packages/google/api_core/_python_version_support.py:273: FutureWarning: You are using a Python version (3.11.16) which Google will stop supporting in new releases of google.api_core once it reaches its end of life (2027-10-24). Please upgrade to the latest Python version, or at least Python 3.12, to continue receiving updates for google.api_core past that date.
+  warnings.warn(message, FutureWarning)
+Tue Nov 17 08:00:52 AM EST 2026: Drive URL: https://drive.google.com/uc?export=view&id=1pCPEu5I0jfJznUEONiud_iQQlkdrravV
+Tue Nov 17 08:00:52 AM EST 2026: Posting to LinkedIn...
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"6afc5005223fb0bae7704692\",\"allowedActions\":[\"publishPostNow\",\"updatePost\",\"movePostToDraft\",\"publishPostNext\",\"updatePostSchedule\",\"updatePostTags\",\"addPostNote\",\"duplicatePost\",\"deletePost\",\"updateShopGridLink\",\"createPostRecurrence\"],\"status\":\"scheduled\",\"text\":\"What questions did they forget to ask?\\n\\nThe evaluators made their decision on page one. Whether they knew it or not.\\n\\nYour first impression is your only impression. Make it count.\\n\\nLead with impact. Mirror their priorities. Make them want page two.\\n\\n#RFP #B2BSales #ProposalWriting #SalesTips #WinRate\",\"channelId\":\"6a7f74bcb2d9d577437af9a4\",\"channelService\":\"linkedin\",\"dueAt\":\"2026-11-18T02:10:00.000Z\",\"sentAt\":null,\"schedulingType\":\"automatic\",\"shareMode\":\"addToQueue\",\"sharedNow\":false,\"isCustomScheduled\":false,\"createdAt\":\"2026-11-17T13:00:52.948Z\",\"updatedAt\":\"2026-11-17T13:00:53.244Z\",\"tags\":[],\"assets\":[{\"__typename\":\"ImageAsset\",\"id\":null,\"type\":\"image\",\"mimeType\":\"image/png\",\"source\":\"https://drive.google.com/uc?export=view&id=1pCPEu5I0jfJznUEONiud_iQQlkdrravV\",\"thumbnail\":\"https://drive.google.com/uc?export=view&id=1pCPEu5I0jfJznUEONiud_iQQlkdrravV\",\"image\":{\"width\":2560,\"height\":1440,\"altText\":\"What questions did they forget to ask?\\n\\nThe evaluators made their decision on page one. Whether they\",\"isAnimated\":false,\"animatedThumbnail\":null,\"userTags\":null}}],\"error\":null,\"metadata\":{\"__typename\":\"LinkedInPostMetadata\",\"type\":\"post\",\"annotations\":[{\"type\":\"hashtag\",\"content\":\"#RFP\",\"indices\":[250,254],\"text\":\"#RFP\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=RFP\"},{\"type\":\"hashtag\",\"content\":\"#B2BSales\",\"indices\":[255,264],\"text\":\"#B2BSales\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=B2BSales\"},{\"type\":\"hashtag\",\"content\":\"#ProposalWriting\",\"indices\":[265,281],\"text\":\"#ProposalWriting\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=ProposalWriting\"},{\"type\":\"hashtag\",\"content\":\"#SalesTips\",\"indices\":[282,292],\"text\":\"#SalesTips\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=SalesTips\"},{\"type\":\"hashtag\",\"content\":\"#WinRate\",\"indices\":[293,301],\"text\":\"#WinRate\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=WinRate\"}],\"firstComment\":null,\"linkAttachment\":null}}"
+      },
+      {
+        "type": "text",
+        "text": "{\"rateLimit\":[{\"remaining\":148,\"resetSeconds\":748},{\"remaining\":572,\"resetSeconds\":43202},{\"remaining\":1771,\"resetSeconds\":2244432}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+Tue Nov 17 08:00:53 AM EST 2026: Posting to Facebook...
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"6afc5005e3ed8b2730c23f11\",\"allowedActions\":[\"publishPostNow\",\"updatePost\",\"movePostToDraft\",\"publishPostNext\",\"updatePostSchedule\",\"updatePostTags\",\"addPostNote\",\"duplicatePost\",\"deletePost\",\"updateShopGridLink\",\"createPostRecurrence\"],\"status\":\"scheduled\",\"text\":\"What questions did they forget to ask?\\n\\nThe evaluators made their decision on page one. Whether they knew it or not.\\n\\nYour first impression is your only impression. Make it count.\\n\\nLead with impact. Mirror their priorities. Make them want page two.\\n\\n#RFP #B2BSales #ProposalWriting #SalesTips #WinRate\",\"channelId\":\"6a7f7476b2d9d577437af67f\",\"channelService\":\"facebook\",\"dueAt\":\"2026-11-17T13:19:00.000Z\",\"sentAt\":null,\"schedulingType\":\"automatic\",\"shareMode\":\"addToQueue\",\"sharedNow\":false,\"isCustomScheduled\":false,\"createdAt\":\"2026-11-17T13:00:53.699Z\",\"updatedAt\":\"2026-11-17T13:00:53.737Z\",\"tags\":[],\"assets\":[{\"__typename\":\"ImageAsset\",\"id\":null,\"type\":\"image\",\"mimeType\":\"image/png\",\"source\":\"https://drive.google.com/uc?export=view&id=1pCPEu5I0jfJznUEONiud_iQQlkdrravV\",\"thumbnail\":\"https://drive.google.com/uc?export=view&id=1pCPEu5I0jfJznUEONiud_iQQlkdrravV\",\"image\":{\"width\":2560,\"height\":1440,\"altText\":\"What questions did they forget to ask?\\n\\nThe evaluators made their decision on page one. Whether they\",\"isAnimated\":false,\"animatedThumbnail\":null,\"userTags\":null}}],\"error\":null,\"metadata\":{\"__typename\":\"FacebookPostMetadata\",\"type\":\"post\",\"annotations\":[{\"type\":\"hashtag\",\"content\":\"#RFP\",\"indices\":[250,254],\"text\":\"#RFP\",\"url\":\"https://www.facebook.com/hashtag/RFP\"},{\"type\":\"hashtag\",\"content\":\"#B2BSales\",\"indices\":[255,264],\"text\":\"#B2BSales\",\"url\":\"https://www.facebook.com/hashtag/B2BSales\"},{\"type\":\"hashtag\",\"content\":\"#ProposalWriting\",\"indices\":[265,281],\"text\":\"#ProposalWriting\",\"url\":\"https://www.facebook.com/hashtag/ProposalWriting\"},{\"type\":\"hashtag\",\"content\":\"#SalesTips\",\"indices\":[282,292],\"text\":\"#SalesTips\",\"url\":\"https://www.facebook.com/hashtag/SalesTips\"},{\"type\":\"hashtag\",\"content\":\"#WinRate\",\"indices\":[293,301],\"text\":\"#WinRate\",\"url\":\"https://www.facebook.com/hashtag/WinRate\"}],\"title\":null,\"firstComment\":null,\"linkAttachment\":null}}"
+      },
+      {
+        "type": "text",
+        "text": "{\"rateLimit\":[{\"remaining\":147,\"resetSeconds\":747},{\"remaining\":571,\"resetSeconds\":43201},{\"remaining\":1770,\"resetSeconds\":2244431}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+Tue Nov 17 08:00:53 AM EST 2026: DONE - Posted with expanded content variety
+
+To stop or manage this job, send me a new message (e.g. "stop reminder optirfp-linkedin-daily").
