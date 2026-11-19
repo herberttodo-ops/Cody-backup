@@ -18,15 +18,15 @@
       "schedule_display": "30 4 * * *",
       "repeat": {
         "times": null,
-        "completed": 165
+        "completed": 166
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-04-05T17:06:06.321746-04:00",
-      "next_run_at": "2026-11-19T04:30:00-05:00",
-      "last_run_at": "2026-11-17T04:31:57.757055-05:00",
+      "next_run_at": "2026-11-20T04:30:00-05:00",
+      "last_run_at": "2026-11-18T04:33:02.135577-05:00",
       "last_status": "ok",
       "last_error": null,
       "deliver": "telegram:___ID___",
@@ -38,8 +38,8 @@
       },
       "last_delivery_error": null,
       "fire_claim": {
-        "at": "2026-11-18T04:32:25.298682-05:00",
-        "by": "herby-Virtual-Machine:1222254:0c5e2ba0be044d6b85f7ec68c85cafd0"
+        "at": "2026-11-19T04:31:11.406812-05:00",
+        "by": "herby-Virtual-Machine:1222254:a15260b902f14295a4404dee4f302a97"
       },
       "failure_streak": 0
     },
@@ -63,15 +63,15 @@
       "schedule_display": "0 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 120
+        "completed": 121
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-14T09:53:18.644425-04:00",
-      "next_run_at": "2026-11-18T08:00:00-05:00",
-      "last_run_at": "2026-11-17T08:00:55.538911-05:00",
+      "next_run_at": "2026-11-19T08:00:00-05:00",
+      "last_run_at": "2026-11-18T08:00:43.378019-05:00",
       "last_status": "ok",
       "last_error": null,
       "deliver": "telegram",
@@ -157,15 +157,15 @@
       "schedule_display": "0 8,12,16 * * *",
       "repeat": {
         "times": null,
-        "completed": 152
+        "completed": 155
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-15T19:55:41.454702-04:00",
-      "next_run_at": "2026-11-18T08:00:00-05:00",
-      "last_run_at": "2026-11-17T16:22:45.809402-05:00",
+      "next_run_at": "2026-11-19T08:00:00-05:00",
+      "last_run_at": "2026-11-18T16:24:09.219897-05:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -311,15 +311,15 @@
       "schedule_display": "0 */4 * * *",
       "repeat": {
         "times": null,
-        "completed": 363
+        "completed": 369
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-18T18:37:03.954111-04:00",
-      "next_run_at": "2026-11-18T08:00:00-05:00",
-      "last_run_at": "2026-11-18T04:00:18.894376-05:00",
+      "next_run_at": "2026-11-19T08:00:00-05:00",
+      "last_run_at": "2026-11-19T04:00:07.916936-05:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -417,19 +417,19 @@
       "schedule_display": "0 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 50
+        "completed": 51
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-28T13:56:22.581547-04:00",
-      "next_run_at": "2026-11-18T08:00:00-05:00",
-      "last_run_at": "2026-11-17T08:21:41.176617-05:00",
+      "next_run_at": "2026-11-19T08:00:00-05:00",
+      "last_run_at": "2026-11-18T08:10:26.294595-05:00",
       "last_status": "error",
-      "last_error": "Script exited with code 1\nstdout:\n[2026-11-17T08:21:21-05:00] === LotSignal Daily Pipeline ===\n[2026-11-17T08:21:21-05:00] Generating draft...\n[2026-11-17T08:21:36-05:00] Draft generated: draft_20261117_082121\n[2026-11-17T08:21:36-05:00] Running compliance check...\n[2026-11-17T08:21:36-05:00] Compliance result: PASS\n[2026-11-17T08:21:36-05:00] Sending approval notification...",
+      "last_error": "Script exited with code 1\nstdout:\n[2026-11-18T08:10:10-05:00] === LotSignal Daily Pipeline ===\n[2026-11-18T08:10:10-05:00] Generating draft...\n[2026-11-18T08:10:23-05:00] Draft generated: draft_20261118_081010\n[2026-11-18T08:10:23-05:00] Running compliance check...\n[2026-11-18T08:10:23-05:00] Compliance result: PASS\n[2026-11-18T08:10:23-05:00] Sending approval notification...",
       "last_delivery_error": null,
-      "failure_streak": 27,
+      "failure_streak": 28,
       "deliver": "origin",
       "origin": {
         "platform": "telegram",
@@ -467,15 +467,15 @@
       "schedule_display": "0 10 * * *",
       "repeat": {
         "times": null,
-        "completed": 53
+        "completed": 54
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-28T13:56:44.148485-04:00",
-      "next_run_at": "2026-11-18T10:00:00-05:00",
-      "last_run_at": "2026-11-17T10:00:05.380661-05:00",
+      "next_run_at": "2026-11-19T10:00:00-05:00",
+      "last_run_at": "2026-11-18T10:00:57.464216-05:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -517,15 +517,15 @@
       "schedule_display": "30 12 * * *",
       "repeat": {
         "times": null,
-        "completed": 52
+        "completed": 53
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-28T13:56:44.282571-04:00",
-      "next_run_at": "2026-11-18T12:30:00-05:00",
-      "last_run_at": "2026-11-17T12:30:41.423870-05:00",
+      "next_run_at": "2026-11-19T12:30:00-05:00",
+      "last_run_at": "2026-11-18T12:30:30.096063-05:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -567,15 +567,15 @@
       "schedule_display": "0 14 * * *",
       "repeat": {
         "times": null,
-        "completed": 52
+        "completed": 53
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-28T13:56:44.416019-04:00",
-      "next_run_at": "2026-11-18T14:00:00-05:00",
-      "last_run_at": "2026-11-17T14:01:02.581280-05:00",
+      "next_run_at": "2026-11-19T14:00:00-05:00",
+      "last_run_at": "2026-11-18T14:00:49.476309-05:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -617,15 +617,15 @@
       "schedule_display": "0 9 * * *",
       "repeat": {
         "times": null,
-        "completed": 48
+        "completed": 49
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-09-30T10:43:30.605842-04:00",
-      "next_run_at": "2026-11-18T09:00:00-05:00",
-      "last_run_at": "2026-11-17T09:00:51.254879-05:00",
+      "next_run_at": "2026-11-19T09:00:00-05:00",
+      "last_run_at": "2026-11-18T09:00:39.891426-05:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -667,15 +667,15 @@
       "schedule_display": "0 */2 * * *",
       "repeat": {
         "times": null,
-        "completed": 509
+        "completed": 521
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-10-06T21:26:33.721625-04:00",
-      "next_run_at": "2026-11-18T06:00:00-05:00",
-      "last_run_at": "2026-11-18T04:00:17.972742-05:00",
+      "next_run_at": "2026-11-19T06:00:00-05:00",
+      "last_run_at": "2026-11-19T04:00:06.749848-05:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -693,5 +693,5 @@
       "fire_claim": null
     }
   ],
-  "updated_at": "2026-11-18T04:32:25.299015-05:00"
+  "updated_at": "2026-11-19T04:31:11.407234-05:00"
 }
