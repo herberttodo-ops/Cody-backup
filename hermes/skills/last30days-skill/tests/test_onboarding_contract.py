@@ -1,0 +1,678 @@
+"""Contract tests for the restored first-run NUX wizard in SKILL.md.
+
+Step 0 has three branches: a **Claude Code Modal Flow** (AskUserQuestion-driven,
+the restored v3.0.0 NUX), a **Non-Modal Prose Flow** for hosts without modals
+(OpenClaw, Codex, Cursor, Gemini CLI), and a **Grok Bot Prose Flow** (the X
+connector lane first, keys written only through the engine, no browser-session
+reads). These tests assert the structural guarantees of the branches, plus the cross-cutting copy rules: the hard
+"Step 0 before Step 1" gate, Digg threaded alongside yt-dlp, the 10,000-free-calls
+credit count, and Threads/Pinterest kept out of the onboarding offers. They read
+SKILL.md as text - the model's runtime contract - matching
+tests/test_runtime_preflight_contract.py.
+
+These lock the flow against silent re-erosion (the failure mode that orphaned the
+wizard in PR #659 and flattened it before this restoration).
+"""
+
+import unittest
+from pathlib import Path
+
+import pytest
+
+import last30days
+from lib import env, setup_wizard
+from tests.skill_contract import contract_documents, reference_text
+
+ROOT = Path(__file__).resolve().parents[1]
+SKILL_MD = ROOT / "skills" / "last30days" / "SKILL.md"
+AGENTS_MD = ROOT / "AGENTS.md"
+
+
+class TestOnboardingContract(unittest.TestCase):
+    def setUp(self):
+        self.text = SKILL_MD.read_text(encoding="utf-8")
+        # Scope assertions to Step 0 so generic substrings elsewhere in the file
+        # do not satisfy ordering/presence checks.
+        self.step0 = reference_text("setup-wizard")
+        self.assertIn("## Step 0: First-Run Setup Wizard", self.step0)
+        # Branch slices.
+        modal_start = self.step0.index("### Claude Code Modal Flow")
+        prose_start = self.step0.index("### Non-Modal Prose Flow")
+        grok_start = self.step0.index("### Grok Bot Prose Flow")
+        manual_start = self.step0.index("### Manual Setup Guide")
+        self.modal = self.step0[modal_start:prose_start]
+        self.prose = self.step0[prose_start:grok_start]
+        self.grok = self.step0[grok_start:manual_start]
+        self.manual = self.step0[manual_start:]
+
+    # --- Platform split + hard gate ---
+
+    def test_platform_split_present(self):
+        """Step 0 routes modal-capable hosts, prose hosts, and Grok Bot to
+        three distinct flows, in that order."""
+        self.assertIn("Platform split", self.step0)
+        self.assertIn("### Claude Code Modal Flow", self.step0)
+        self.assertIn("### Non-Modal Prose Flow", self.step0)
+        self.assertIn("### Grok Bot Prose Flow", self.step0)
+        split = self.step0[self.step0.index("Platform split"):self.step0.index("### Claude Code Modal Flow")]
+        self.assertIn("Grok Bot Prose Flow", split)
+        self.assertEqual(3, len([h for h in ("### Claude Code Modal Flow", "### Non-Modal Prose Flow", "### Grok Bot Prose Flow") if h in self.step0]))
+        self.assertLess(self.step0.index("### Non-Modal Prose Flow"), self.step0.index("### Grok Bot Prose Flow"))
+
+    def ___LONG_STRING___(self):
+        """AGENTS.md's onboarding rule and this contract move together."""
+        agents = AGENTS_MD.read_text(encoding="utf-8")
+        self.assertIn("Step 0 has THREE branches", agents)
+        self.assertNotIn("Step 0 has TWO branches", agents)
+        for name in ("Claude Code Modal Flow", "Non-Modal Prose Flow", "Grok Bot Prose Flow"):
+            self.assertIn(name, agents, name)
+
+    def ___LONG_STRING___(self):
+        """The third branch has no modals, leads with the X connector, and
+        never routes through a browser-session step."""
+        self.assertNotIn("AskUserQuestion", self.grok)
+        self.assertNotIn("cookie", self.grok.lower())
+        self.assertLess(self.grok.index("search_posts_all"), self.grok.index("X_BEARER_TOKEN"))
+        self.assertIn("setup --store-key", self.grok)
+
+    def ___LONG_STRING___(self):
+        """Status and permission inspection are not a required first-run beat.
+        `--preflight` stays an opt-in inspector; Step 0 must not dump `.env`."""
+        self.assertNotIn("--preflight", self.modal)
+        self.assertNotIn("--preflight", self.prose)
+        self.assertNotIn("--preflight", self.grok)
+        self.assertIn("Do not run it as a required first-run step", self.step0)
+        self.assertIn("Do not print `.env` contents or credential values", self.step0)
+
+    def ___LONG_STRING___(self):
+        gates = (
+            (self.modal, "**If the user picks Auto setup:**", "Otherwise **call AskUserQuestion:**"),
+            (self.prose, "**2. Cookie consent (ask BEFORE reading anything).**", "Otherwise ask. Example:"),
+        )
+        for flow, start, prompt in gates:
+            with self.subTest(prompt=prompt):
+                gate = flow.split(start, 1)[1].split(prompt, 1)[0]
+                self.assertIn("--resolve-browser-consent", gate)
+                self.assertIn("command succeeds and stdout is exactly `granted`", gate)
+                self.assertIn("setup --use-recorded-browser-consent", gate)
+                self.assertNotIn("--allow-browser-cookies", gate)
+                self.assertNotIn("~/.config/last30days/.env", gate)
+
+    def ___LONG_STRING___(self):
+        """The cheap SETUP_COMPLETE grep is not itself a first-run verdict."""
+        start = self.text.index("**FIRST-RUN GATE")
+        gate = self.text[start:].split("\n## ", 1)[0].replace("**", "")
+        self.assertIn("FIRST_RUN_DETECTED", gate)
+        self.assertIn("A missing `.env` alone is not a first run", gate)
+        self.assertIn("That section decides first-run from every credential source", gate)
+
+    def ___LONG_STRING___(self):
+        """The wizard's own Step 0 gate is only read after this root route fires."""
+        start = self.text.index("**FIRST-RUN GATE")
+        gate = self.text[start:].split("\n## ", 1)[0]
+        first_run = next(
+            line for line in gate.splitlines() if line.startswith("- `FIRST_RUN_DETECTED`")
+        )
+        self.assertIn("read the setup-wizard reference through its root gate immediately", first_run)
+        self.assertIn("complete the applicable flow before topic research", first_run)
+        self.assertLess(gate.index("FIRST_RUN_DETECTED"), gate.index("Topic supplied: load the topic runbook"))
+
+    def ___LONG_STRING___(self):
+        """Configured runs never load setup-wizard.md, so consent must stay in the root."""
+        start = self.text.index("**Onboarding consent is model-led and host-split.**")
+        consent = self.text[start:].split("\n\n", 1)[0]
+        self.assertIn("Ask before browser-cookie reads, and preserve refusal", consent)
+        self.assertIn("a skip or no answer is never consent", consent)
+        self.assertIn("All three host flows offer the ScrapeCreators signup on first run", consent)
+
+    def ___LONG_STRING___(self):
+        self.assertIn(
+            "Setup stdout is what this run installed, not the runtime source list",
+            self.prose,
+        )
+        self.assertIn(
+            "Setup stdout is what this run installed, not the runtime source list",
+            self.grok,
+        )
+
+    def test_hard_gate_step0_before_step1(self):
+        """The erosion-resistant gate that orphaned the wizard in #659 is restored."""
+        self.assertIn("ALWAYS execute Step 0 BEFORE Step 1", self.step0)
+
+    def ___LONG_STRING___(self):
+        """Declining optional X access must never strand the requested topic."""
+        self.assertIn("RESEARCH CONTINUATION OVERRIDE", self.step0)
+        self.assertIn("declining or skipping X must never stop", self.step0)
+        self.assertIn("research it now (`--no-browser-cookies` if Reddit got a no)", self.modal)
+        self.assertIn("research it now (`--no-browser-cookies` if Reddit got a no)", self.prose)
+        self.assertIn("a skip or no answer is never consent", self.step0)
+
+    def ___LONG_STRING___(self):
+        self.assertIn("skip the ScrapeCreators offer", self.step0)
+        self.assertIn("Do not ask another X question in the same run", self.step0)
+        self.assertIn("Offer ONE retry only when no research topic is waiting", self.modal)
+        self.assertIn("Offer ONE retry only when no research topic is waiting", self.prose)
+
+    def ___LONG_STRING___(self):
+        """Deferral is same-run only: SETUP_COMPLETE=true means later runs skip
+        Step 0, so a skip-X-with-topic run must itself resume the ScrapeCreators
+        offer after the findings or the offer is dropped forever."""
+        self.assertIn("RESUME the deferred onboarding in the SAME run", self.step0)
+        self.assertIn(
+            "this run is the only chance to make the offer", self.step0
+        )
+        # Both flows: Skip-for-now, Skip-X modal option, and the prose no-path
+        # all resume the deferred offer in the same run after the findings.
+        self.assertEqual(
+            2,
+            self.modal.count(
+                "then resume Step 4 (and Step 5 if a key is saved) in the same run"
+            ),
+        )
+        self.assertIn("then resume the deferred onboarding in the same run", self.prose)
+        # The resume never turns back into a second X consent ask.
+        self.assertIn("the resume never re-asks X/browser-cookie consent", self.step0)
+        self.assertIn("Do not re-ask cookie consent as part of the resume", self.prose)
+
+    def ___LONG_STRING___(self):
+        research = reference_text("research-runbook")
+        self.assertIn("If `ACTIVE_SOURCES_LIST` contains `x`", research)
+        self.assertIn("every applicable source from `ACTIVE_SOURCES_LIST`", research)
+        self.assertIn("Preserve X whenever it is active", research)
+
+    def test_post_report_x_note_is_non_blocking(self):
+        synthesis = reference_text("synthesis")
+        for name, text in contract_documents().items():
+            self.assertNotIn("Just-in-time X unlock", text, name)
+        self.assertIn("Optional X omission", synthesis)
+        self.assertIn("finish the useful findings first", synthesis)
+
+    # --- Modal flow: the restored NUX, stages in order ---
+
+    def test_modal_flow_stage_order(self):
+        """Welcome -> setup modal -> cookie consent -> SC offer -> opt-in -> picker."""
+        anchors = [
+            "Welcome to /last30days!",  # welcome pitch, embedded in the setup modal
+            "How would you like to set up?",
+            "your browser's x.com cookies",  # cookie-consent modal
+            "Want to add TikTok and Instagram?",  # SC offer
+            "Which ScrapeCreators sources?",  # source opt-in
+            "What do you want to research first?",  # topic picker
+        ]
+        idxs = [self.modal.find(a) for a in anchors]
+        for a, i in zip(anchors, idxs):
+            self.assertGreater(i, -1, f"modal flow missing stage anchor: {a!r}")
+        self.assertEqual(idxs, sorted(idxs), "modal flow stages are out of order")
+
+    def test_modal_uses_askuserquestion(self):
+        self.assertIn("AskUserQuestion", self.modal)
+
+    def ___LONG_STRING___(self):
+        """The cookie-consent modal must not frame X cookies as instead-of the CLIs,
+        and must name every installed CLI (not just 'YouTube + Digg') since auto-setup
+        installs all five regardless of the cookie choice."""
+        consent = self.modal[self.modal.find("your browser's x.com cookies"):]
+        consent = consent[: consent.find("Full Disk Access")]  # bound to the consent modal
+        for cli in ("yt-dlp", "Digg", "arXiv", "Techmeme", "Yahoo Finance"):
+            self.assertIn(cli, consent, cli)
+        # The question and each option's description name the full list, so no
+        # choice hides an install.
+        full_list = "yt-dlp (YouTube), Digg, arXiv, Techmeme, and Yahoo Finance"
+        self.assertIn(f"Auto setup installs the free CLIs either way - {full_list}.", self.modal)
+        self.assertEqual(3, consent.count(full_list))
+        self.assertNotIn("arXiv, and Techmeme", self.step0)
+        # The "skip X" option still installs the CLIs (not framed as X-or-CLIs).
+        self.assertIn("Skip X - just the CLIs", consent)
+
+    def ___LONG_STRING___(self):
+        """The recommended GitHub option tells the user the code is auto-copied to
+        their clipboard, so they just paste it."""
+        self.assertIn("clipboard automatically", self.modal)
+
+    def test_modal_cookie_consent_before_setup(self):
+        consent = self.modal.find("your browser's x.com cookies")
+        setup = self.modal.find('last30days.py" setup --allow-browser-cookies')
+        self.assertGreater(consent, -1, "no cookie-consent modal in modal flow")
+        self.assertGreater(setup, -1, "no setup invocation after a fresh yes")
+        self.assertLess(consent, setup, "consent question must precede the fresh-consent invocation")
+
+    def ___LONG_STRING___(self):
+        """The picker documents skipping when the user already gave a topic."""
+        self.assertIn("What do you want to research first?", self.modal)
+        self.assertIn("SKIP this picker", self.modal)
+
+    # --- Prose flow: same work, modal-free ---
+
+    def test_prose_flow_has_no_modals(self):
+        self.assertNotIn("AskUserQuestion", self.prose)
+
+    def test_prose_cookie_consent_before_setup(self):
+        consent = self.prose.find("Cookie consent")
+        setup = self.prose.find('last30days.py" setup')
+        self.assertGreater(consent, -1, "no cookie-consent step in prose flow")
+        self.assertGreater(setup, -1, "no setup invocation in prose flow")
+        self.assertLess(consent, setup, "cookie consent must precede setup in prose flow")
+
+    def ___LONG_STRING___(self):
+        self.assertIn("FROM_BROWSER=off", self.prose)
+
+    # --- Full Disk Access remediation (both branches) ---
+
+    def ___LONG_STRING___(self):
+        self.assertIn("Permission denied reading Cookies.binarycookies", self.modal)
+        self.assertIn("Full Disk Access", self.modal)
+        self.assertIn("Permission denied reading Cookies.binarycookies", self.prose)
+        self.assertIn("Full Disk Access", self.prose)
+
+    def test_skip_path_writes_setup_complete(self):
+        """The 'Skip for now' setup choice must write SETUP_COMPLETE or the wizard loops."""
+        skip_idx = self.modal.find("If the user picks Skip for now")
+        self.assertGreater(skip_idx, -1, "no Skip-for-now handling in modal flow")
+        # The skip branch must persist the completion flag in its own paragraph.
+        skip_para = self.modal[skip_idx:skip_idx + 400]
+        self.assertIn("SETUP_COMPLETE=true", skip_para)
+
+    # --- ScrapeCreators signup + persisted edge case ---
+
+    def ___LONG_STRING___(self):
+        self.assertIn("setup --github", self.modal)
+        self.assertIn("setup --github", self.prose)
+
+    def ___LONG_STRING___(self):
+        self.assertIn('"persisted": false', self.step0)
+
+    # --- Digg threaded alongside yt-dlp everywhere it appears ---
+
+    def test_digg_threaded_with_ytdlp(self):
+        self.assertIn("Digg", self.modal)
+        self.assertIn("Digg", self.prose)
+        self.assertIn("Digg", self.manual)
+        # The prose and Grok Bot flows run the same installs, so they name the
+        # same list.
+        self.assertIn("Yahoo Finance", self.prose)
+        self.assertIn("Yahoo Finance", self.grok)
+        # The Auto-setup modal option names every installed CLI, not just two.
+        self.assertIn("yt-dlp (YouTube), Digg, arXiv, Techmeme, Yahoo Finance.", self.modal)
+
+    # --- Credit count = 10,000, no conflicting numbers in onboarding ---
+
+    def test_credit_count_is_10000(self):
+        self.assertIn("10,000 free calls", self.step0)
+        self.assertNotIn("1,000 free", self.step0)
+        self.assertNotIn("1000 free credit", self.step0)
+        self.assertNotIn("1000 credits", self.step0)
+        self.assertNotIn("100 free call", self.step0)
+
+    # --- Threads/Pinterest live ONLY in the Step 5 "Everything" opt-in ---
+
+    def _modal_step5(self):
+        start = self.modal.index("**Step 5:")
+        end = self.modal.index("**Step 6:", start)
+        return self.modal[start:end]
+
+    def _modal_before_step5(self):
+        # Welcome (Step 1) through the Step 4 ScrapeCreators offer.
+        return self.modal[: self.modal.index("**Step 5:")]
+
+    def ___LONG_STRING___(self):
+        """Threads/Pinterest are offered in the Step 5 Everything tier, and
+
+        must NOT appear in the welcome or the Step 4 offer (where they would
+        read as default-on). They are opt-in via INCLUDE_SOURCES.
+        """
+        step5 = self._modal_step5()
+        self.assertIn("Threads", step5)
+        self.assertIn("Pinterest", step5)
+        before = self._modal_before_step5()
+        self.assertNotIn("Threads", before)
+        self.assertNotIn("Pinterest", before)
+
+    def ___LONG_STRING___(self):
+        """The Step 4 offer states comments are part of the default value and
+        describes the key's real Reddit/YouTube roles (Reddit search backfill
+        below the 5-item floor + yt-dlp transcript backstop), not rate-limit
+        escalation or SC Reddit comment enrichment on the free path."""
+        before = self._modal_before_step5()
+        self.assertIn("comments", before.lower())
+        self.assertIn("Reddit", before)
+        self.assertIn("YouTube", before)
+        self.assertIn("10,000 free calls", before)
+        # Floor-triggered search backfill with the 0 opt-out (not
+        # transport/rate-limit escalation, and no longer empty-only).
+        self.assertIn("fewer than 5 items", before)
+        self.assertIn("LAST30DAYS_REDDIT_SC_MIN_ITEMS=0", before)
+        self.assertIn("YouTube search below 3", before)
+        self.assertIn("LAST30DAYS_YT_SC_MIN_ITEMS=0", before)
+        self.assertIn("spends credits", before)
+        self.assertNotIn("returns no items", before)
+        self.assertNotIn("empty-path Reddit", before)
+        self.assertNotIn("when they hit rate limits", before)
+        # Free-path comments are shreddit; do not claim SC comment preference.
+        self.assertNotIn("prefers ScrapeCreators for Reddit", before)
+        self.assertNotIn("enriches Reddit comments", before)
+
+    def ___LONG_STRING___(self):
+        """Step 5 must not contradict Step 4 with 'public + ScrapeCreators' merge."""
+        step5 = self._modal_step5()
+        self.assertNotIn("public + ScrapeCreators", step5)
+        self.assertNotIn("Reddit auto-enrichment", step5)
+        self.assertIn("fewer than 5 items", step5)
+        self.assertNotIn("empty-only", step5)
+
+    def ___LONG_STRING___(self):
+        """Comments are the DEFAULT: the recommended option enables YouTube +
+        TikTok + Instagram comments (posts on -> comments on)."""
+        step5 = self._modal_step5()
+        self.assertIn(
+            "INCLUDE_SOURCES=tiktok,instagram,youtube_comments,tiktok_comments,instagram_comments",
+            step5,
+        )
+        # There is no posts-only tier.
+        self.assertIn("recommended", step5.lower())
+        self.assertIn("comments", step5.lower())
+
+    def ___LONG_STRING___(self):
+        """The Everything option persists the full list incl. Threads + Pinterest."""
+        step5 = self._modal_step5()
+        self.assertIn(
+            "INCLUDE_SOURCES=tiktok,instagram,youtube_comments,tiktok_comments,instagram_comments,threads,pinterest",
+            step5,
+        )
+
+    # --- Chrome-first cookie scan (U2/U3) ---
+
+    def test_cookie_consent_leads_with_chrome(self):
+        """Both flows tell the user Chrome is checked first, with the Keychain cue."""
+        for slice_name, slice_text in (("modal", self.modal), ("prose", self.prose)):
+            self.assertIn("Chrome", slice_text, f"{slice_name} cookie copy omits Chrome")
+            self.assertIn("Always Allow", slice_text, f"{slice_name} omits the Keychain cue")
+
+    def ___LONG_STRING___(self):
+        prompts = (
+            self.modal.split('Question: "Auto setup', 1)[1].split("Options (", 1)[0],
+            self.prose.split("Otherwise ask. Example:", 1)[1].split("**Wait for the answer.**", 1)[0],
+        )
+        for prompt in prompts:
+            with self.subTest(prompt=prompt):
+                self.assertIn("later research runs", prompt)
+                self.assertIn("browser names", prompt)
+                self.assertIn("may prompt again", prompt)
+                self.assertIn("Always Allow", prompt)
+                self.assertIn("BROWSER_CONSENT=false", prompt)
+                self.assertIn("FROM_BROWSER=off", prompt)
+                self.assertIn("On macOS", prompt)
+                self.assertIn("Windows and Linux", prompt)
+                self.assertIn("Windows Firefox", prompt)
+
+    def ___LONG_STRING___(self):
+        for flow in (self.modal, self.prose):
+            with self.subTest(flow=flow[:30]):
+                self.assertIn("complete cookies", flow)
+                self.assertIn("comma-separated", flow)
+                self.assertIn("never saves cookie values", flow)
+                self.assertNotIn("one-time macOS Keychain prompt", flow)
+                self.assertNotIn("only when it is Firefox or Safari", flow)
+                self.assertNotIn("only a Firefox/Safari winner", flow)
+                self.assertNotIn("Chrome never re-", flow)
+
+    def ___LONG_STRING___(self):
+        """Browser permission guidance does not change consented scan order."""
+        self.assertNotIn("scan your browser (Firefox/Safari)", self.modal)
+        self.assertIn("X cookie access was permission denied", self.modal)
+        self.assertIn("X cookie access was permission denied", self.prose)
+        self.assertIn("AUTH_TOKEN and CT0", self.modal)
+
+    def test_welcome_embedded_in_modal(self):
+        """The welcome pitch lives INSIDE the setup modal (the only always-visible
+        surface), not as a separate message/command that Claude Code folds away.
+        The engine --welcome command is kept for the non-modal prose flow."""
+        # Pitch is in the modal question.
+        self.assertIn("Welcome to /last30days!", self.modal)
+        self.assertIn("How would you like to set up?", self.modal)
+        # The modal flow explicitly does NOT run a separate --welcome command.
+        self.assertIn("Do NOT run a separate `--welcome`", self.modal)
+        # The non-modal flow still uses the engine welcome command.
+        self.assertIn('last30days.py" --welcome', self.prose)
+
+    def test_stocktwits_surfaced_as_conditional(self):
+        """StockTwits is advertised in the engine welcome as a ticker/crypto-gated
+        source (welcome text moved out of SKILL.md into the engine)."""
+        self.assertIn("StockTwits", setup_wizard.render_welcome())
+
+    # --- Honest GitHub device-code copy (U4/U7) ---
+
+    def test_no_false_instant_gh_promise(self):
+        """The '~2 seconds - no browser' claim (a nonexistent code path) is gone."""
+        self.assertNotIn("~2 seconds - no browser", self.step0)
+        self.assertNotIn("Registers via GitHub CLI in ~2 seconds", self.step0)
+
+    def ___LONG_STRING___(self):
+        """Both flows use the deterministic two-command split (start returns the
+        code fast, then poll) instead of a background-and-surface spinner."""
+        self.assertIn("setup --github-start", self.modal)
+        self.assertIn("setup --github-poll", self.modal)
+        self.assertIn("setup --github-start", self.prose)
+        self.assertIn("setup --github-poll", self.prose)
+
+    def test_already_registered_status_handled(self):
+        self.assertIn("already_registered", self.modal)
+        self.assertIn("already_registered", self.prose)
+
+    # --- Welcome must render before the modal (U1) ---
+
+    def ___LONG_STRING___(self):
+        """The welcome pitch names the core sources inside the modal question, so
+        the user sees it without expanding folded tool output. The old skip-prone
+        'IMMEDIATELY call AskUserQuestion' wording stays gone."""
+        # Pitch names the core sources right in the modal.
+        for source in ("Reddit", "X,", "YouTube", "TikTok"):
+            self.assertIn(source, self.modal, source)
+        self.assertNotIn("Then IMMEDIATELY call AskUserQuestion", self.modal)
+
+    # --- Device code surfaced with a clipboard-paste hint (U3) ---
+
+    def ___LONG_STRING___(self):
+        """The GitHub flow tells the user the code is on their clipboard to paste,
+
+        and makes surfacing the code a required step (the bug the user hit).
+        """
+        self.assertIn("on your clipboard", self.modal)
+        # Surfacing the code is a required, explicit step in the new split flow.
+        self.assertIn("SHOW THE CODE", self.modal)
+        self.assertIn("just paste", self.modal)
+
+    # --- Honest 'authorized but no key' branch, distinct from auth-failed (U4) ---
+
+    def ___LONG_STRING___(self):
+        """A key-fetch failure after successful auth is handled honestly (likely
+
+        an already-linked account), not lumped into 'auth didn't complete'.
+        """
+        for slice_name, slice_text in (("modal", self.modal), ("prose", self.prose)):
+            self.assertIn("Authorized but failed to fetch API key", slice_text, slice_name)
+            self.assertIn("already linked", slice_text, slice_name)
+
+    def ___LONG_STRING___(self):
+        """A ScrapeCreators /profile 5xx must not be diagnosed as already-linked (#882)."""
+        for slice_name, slice_text in (("modal", self.modal), ("prose", self.prose)):
+            self.assertIn("ScrapeCreators profile failed", slice_text, slice_name)
+            self.assertIn("upstream_error", slice_text, slice_name)
+            self.assertIn("server error", slice_text, slice_name)
+            # Guidance forbids the already-linked misdiagnosis on this path.
+            self.assertIn("do **NOT** say", slice_text, slice_name)
+            self.assertIn("already linked", slice_text, slice_name)
+
+    # --- Legacy guarantees retained ---
+
+    def ___LONG_STRING___(self):
+        for document in contract_documents().values():
+            self.assertNotIn("Follow the wizard's prompts end-to-end", document)
+
+    def ___LONG_STRING___(self):
+        self.assertIn("You are the conversational driver", self.step0)
+        self.assertIn("consent happens HERE, in chat", self.step0)
+        self.assertIn("gate each subprocess call on the answer", self.step0)
+        self.assertIn("non-interactive subprocess", self.step0)
+
+
+    # --- Reddit session offer (U6) ---
+
+    def _gate_script(self):
+        gate = self.text.split("**FIRST-RUN GATE", 1)[1].split("**Onboarding consent", 1)[0]
+        return gate.split("```bash\n", 1)[1].split("```", 1)[0]
+
+    def _run_gate(self, env_lines, host=None):
+        import os
+        import subprocess
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as home:
+            if env_lines is not None:
+                config = Path(home) / ".config" / "last30days"
+                config.mkdir(parents=True)
+                (config / ".env").write_text("".join(f"{line}\n" for line in env_lines))
+            env = {"HOME": home, "PATH": os.environ.get("PATH", "/usr/bin:/bin")}
+            if host:
+                env["LAST30DAYS_HOST"] = host
+            out = subprocess.run(
+                ["bash", "-c", self._gate_script()], env=env, capture_output=True, text=True, check=False,
+            )
+            return out.stdout.strip()
+
+    def ___LONG_STRING___(self):
+        self.assertEqual(self._run_gate(None), "FIRST_RUN_DETECTED")
+        self.assertEqual(self._run_gate(["BROWSER_CONSENT=true"]), "FIRST_RUN_DETECTED")
+        self.assertEqual(self._run_gate(["SETUP_COMPLETE=true"]), "REDDIT_OFFER")
+        # Either answer writes the offered marker, so the offer never repeats.
+        for answer in ("true", "false"):
+            lines = ["SETUP_COMPLETE=true", "REDDIT_SESSION_OFFERED=true", f"REDDIT_BROWSER_CONSENT={answer}"]
+            self.assertEqual(self._run_gate(lines), "1")
+        # Skipping X saved BROWSER_CONSENT=false; that user still gets the Reddit offer once.
+        self.assertEqual(self._run_gate(["SETUP_COMPLETE=true", "BROWSER_CONSENT=false"]), "REDDIT_OFFER")
+        # FROM_BROWSER=off and a Grok Bot host never get the offer.
+        self.assertEqual(self._run_gate(["SETUP_COMPLETE=true", "FROM_BROWSER=off"]), "1")
+        self.assertEqual(self._run_gate(["SETUP_COMPLETE=true"], host="grok-bot"), "1")
+
+    def ___LONG_STRING___(self):
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            env_path = Path(tmp) / ".env"
+            result = setup_wizard.run_reddit_session_setup({}, env_path, consent=False)
+            self.assertEqual(result["status"], "declined")
+            text = env_path.read_text()
+            self.assertIn("REDDIT_SESSION_OFFERED=true", text)
+            self.assertIn("REDDIT_BROWSER_CONSENT=false", text)
+
+    def ___LONG_STRING___(self):
+        offer = reference_text("reddit-session")
+        question = offer.split("Question text (reproduce it verbatim):", 1)[1].split("\n- Modal hosts", 1)[0]
+        self.assertIn("Separate from any X access", question)
+        self.assertIn("reddit.com login cookie", question)
+        self.assertIn("acts as your own Reddit account", question)
+        self.assertIn("may breach Reddit's terms", question)
+        self.assertIn("REDDIT_BROWSER_CONSENT=false", question)
+        self.assertIn("never the cookie value", question)
+        self.assertIn("X consent never implies it", offer)
+        self.assertIn("A skip, an unrelated reply or no answer is a no", offer)
+        self.assertIn("setup --reddit-session", offer)
+        self.assertIn("setup --no-reddit-session", offer)
+        self.assertIn("never ask this question", offer.split("\n\n", 2)[1])
+        self.assertIn("REDDIT_SESSION_OFFERED=true", offer)
+
+    def ___LONG_STRING___(self):
+        hook = "take the root Reddit session offer route"
+        modal_yes = self.modal.index('"Yes - X cookies + all CLIs"')
+        modal_reddit = self.modal.index(hook, modal_yes)
+        self.assertLess(modal_reddit, self.modal.index('"Skip X - just the CLIs"'))
+        self.assertLess(modal_reddit, self.modal.index("**Step 4"))
+        prose_yes = self.prose.index("On **yes** → run")
+        prose_reddit = self.prose.index(hook, prose_yes)
+        self.assertLess(prose_reddit, self.prose.index("On **no** → run"))
+        self.assertIn("as its own step", self.prose)
+        self.assertIn("separate yes/no", self.prose)
+        # Never folded into the X question itself.
+        x_question = self.prose.split("Otherwise ask. Example:", 1)[1].split("**Wait for the answer.**", 1)[0]
+        self.assertNotIn("reddit", x_question.lower())
+
+    def ___LONG_STRING___(self):
+        self.assertNotIn("cookie", self.grok.lower())
+        self.assertNotIn("reddit-session", self.grok)
+        self.assertNotIn("Reddit session offer", self.grok)
+
+
+@pytest.mark.parametrize(
+    ("global_settings", "project_settings", "process_settings", "expected"),
+    [
+        pytest.param("BROWSER_CONSENT=false", "", {}, "not-granted", id="custom-global-refusal"),
+        pytest.param("BROWSER_CONSENT=YES", "", {}, "granted", id="prior-affirmative"),
+        pytest.param("", "", {}, "not-granted", id="no-recorded-consent"),
+        pytest.param(
+            "BROWSER_CONSENT=true\nLAST30DAYS_TRUST_PROJECT_CONFIG=1",
+            "BROWSER_CONSENT=false",
+            {},
+            "not-granted",
+            id="trusted-project-refusal",
+        ),
+        pytest.param(
+            "BROWSER_CONSENT=true",
+            "BROWSER_CONSENT=false\nLAST30DAYS_TRUST_PROJECT_CONFIG=1",
+            {},
+            "granted",
+            id="untrusted-project-refusal-is-ignored",
+        ),
+        pytest.param(
+            "BROWSER_CONSENT=true",
+            "",
+            {"BROWSER_CONSENT": "false"},
+            "not-granted",
+            id="process-refusal",
+        ),
+        pytest.param(
+            "BROWSER_CONSENT=true",
+            "",
+            {"FROM_BROWSER": "off"},
+            "not-granted",
+            id="browser-access-veto",
+        ),
+        pytest.param(
+            "BROWSER_CONSENT=true",
+            "",
+            {"BROWSER_CONSENT": "${user_config.consent}"},
+            "granted",
+            id="placeholder-falls-back",
+        ),
+    ],
+)
+def ___LONG_STRING___(
+    monkeypatch, tmp_path, capsys, global_settings, project_settings, process_settings, expected,
+):
+    default_config = Path.home() / ".config" / "last30days" / ".env"
+    default_config.write_text("BROWSER_CONSENT=true\n", encoding="utf-8")
+    config_dir = tmp_path / "active"
+    config_dir.mkdir()
+    global_file = config_dir / ".env"
+    global_file.write_text(global_settings, encoding="utf-8")
+    global_file.chmod(0o600)
+    monkeypatch.setenv("LAST30DAYS_CONFIG_DIR", str(config_dir))
+    monkeypatch.setattr(env, "CONFIG_FILE", global_file)
+    project_dir = tmp_path / "project" / ".claude"
+    project_dir.mkdir(parents=True)
+    project_file = project_dir / "last30days.env"
+    project_file.write_text(project_settings, encoding="utf-8")
+    project_file.chmod(0o600)
+    monkeypatch.chdir(project_dir.parent)
+    for name, value in process_settings.items():
+        monkeypatch.setenv(name, value)
+    monkeypatch.setattr(env, "get_config", lambda **_: pytest.fail("loaded provider credentials"))
+
+    parser = last30days.build_parser()
+    args, extra = parser.parse_known_args(["--resolve-browser-consent"])
+    assert last30days._main(parser, args, extra) == 0
+    assert capsys.readouterr().out == f"{expected}\n"
+    assert global_file.read_text(encoding="utf-8") == global_settings
+    assert project_file.read_text(encoding="utf-8") == project_settings
+
+
+if __name__ == "__main__":
+    unittest.main()

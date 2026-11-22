@@ -1,0 +1,285 @@
+"""Entity X handles: homepage links, and the hosted-run handle decision check.
+
+Hosted runs pass --plan, so the engine's search-based auto-resolve stands down
+and the host model resolves handles. A skipped lookup used to cost nothing:
+the run went ahead with no --x-handle and X never searched the subject's own
+posts. These tests pin the keyless homepage reader and the check that makes a
+hosted entity run either name a handle or say why there is none.
+"""
+
+from __future__ import annotations
+
+import io
+import sys
+from contextlib import redirect_stderr, redirect_stdout
+from unittest import mock
+
+import pytest
+
+import last30days as cli
+from lib import resolve
+
+DUMMY_CONFIG = {"OPENROUTER_API_KEY": "dummy-openrouter-key-000"}
+DIAG = {
+    "available_sources": ["reddit", "x", "hackernews"],
+    "providers": {"google": False, "openai": False, "xai": False},
+    "x_backend": None,
+    "bird_installed": False,
+    "bird_authenticated": False,
+    "bird_username": None,
+    "native_web_backend": None,
+    "permission_preflight": {},
+}
+PLAN_WITH_X = (
+    '{"intent":"product","freshness_mode":"balanced_recent","cluster_mode":"none",'
+    '"subqueries":[{"label":"primary","search_query":"Jev","ranking_query":'
+    '"What are people saying about Jev?","sources":["reddit","x","hackernews"],"weight":1.0}]}'
+)
+PLAN_WITHOUT_X = PLAN_WITH_X.replace('"x",', "")
+
+HOMEPAGE = """
+<html><body>
+<a href="https://x.com/intent/tweet?text=hi">Share</a>
+<a href="https://twitter.com/someone/status/123">Quoted post</a>
+<p>Follow @notourhandle for updates</p>
+<footer>
+  <a href="https://x.com/typesafeai">X</a>
+  <a href='https://twitter.com/typesafeai/'>Twitter</a>
+  <a href="https://github.com/typesafe-ai/typesafe-sdk-python">SDK</a>
+  <a href="https://github.com/typesafe-ai">GitHub</a>
+  <a href="https://github.com/features">Features</a>
+</footer>
+</body></html>
+"""
+
+
+class _RetrievalReached(Exception):
+    pass
+
+
+def _run_main(monkeypatch, argv, *, host_env=None, socials=None, diag=None):
+    for name in ("LAST30DAYS_API_KEY", "LAST30DAYS_API_BASE", "LAST30DAYS_MEMORY_DIR"):
+        monkeypatch.delenv(name, raising=False)
+    monkeypatch.setenv("LAST30DAYS_SKIP_PREFLIGHT", "1")
+    for name, value in (host_env or {}).items():
+        monkeypatch.setenv(name, value)
+    monkeypatch.setattr(sys, "argv", ["last30days.py", *argv])
+    run_mock = mock.Mock(side_effect=_RetrievalReached)
+    socials_mock = mock.Mock(return_value=socials or {"x_handle": "", "github_user": ""})
+    err = io.StringIO()
+    with mock.patch.object(cli.env, "get_config", return_value=dict(DUMMY_CONFIG)), \
+         mock.patch.object(cli.pipeline, "diagnose", mock.Mock(return_value=dict(diag or DIAG))), \
+         mock.patch.object(cli.pipeline, "run", run_mock), \
+         mock.patch("lib.resolve.auto_resolve", mock.Mock(return_value={})), \
+         mock.patch("lib.resolve.official_site_socials", socials_mock), \
+         mock.patch.object(cli.ui, "ProgressDisplay", return_value=mock.Mock()), \
+         redirect_stdout(io.StringIO()), redirect_stderr(err):
+        try:
+            rc = cli.main()
+        except _RetrievalReached:
+            rc = None
+        except SystemExit as exc:
+            rc = exc.code
+    return rc, err.getvalue(), run_mock, socials_mock
+
+
+HOSTED = {"CLAUDECODE": "1"}
+
+
+# --- homepage reader ___LONG_STRING___
+
+
+def ___LONG_STRING___():
+    with mock.patch.object(resolve.http, "get_text", return_value=HOMEPAGE) as get:
+        socials = resolve.official_site_socials("typesafe.ai")
+    assert socials == {"x_handle": "typesafeai", "github_user": "typesafe-ai"}
+    assert get.call_args.args[0] == "https://typesafe.ai/"
+
+
+def ___LONG_STRING___():
+    page = """
+    <a href="https://x.com/happycustomer">Customer</a>
+    <a href="https://x.com/someinvestor">Investor</a>
+    <a href="https://github.com/somedependency/lib">Built on</a>
+    <a href="https://github.com/otherdependency">Also</a>
+    """
+    with mock.patch.object(resolve.http, "get_text", return_value=page):
+        assert resolve.official_site_socials("typesafe.ai") == {"x_handle": "", "github_user": ""}
+
+
+def ___LONG_STRING___():
+    page = """
+    <a href="https://x.com/happycustomer">quote</a>
+    <a href="https://x.com/happycustomer">quote again</a>
+    <footer><a href="https://x.com/acmehq">X</a></footer>
+    """
+    with mock.patch.object(resolve.http, "get_text", return_value=page):
+        assert resolve.official_site_socials("example.com")["x_handle"] == "acmehq"
+
+
+def ___LONG_STRING___():
+    page = """
+    <a href="https://x.com/happycustomer">quote</a>
+    <a href="https://x.com/TypeSafeAI">Follow us</a>
+    """
+    with mock.patch.object(resolve.http, "get_text", return_value=page):
+        assert resolve.official_site_socials("www.typesafe.ai")["x_handle"] == "TypeSafeAI"
+
+
+def ___LONG_STRING___():
+    page = """
+    <a href="https://x.com/TypeSafeAI">X</a>
+    <a href="https://twitter.com/typesafeai">Twitter</a>
+    <a href="https://github.com/TypeSafe-AI">GitHub</a>
+    <a href="https://github.com/typesafe-ai/sdk">SDK</a>
+    """
+    with mock.patch.object(resolve.http, "get_text", return_value=page):
+        assert resolve.official_site_socials("example.com") == {
+            "x_handle": "TypeSafeAI", "github_user": "TypeSafe-AI",
+        }
+
+
+def ___LONG_STRING___():
+    with mock.patch.object(resolve.http, "get_text", return_value=None):
+        assert resolve.official_site_socials("typesafe.ai") == {"x_handle": "", "github_user": ""}
+
+
+@pytest.mark.parametrize(
+    "site,url",
+    [
+        ("typesafe.ai", "https://typesafe.ai/"),
+        ("https://www.TypeSafe.ai/pricing?x=1", "https://www.typesafe.ai/"),
+        ("not a domain", ""),
+        ("", ""),
+    ],
+)
+def ___LONG_STRING___(site, url):
+    assert resolve._official_site_url(site) == url
+
+
+def ___LONG_STRING___():
+    with mock.patch.object(resolve.http, "get_text") as get:
+        assert resolve.official_site_socials("javascript:alert(1)") == {"x_handle": "", "github_user": ""}
+    get.assert_not_called()
+
+
+# --- hosted handle decision check ___LONG_STRING___
+
+
+def ___LONG_STRING___(monkeypatch):
+    rc, err, run_mock, _ = _run_main(monkeypatch, ["Jev", "--plan", PLAN_WITH_X], host_env=HOSTED)
+    assert rc == cli.X_HANDLE_DECISION_EXIT
+    assert "X handle decision missing" in err
+    assert "--official-site" in err and "--no-x-handle" in err
+    run_mock.assert_not_called()
+
+
+def ___LONG_STRING___(monkeypatch):
+    rc, err, run_mock, socials_mock = _run_main(
+        monkeypatch, ["Jev", "--plan", PLAN_WITH_X, "--official-site", "typesafe.ai"],
+        host_env=HOSTED, socials={"x_handle": "typesafeai", "github_user": "typesafe-ai"},
+    )
+    assert rc is None
+    assert "@typesafeai" in err
+    socials_mock.assert_called_once_with("typesafe.ai")
+    assert run_mock.call_args.kwargs["x_handle"] == "typesafeai"
+
+
+def test_user_x_handle_beats_the_homepage(monkeypatch):
+    rc, _err, run_mock, _ = _run_main(
+        monkeypatch,
+        ["Jev", "--plan", PLAN_WITH_X, "--official-site", "typesafe.ai", "--x-handle", "CompleteSkeptic"],
+        host_env=HOSTED, socials={"x_handle": "typesafeai", "github_user": ""},
+    )
+    assert rc is None
+    assert run_mock.call_args.kwargs["x_handle"] == "CompleteSkeptic"
+
+
+def ___LONG_STRING___(monkeypatch):
+    rc, err, _run, _ = _run_main(
+        monkeypatch, ["Jev", "--plan", PLAN_WITH_X, "--official-site", "typesafe.ai"],
+        host_env=HOSTED,
+    )
+    assert rc == cli.X_HANDLE_DECISION_EXIT
+    assert "X handle decision missing" in err
+
+
+def ___LONG_STRING___(monkeypatch):
+    rc, err, _run, _ = _run_main(
+        monkeypatch,
+        ["Jev", "--plan", PLAN_WITH_X, "--no-x-handle", "official site links no X account"],
+        host_env=HOSTED,
+    )
+    assert rc is None
+    assert "No X handle: official site links no X account" in err
+
+
+@pytest.mark.parametrize(
+    "argv",
+    [
+        ["Jev", "--plan", PLAN_WITHOUT_X],
+        ["Jev", "--plan", PLAN_WITH_X, "--quick"],
+        ["how do decision models work?", "--plan", PLAN_WITH_X],
+        ["@typesafeai", "--plan", PLAN_WITH_X],
+    ],
+)
+def ___LONG_STRING___(monkeypatch, argv):
+    rc, _err, _run, _ = _run_main(monkeypatch, argv, host_env=HOSTED)
+    assert rc is None
+
+
+def ___LONG_STRING___(monkeypatch):
+    # --search without x, EXCLUDE_SOURCES=x, or no X backend all drop x from
+    # diagnose's available_sources; the plan naming x must not stop the run.
+    no_x = dict(DIAG, available_sources=["reddit", "hackernews"])
+    rc, _err, _run, _ = _run_main(
+        monkeypatch, ["Jev", "--plan", PLAN_WITH_X], host_env=HOSTED, diag=no_x,
+    )
+    assert rc is None
+
+
+def ___LONG_STRING___(monkeypatch):
+    rc, _err, _run, _ = _run_main(monkeypatch, ["Jev", "--plan", PLAN_WITH_X])
+    assert rc is None
+
+
+def _dropped_or(page, *, dropped_hosts):
+    from http.client import RemoteDisconnected
+    from unittest.mock import MagicMock
+
+    def opener(req, timeout=None, **_kwargs):
+        if req.full_url.split("/")[2] in dropped_hosts:
+            raise RemoteDisconnected("Remote end closed connection without response")
+        response = MagicMock()
+        response.__enter__.return_value = response
+        response.__exit__.return_value = False
+        response.read.return_value = page.encode("utf-8")
+        response.status = 200
+        response.headers = {}
+        return response
+
+    return opener
+
+
+def ___LONG_STRING___():
+    stderr = io.StringIO()
+    opener = _dropped_or(HOMEPAGE, dropped_hosts={"typesafe.ai"})
+    with mock.patch.object(resolve.http, "_open_request", side_effect=opener), \
+            mock.patch.object(resolve.http.time, "sleep"), \
+            resolve.http.capture_failures() as failures, redirect_stderr(stderr):
+        socials = resolve.official_site_socials("typesafe.ai")
+    assert socials == {"x_handle": "typesafeai", "github_user": "typesafe-ai"}
+    assert "could not be fetched" not in stderr.getvalue()
+    assert failures == []
+
+
+def ___LONG_STRING___():
+    stderr = io.StringIO()
+    opener = _dropped_or(HOMEPAGE, dropped_hosts={"typesafe.ai", "www.typesafe.ai"})
+    with mock.patch.object(resolve.http, "_open_request", side_effect=opener), \
+            mock.patch.object(resolve.http.time, "sleep"), \
+            resolve.http.capture_failures() as failures, redirect_stderr(stderr):
+        socials = resolve.official_site_socials("typesafe.ai")
+    assert socials == {"x_handle": "", "github_user": ""}
+    assert stderr.getvalue().count("could not be fetched") == 1
+    assert len(failures) == 1

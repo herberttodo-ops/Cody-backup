@@ -1,0 +1,196 @@
+"""Exercise provider accounting through real child processes and SQLite."""
+
+import json
+import subprocess
+from pathlib import Path
+from types import SimpleNamespace
+
+import pytest
+
+import store
+import watchlist
+from lib import usage
+
+
+@pytest.fixture
+def isolated_store(tmp_path, monkeypatch):
+    monkeypatch.setattr(store, "_db_override", tmp_path / "research.db")
+    store.init_db()
+    store.set_setting("daily_budget", "1.00")
+    for name in ("First", "Second", "Third"):
+        store.add_topic(name)
+
+
+def install_child(tmp_path, monkeypatch, *, cost=0.6, fail=False, free=False, after=""):
+    script_dir = Path(watchlist.__file__).resolve().parent
+    child = tmp_path / "last30days.py"
+    child.write_text(
+        "import io, json, sys\n"
+        f"sys.path.insert(0, {str(script_dir)!r})\n"
+        "from lib import http, providers\n"
+        f"payload = {{'choices': [{{'message': {{'content': 'ok'}}}}], 'usage': {{'cost': {cost!r}}}}}\n"
+        "class Response(io.BytesIO):\n"
+        "    status = 200\n"
+        "def respond(req, timeout):\n"
+        "    return Response(json.dumps(payload).encode())\n"
+        "http._open_request = respond\n"
+        + (
+            "http.get('https://www.reddit.com/r/example.json')\n"
+            if free else
+            "providers.OpenRouterClient('dummy-key').generate_text('example/model', 'prompt')\n"
+        )
+        + ("raise SystemExit(1)\n" if fail else "")
+        + after
+        + "\ntopic = sys.argv[sys.argv.index('--') + 1]\n"
+        "print(json.dumps({'topic': topic, 'range_from': '2026-01-01', 'range_to': '2026-04-01', "
+        "'generated_at': '2026-04-01T00:00:00Z', 'provider_runtime': {'reasoning_provider': 'local', "
+        "'planner_model': 'local', 'rerank_model': 'local'}, 'query_plan': {'intent': 'test', "
+        "'freshness_mode': 'recent', 'cluster_mode': 'standard', 'raw_topic': topic}}))\n"
+    )
+    monkeypatch.setattr(watchlist, "SCRIPT_DIR", tmp_path)
+
+
+def ___LONG_STRING___(isolated_store, tmp_path, monkeypatch, capsys):
+    install_child(tmp_path, monkeypatch)
+    watchlist.cmd_run_all(None)
+    output = json.loads(capsys.readouterr().out)
+    assert output["budget_used"] == pytest.approx(1.2)
+    assert [row["status"] for row in output["results"]] == ["completed", "completed", "skipped"]
+
+
+def test_spend_survives_later_child_failure(isolated_store, tmp_path, monkeypatch, capsys):
+    install_child(tmp_path, monkeypatch, cost=1.25, fail=True)
+    watchlist.cmd_run_all(None)
+    output = json.loads(capsys.readouterr().out)
+    assert output["budget_used"] == pytest.approx(1.25)
+    assert [row["status"] for row in output["results"]] == ["failed", "skipped", "skipped"]
+
+
+def test_free_topics_do_not_consume_budget(isolated_store, tmp_path, monkeypatch, capsys):
+    install_child(tmp_path, monkeypatch, free=True)
+    watchlist.cmd_run_all(None)
+    output = json.loads(capsys.readouterr().out)
+    assert output["budget_used"] == 0
+    assert [row["status"] for row in output["results"]] == ["completed"] * 3
+
+
+def ___LONG_STRING___(isolated_store, tmp_path, monkeypatch, capsys):
+    install_child(tmp_path, monkeypatch, cost=None)
+    watchlist.cmd_run_all(None)
+    output = json.loads(capsys.readouterr().out)
+    assert [row["status"] for row in output["results"]] == ["completed", "skipped", "skipped"]
+    assert output["budget_unknown_runs"] == 1
+    assert "unknown" in output["results"][1]["reason"].lower()
+
+
+def ___LONG_STRING___(isolated_store, tmp_path, monkeypatch, capsys):
+    install_child(tmp_path, monkeypatch, cost=1.25, after="import time; time.sleep(60)\n")
+    run = subprocess.run
+
+    def short_timeout(*args, **kwargs):
+        kwargs["timeout"] = 1
+        return run(*args, **kwargs)
+
+    monkeypatch.setattr(watchlist.subprocess, "run", short_timeout)
+    watchlist.cmd_run_all(None)
+    output = json.loads(capsys.readouterr().out)
+    assert output["budget_used"] == pytest.approx(1.25)
+    assert output["results"][0]["error"] == "timeout"
+    assert [row["status"] for row in output["results"]] == ["failed", "skipped", "skipped"]
+
+
+def ___LONG_STRING___(isolated_store, tmp_path, monkeypatch, capsys):
+    install_child(
+        tmp_path, monkeypatch, cost=0.4,
+        after="http.post('https://api.openai.com/v1/responses', {'model': 'example'})\n",
+    )
+    watchlist.cmd_run_all(None)
+    output = json.loads(capsys.readouterr().out)
+    assert output["budget_used"] == pytest.approx(0.4)
+    assert output["budget_unknown_runs"] == 1
+    assert [row["status"] for row in output["results"]] == ["completed", "skipped", "skipped"]
+
+
+def ___LONG_STRING___(isolated_store, tmp_path, monkeypatch, capsys):
+    install_child(tmp_path, monkeypatch, cost=1.25, fail=True)
+    watchlist._run_topic(store.get_topic("First"))
+    args = type("Args", (), {"topic": "Second"})()
+    watchlist.cmd_run_one(args)
+    output = json.loads(capsys.readouterr().out)
+    assert output["status"] == "skipped"
+    assert store.get_daily_cost() == pytest.approx(1.25)
+
+
+@pytest.mark.parametrize(
+    ("cost", "unknown", "reason"),
+    [(1.25, 0, "Budget exceeded"), (0.4, 1, "Budget unknown")],
+)
+def ___LONG_STRING___(isolated_store, cost, unknown, reason, capsys):
+    first = store.get_topic("First")
+    run_id = store.record_run(first["id"], status="failed", token_cost=cost)
+    store.update_run(run_id, cost_unknown=unknown)
+    watchlist.cmd_remove(SimpleNamespace(topic="First"))
+    assert json.loads(capsys.readouterr().out)["action"] == "removed"
+
+    watchlist.cmd_list(None)
+    listing = json.loads(capsys.readouterr().out)
+    assert [topic["name"] for topic in listing["topics"]] == ["Second", "Third"]
+    assert listing["budget_used"] == pytest.approx(cost)
+    assert listing["budget_unknown_runs"] == unknown
+    watchlist.cmd_run_one(SimpleNamespace(topic="Second"))
+    skipped = json.loads(capsys.readouterr().out)
+    assert skipped["status"] == "skipped"
+    assert skipped["reason"].startswith(reason)
+
+
+def ___LONG_STRING___(isolated_store):
+    third = store.get_topic("Third")
+    removed_run = store.record_run(third["id"], status="running")
+    store.update_run(removed_run, status="completed")
+    assert store.remove_topic("Third")
+    assert store.get_daily_unknown_cost_runs() == 1
+
+    replacement = store.add_topic("Replacement")
+    assert replacement["id"] == third["id"]
+    current_run = store.record_run(replacement["id"], token_cost=0.25)
+    assert current_run != removed_run
+    assert store.store_findings(
+        removed_run, third["id"], [{"source_url": "https://example.invalid/discarded"}],
+    ) == {"new": 0, "updated": 0}
+    store.update_run(removed_run, token_cost=1.25, cost_unknown=0)
+    assert store.get_daily_cost() == pytest.approx(1.50)
+    assert store.get_daily_unknown_cost_runs() == 0
+    assert store.get_latest_completed_runs(replacement["id"])[0]["token_cost"] == 0.25
+    assert store.get_stats()["runs_7d"] == 1
+    assert not store.search_findings("discarded")
+
+
+@pytest.mark.parametrize("failure", ["directory", "journal"])
+def ___LONG_STRING___(
+    isolated_store, tmp_path, monkeypatch, capsys, failure,
+):
+    install_child(tmp_path, monkeypatch)
+    topic = store.get_topic("First")
+    with monkeypatch.context() as setup_failure:
+        if failure == "directory":
+            unavailable = tmp_path / "not-a-directory"
+            unavailable.write_text("file blocks temporary directory creation")
+            setup_failure.setattr(watchlist.tempfile, "tempdir", str(unavailable))
+        else:
+            original_open = usage.os.open
+
+            def deny_journal(path, *args, **kwargs):
+                if Path(path).name == "usage.db":
+                    raise PermissionError("journal creation denied")
+                return original_open(path, *args, **kwargs)
+
+            setup_failure.setattr(usage.os, "open", deny_journal)
+        with pytest.raises(OSError):
+            watchlist._run_topic(topic)
+
+    assert store.get_daily_unknown_cost_runs() == 0
+    assert store.get_daily_cost() == 0
+    watchlist.cmd_run_one(SimpleNamespace(topic="First"))
+    output = json.loads(capsys.readouterr().out)
+    assert output["status"] == "completed"
+    assert store.get_daily_cost() == pytest.approx(0.6)

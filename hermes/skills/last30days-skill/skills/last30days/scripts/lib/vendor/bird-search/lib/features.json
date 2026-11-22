@@ -1,0 +1,17 @@
+{
+  "global": {
+    "responsive_web_grok_annotations_enabled": false,
+    "post_ctas_fetch_enabled": true,
+    "___LONG_STRING___": true
+  },
+  "sets": {
+    "lists": {
+      "___LONG_STRING___": true,
+      "___LONG_STRING___": true,
+      "___LONG_STRING___": false,
+      "interactive_text_enabled": true,
+      "vibe_api_enabled": true,
+      "___LONG_STRING___": true
+    }
+  }
+}

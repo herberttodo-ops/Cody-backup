@@ -1,0 +1,68 @@
+"""Run real CLI/fanout wiring while collecting the research boundary inputs."""
+
+import copy
+import sys
+from types import SimpleNamespace
+from unittest import mock
+
+import last30days as cli
+from lib import resolve, schema
+
+
+def run_competitor_cli(
+    monkeypatch, tmp_path, *, args=(), config=None, has_backend=False, resolutions=None,
+    topic="MainBrand", competitors_list="PeerOne,PeerTwo", companies=None,
+    expected_topics=frozenset({"MainBrand", "PeerOne", "PeerTwo"}), market_cli=None,
+):
+    config = {} if config is None else config
+    calls = {}
+    reports = {}
+
+    def research(**kwargs):
+        topic = kwargs["topic"]
+        calls[topic] = kwargs
+        report = schema.Report(
+            topic=topic, range_from="2026-06-01", range_to="2026-06-30",
+            generated_at="2026-06-30T12:00:00Z",
+            provider_runtime=schema.ProviderRuntime("local", "none", "none"),
+            query_plan=schema.QueryPlan("general", "recent", "none", topic, [], {}),
+            clusters=[], ranked_candidates=[], items_by_source={}, errors_by_source={},
+        )
+        reports[topic] = report
+        return report
+
+    if isinstance(resolutions, Exception):
+        resolver = mock.Mock(side_effect=resolutions)
+    else:
+        resolver = mock.Mock(side_effect=lambda topic, _config: (resolutions or {}).get(topic, {}))
+    monkeypatch.setattr(cli.env, "get_config", lambda **_kwargs: config)
+    monkeypatch.setattr(cli.env, "CONFIG_DIR", tmp_path / "config")
+    monkeypatch.setattr(cli.env, "CONFIG_FILE", tmp_path / "config" / ".env")
+    monkeypatch.setattr(cli.pipeline, "diagnose", lambda *_args, **_kwargs: {"available_sources": ["reddit"]})
+    monkeypatch.setattr(cli.pipeline, "run", research)
+    monkeypatch.setattr(resolve, "_has_backend", lambda _config: has_backend)
+    monkeypatch.setattr(resolve, "auto_resolve", resolver)
+    # copy.copy keeps the type of a failed lookup, which dict() would drop.
+    company_resolver = mock.Mock(
+        side_effect=lambda topic, **_kwargs: copy.copy((companies or {}).get(topic, {}))
+    )
+    monkeypatch.setattr(cli.company_resolve, "resolve_company", company_resolver)
+    # The price CLI is absent unless a test hands in a stand-in for it.
+    monkeypatch.setattr(cli.yahoo_finance, "_is_available", lambda: market_cli is not None)
+    monkeypatch.setattr(cli.yahoo_finance.subproc, "run_with_timeout", market_cli)
+    monkeypatch.setenv("LAST30DAYS_SKIP_PREFLIGHT", "1")
+    monkeypatch.setenv("LAST30DAYS_MEMORY_DIR", "")
+    monkeypatch.setenv("LAST30DAYS_STORE", "")
+    monkeypatch.delenv("LAST30DAYS_API_BASE", raising=False)
+    monkeypatch.delenv("LAST30DAYS_API_KEY", raising=False)
+    argv = ["last30days.py", topic]
+    if competitors_list is not None:
+        argv.extend(["--competitors-list", competitors_list])
+    argv.extend(["--emit=json", "--json-profile=raw", "--save-dir=", *args])
+    monkeypatch.setattr(sys, "argv", argv)
+
+    assert cli.main() == 0
+    assert set(calls) == set(expected_topics)
+    return SimpleNamespace(
+        calls=calls, reports=reports, resolver=resolver, company_resolver=company_resolver,
+    )

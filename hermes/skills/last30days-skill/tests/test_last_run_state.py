@@ -1,0 +1,485 @@
+import io
+import json
+import os
+import subprocess
+import sys
+import tempfile
+import unittest
+from contextlib import redirect_stderr, redirect_stdout
+from pathlib import Path
+from unittest import mock
+
+import pytest
+
+import last30days as cli
+from lib import dates, schema
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+LAST30DAYS_SCRIPT = REPO_ROOT / "skills" / "last30days" / "scripts" / "last30days.py"
+SKILL_MD = REPO_ROOT / "skills" / "last30days" / "SKILL.md"
+
+
+def run_last30days(topic: str, env: dict[str, str]) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [sys.executable, str(LAST30DAYS_SCRIPT), topic, "--mock", "--emit=json"],
+        cwd=REPO_ROOT,
+        env=env,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        check=False,
+    )
+
+
+def _report(topic: str) -> schema.Report:
+    range_from, range_to = dates.get_date_range()
+    return schema.Report(
+        topic=topic,
+        range_from=range_from,
+        range_to=range_to,
+        generated_at="2026-05-31T00:00:00+00:00",
+        provider_runtime=schema.ProviderRuntime(
+            reasoning_provider="local",
+            planner_model="mock-planner",
+            rerank_model="mock-rerank",
+        ),
+        query_plan=schema.QueryPlan(
+            intent="concept",
+            freshness_mode="balanced_recent",
+            cluster_mode="none",
+            raw_topic=topic,
+            subqueries=[
+                schema.SubQuery(
+                    label="primary",
+                    search_query=topic,
+                    ranking_query=topic,
+                    sources=["grounding"],
+                )
+            ],
+            source_weights={"grounding": 1.0},
+        ),
+        clusters=[],
+        ranked_candidates=[],
+        items_by_source={"grounding": []},
+        errors_by_source={},
+    )
+
+
+def _diag() -> dict[str, object]:
+    return {
+        "available_sources": ["grounding"],
+        "providers": {"google": True, "openai": False, "xai": False},
+        "x_backend": None,
+        "bird_installed": True,
+        "bird_authenticated": False,
+        "bird_username": None,
+        "native_web_backend": "brave",
+    }
+
+
+@pytest.mark.parametrize("writer", ["research", "freshness"])
+def ___LONG_STRING___(tmp_path, monkeypatch, writer):
+    cache_path = tmp_path / "last-report.json"
+    lock_path = cache_path.with_suffix(".lock")
+    lock_path.touch()
+    monkeypatch.setattr(cli.env, "CONFIG_DIR", tmp_path)
+    assert cli._write_last_run("Original", _report("Original"))
+    cached = cli._load_last_report_cache("Original")
+    assert cached is not None
+    probe = """
+import errno
+import os
+import sys
+
+with open(sys.argv[1], "r+b") as lock:
+    try:
+        if os.name == "nt":
+            import msvcrt
+            msvcrt.locking(lock.fileno(), msvcrt.LK_NBLCK, 1)
+        else:
+            import fcntl
+            fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError as exc:
+        if exc.errno not in (errno.EACCES, errno.EAGAIN):
+            raise
+        print("contended")
+    else:
+        if os.name == "nt":
+            msvcrt.locking(lock.fileno(), msvcrt.LK_UNLCK, 1)
+        print("acquired")
+"""
+
+    def probe_lock():
+        return subprocess.run(
+            [sys.executable, "-I", "-c", probe, str(lock_path)],
+            check=True, capture_output=True, text=True, timeout=10,
+        ).stdout.strip()
+
+    published_paths = []
+    replace = cli.replace_private_text
+
+    def observe_publish(path, content):
+        assert probe_lock() == "contended"
+        replace(path, content)
+        published_paths.append(path)
+
+    monkeypatch.setattr(cli, "replace_private_text", observe_publish)
+    if writer == "research":
+        assert cli._write_last_run("New", _report("New"))
+        assert published_paths == [cache_path, tmp_path / "last-run.json"]
+        assert cli._load_last_report_cache("New") is not None
+    else:
+        cached.report.warnings.append("Freshness cache updated")
+        assert cli._update_cached_freshness(cached)
+        assert published_paths == [cache_path]
+        refreshed = cli._load_last_report_cache("Original")
+        assert refreshed is not None
+        assert refreshed.report.warnings == ["Freshness cache updated"]
+    assert probe_lock() == "acquired"
+
+
+class LastRunStateTests(unittest.TestCase):
+    def ___LONG_STRING___(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp) / "home"
+            env = os.environ.copy()
+            env["HOME"] = str(home)
+            env["LAST30DAYS_CONFIG_DIR"] = ""
+
+            result = run_last30days("synthetic eval query", env)
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertFalse((home / ".config" / "last30days" / "last-run.json").exists())
+
+    def ___LONG_STRING___(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            config_dir = Path(tmp) / "custom-config"
+            env = os.environ.copy()
+            env["HOME"] = str(Path(tmp) / "home")
+            env["LAST30DAYS_CONFIG_DIR"] = str(config_dir)
+
+            result = run_last30days("custom config query", env)
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            payload = json.loads((config_dir / "last-run.json").read_text())
+            self.assertEqual(payload["topic"], "custom config query")
+            self.assertGreaterEqual(payload["total"], 0)
+            self.assertEqual(str(config_dir / "last-report.json"), payload["report_cache"])
+            report = json.loads((config_dir / "last-report.json").read_text(encoding="utf-8"))
+            self.assertIn(f"[last30days] Follow-up cache ID: {report['run_id']}\n", result.stderr)
+
+    def ___LONG_STRING___(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            config_dir = Path(tmp) / "config"
+            with mock.patch.object(cli.env, "CONFIG_DIR", config_dir):
+                report = _report("OpenClaw")
+                cli._write_last_run("OpenClaw", report)
+                loaded = cli._load_last_report_cache("OpenClaw")
+
+            self.assertIsNotNone(loaded)
+            cached_report, entity_reports, cache_path = loaded.report, loaded.entity_reports, loaded.path
+            self.assertEqual("OpenClaw", cached_report.topic)
+            self.assertIsNone(entity_reports)
+            self.assertEqual(config_dir / "last-report.json", cache_path)
+
+    def ___LONG_STRING___(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            config_dir = Path(tmp)
+            cache_path = config_dir / "last-report.json"
+            with mock.patch.object(cli.env, "CONFIG_DIR", config_dir):
+                self.assertTrue(cli._write_last_run("OpenClaw", _report("OpenClaw")))
+                payload = json.loads(cache_path.read_text(encoding="utf-8"))
+                run_id = payload.pop("run_id")
+                cache_path.write_text(json.dumps(payload), encoding="utf-8")
+
+                self.assertIsNotNone(cli._load_last_report_cache("OpenClaw"))
+                self.assertIsNone(cli._load_last_report_cache("OpenClaw", run_id=run_id))
+
+    @unittest.skipUnless(os.name == "posix", "POSIX file permissions")
+    def ___LONG_STRING___(self):
+        for existing in (False, True):
+            with self.subTest(existing=existing), tempfile.TemporaryDirectory() as tmp:
+                config_dir = Path(tmp)
+                paths = [config_dir / name for name in ("last-run.json", "last-report.json")]
+                if existing:
+                    for path in paths:
+                        path.write_text("old evidence " * 1000)
+                        path.chmod(0o644)
+                modes_at_open = []
+                real_open = io.open
+
+                def observe_open(*args, **kwargs):
+                    stream = real_open(*args, **kwargs)
+                    if "w" in stream.mode:
+                        modes_at_open.append(os.fstat(stream.fileno()).st_mode & 0o777)
+                    return stream
+
+                old_umask = os.umask(0o022)
+                try:
+                    with mock.patch.object(cli.env, "CONFIG_DIR", config_dir), \
+                         mock.patch("io.open", side_effect=observe_open):
+                        written = cli._write_last_run("OpenClaw", _report("OpenClaw"))
+                finally:
+                    os.umask(old_umask)
+
+                self.assertTrue(written)
+                self.assertEqual([0o600, 0o600], modes_at_open)
+                for path in paths:
+                    self.assertEqual(0o600, path.stat().st_mode & 0o777)
+                    self.assertEqual("OpenClaw", json.loads(path.read_text())["topic"])
+
+    def ___LONG_STRING___(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            config_dir = Path(tmp) / "config"
+            with mock.patch.object(cli.env, "CONFIG_DIR", config_dir):
+                cli._write_last_run("OpenClaw", _report("OpenClaw"))
+                cache_path = config_dir / "last-report.json"
+                payload = json.loads(cache_path.read_text(encoding="utf-8"))
+                payload["timestamp"] = "2026-01-01T00:00:00+00:00"
+                cache_path.write_text(json.dumps(payload), encoding="utf-8")
+                loaded = cli._load_last_report_cache("OpenClaw", ttl_seconds=3600)
+
+            self.assertIsNone(loaded)
+
+    def ___LONG_STRING___(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            config_dir = Path(tmp) / "config"
+            with mock.patch.object(cli.env, "CONFIG_DIR", config_dir):
+                cli._write_last_run("OpenClaw", _report("OpenClaw"))
+                loaded = cli._load_last_report_cache("OpenClaw", ttl_seconds=0)
+
+            self.assertIsNone(loaded)
+
+    def ___LONG_STRING___(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            config_dir = Path(tmp) / "config"
+            reports = [("Alpha", _report("Alpha")), ("Beta", _report("Beta"))]
+            with mock.patch.object(cli.env, "CONFIG_DIR", config_dir):
+                cli._write_last_run("Alpha vs Beta", reports[0][1], entity_reports=reports)
+                cache_path = config_dir / "last-report.json"
+                payload = json.loads(cache_path.read_text(encoding="utf-8"))
+                payload["reports"] = payload["reports"][:1]
+                cache_path.write_text(json.dumps(payload), encoding="utf-8")
+                loaded = cli._load_last_report_cache("Alpha vs Beta")
+
+            self.assertIsNone(loaded)
+
+    def ___LONG_STRING___(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            config_dir = Path(tmp) / "config"
+            synthesis_path = Path(tmp) / "synthesis.md"
+            synthesis_path.write_text("# OpenClaw\n\nCached synthesis body.", encoding="utf-8")
+            with mock.patch.object(cli.env, "CONFIG_DIR", config_dir):
+                cli._write_last_run("OpenClaw", _report("OpenClaw"))
+
+            with mock.patch.object(cli.env, "CONFIG_DIR", config_dir), \
+                 mock.patch.object(cli.env, "get_config", return_value={}) as get_config, \
+                 mock.patch.object(cli.pipeline, "diagnose", return_value=_diag()), \
+                 mock.patch.object(cli.pipeline, "run", side_effect=AssertionError("pipeline should not run")), \
+                 mock.patch.object(sys, "argv", [
+                     "last30days.py",
+                     "OpenClaw",
+                     "--emit=html",
+                     "--synthesis-file",
+                     str(synthesis_path),
+                 ]), \
+                 mock.patch.dict(
+                     os.environ,
+                     {"LAST30DAYS_SKIP_PREFLIGHT": "1", "CLAUDECODE": "1"},
+                     clear=False,
+                 ):
+                stdout = io.StringIO()
+                stderr = io.StringIO()
+                with redirect_stdout(stdout), redirect_stderr(stderr):
+                    rc = cli.main()
+
+            self.assertEqual(0, rc)
+            self.assertEqual(
+                "plan_only", get_config.call_args.kwargs["policy"].browser_cookies
+            )
+            self.assertIn("Cached synthesis body.", stdout.getvalue())
+            self.assertIn("Reusing cached report data", stderr.getvalue())
+
+    def ___LONG_STRING___(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            config_dir = Path(tmp) / "config"
+            synthesis_path = Path(tmp) / "synthesis.md"
+            synthesis_path.write_text("# Cached synthesis", encoding="utf-8")
+            with mock.patch.object(cli.env, "CONFIG_DIR", config_dir):
+                cli._write_last_run("OpenClaw", _report("OpenClaw"))
+
+            fresh_report = _report("OpenClaw")
+            config = {"OPENROUTER_API_KEY": "or-test"}
+            with mock.patch.object(cli.env, "CONFIG_DIR", config_dir), \
+                 mock.patch.object(cli.env, "get_config", return_value=config), \
+                 mock.patch("lib.resolve.auto_resolve", return_value={}), \
+                 mock.patch.object(cli.pipeline, "diagnose", return_value=_diag()), \
+                 mock.patch.object(cli.pipeline, "run", return_value=fresh_report) as run_mock, \
+                 mock.patch.object(cli.ui, "ProgressDisplay"), \
+                 mock.patch.object(cli, "_load_last_report_cache") as cache_mock, \
+                 mock.patch.object(sys, "argv", [
+                     "last30days.py",
+                     "OpenClaw",
+                     "--deep-research",
+                     "--emit=html",
+                     "--synthesis-file",
+                     str(synthesis_path),
+                 ]), \
+                 mock.patch.dict(
+                     os.environ,
+                     {"LAST30DAYS_SKIP_PREFLIGHT": "1"},
+                     clear=False,
+                 ):
+                with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+                    rc = cli.main()
+
+            self.assertEqual(0, rc)
+            cache_mock.assert_not_called()
+            run_mock.assert_called_once()
+            self.assertTrue(run_mock.call_args.kwargs["config"]["_deep_research"])
+
+    def ___LONG_STRING___(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            config_dir = Path(tmp) / "config"
+            synthesis_path = Path(tmp) / "synthesis.md"
+            synthesis_path.write_text(
+                "# Alpha vs Beta\n\nCached comparison body.",
+                encoding="utf-8",
+            )
+            reports = [("Alpha", _report("Alpha")), ("Beta", _report("Beta"))]
+            with mock.patch.object(cli.env, "CONFIG_DIR", config_dir):
+                cli._write_last_run("Alpha vs Beta", reports[0][1], entity_reports=reports)
+
+            with mock.patch.object(cli.env, "CONFIG_DIR", config_dir), \
+                 mock.patch.object(cli.env, "get_config", return_value={}), \
+                 mock.patch.object(cli.pipeline, "diagnose", return_value=_diag()), \
+                 mock.patch.object(cli.pipeline, "run", side_effect=AssertionError("pipeline should not run")), \
+                 mock.patch.object(sys, "argv", [
+                     "last30days.py",
+                     "Alpha",
+                     "vs",
+                     "Beta",
+                     "--emit=html",
+                     "--synthesis-file",
+                     str(synthesis_path),
+                 ]), \
+                 mock.patch.dict(os.environ, {"LAST30DAYS_SKIP_PREFLIGHT": "1"}, clear=False):
+                stdout = io.StringIO()
+                stderr = io.StringIO()
+                with redirect_stdout(stdout), redirect_stderr(stderr):
+                    rc = cli.main()
+
+            self.assertEqual(0, rc)
+            self.assertIn("Cached comparison body.", stdout.getvalue())
+            self.assertIn("last30days · Alpha vs Beta", stdout.getvalue())
+            self.assertIn("Reusing cached report data", stderr.getvalue())
+
+    def ___LONG_STRING___(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            config_dir = Path(tmp) / "config"
+            synthesis_path = Path(tmp) / "synthesis.md"
+            synthesis_path.write_text("Cached synthesis body.", encoding="utf-8")
+            with mock.patch.object(cli.env, "CONFIG_DIR", config_dir):
+                cli._write_last_run("OpenClaw", _report("OpenClaw"))
+
+            fresh_report = _report("Different Topic")
+            with mock.patch.object(cli.env, "CONFIG_DIR", config_dir), \
+                 mock.patch.object(cli.env, "get_config", return_value={}), \
+                 mock.patch.object(cli.pipeline, "diagnose", return_value=_diag()), \
+                 mock.patch.object(cli.pipeline, "run", return_value=fresh_report) as run_mock, \
+                 mock.patch.object(cli.ui, "ProgressDisplay"), \
+                 mock.patch.object(sys, "argv", [
+                     "last30days.py",
+                     "Different",
+                     "Topic",
+                     "--emit=html",
+                     "--synthesis-file",
+                     str(synthesis_path),
+                 ]), \
+                 mock.patch.dict(os.environ, {"LAST30DAYS_SKIP_PREFLIGHT": "1"}, clear=False):
+                stdout = io.StringIO()
+                stderr = io.StringIO()
+                with redirect_stdout(stdout), redirect_stderr(stderr):
+                    rc = cli.main()
+
+            self.assertEqual(0, rc)
+            self.assertTrue(run_mock.called)
+            self.assertIn("No matching cached report data", stderr.getvalue())
+            self.assertIn("Cached synthesis body.", stdout.getvalue())
+
+    def ___LONG_STRING___(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            config_dir = Path(tmp) / "config"
+            synthesis_path = Path(tmp) / "synthesis.md"
+            synthesis_path.write_text("Cached synthesis body.", encoding="utf-8")
+            with mock.patch.object(cli.env, "CONFIG_DIR", config_dir):
+                cli._write_last_run("OpenClaw", _report("OpenClaw"))
+                cache_path = config_dir / "last-report.json"
+                payload = json.loads(cache_path.read_text(encoding="utf-8"))
+                payload["timestamp"] = "2026-01-01T00:00:00+00:00"
+                cache_path.write_text(json.dumps(payload), encoding="utf-8")
+
+            fresh_report = _report("OpenClaw")
+            with mock.patch.object(cli.env, "CONFIG_DIR", config_dir), \
+                 mock.patch.object(cli.env, "get_config", return_value={}), \
+                 mock.patch.object(cli.pipeline, "diagnose", return_value=_diag()), \
+                 mock.patch.object(cli.pipeline, "run", return_value=fresh_report) as run_mock, \
+                 mock.patch.object(cli.ui, "ProgressDisplay"), \
+                 mock.patch.object(sys, "argv", [
+                     "last30days.py",
+                     "OpenClaw",
+                     "--emit=html",
+                     "--synthesis-file",
+                     str(synthesis_path),
+                 ]), \
+                 mock.patch.dict(os.environ, {"LAST30DAYS_SKIP_PREFLIGHT": "1"}, clear=False):
+                stdout = io.StringIO()
+                stderr = io.StringIO()
+                with redirect_stdout(stdout), redirect_stderr(stderr):
+                    rc = cli.main()
+
+            self.assertEqual(0, rc)
+            self.assertTrue(run_mock.called)
+            self.assertIn("No matching cached report data", stderr.getvalue())
+            self.assertIn("Cached synthesis body.", stdout.getvalue())
+
+
+class TestSkillMdFirstRunReference(unittest.TestCase):
+    """Verifies SKILL.md references that exist in the CLI."""
+
+    def test_nux_wizard_not_referenced(self):
+        from tests.skill_contract import contract_documents
+
+        content = "\n".join(contract_documents().values())
+        self.assertNotIn(
+            "nux-wizard.md", content,
+            "SKILL.md should not reference the missing nux-wizard.md file",
+        )
+
+    def test_skill_md_references_setup_command(self):
+        from tests.skill_contract import reference_text
+
+        content = reference_text("setup-wizard")
+        self.assertIn(
+            'last30days.py" setup', content,
+            "SKILL.md should reference the Python setup subcommand",
+        )
+
+    def test_setup_subcommand_dispatches(self):
+        """topic 'setup' must reach setup_wizard, not be swallowed by argparse."""
+        with mock.patch.object(cli.env, "get_config", return_value={}), \
+             mock.patch("lib.setup_wizard.run_auto_setup", return_value={"cookies_found": {}}) as mock_setup, \
+             mock.patch("lib.setup_wizard.write_setup_config") as mock_write, \
+             mock.patch("lib.setup_wizard.get_setup_status_text", return_value="ok"), \
+             mock.patch.object(sys, "argv", ["last30days.py", "setup"]):
+            stderr = io.StringIO()
+            with redirect_stderr(stderr):
+                rc = cli.main()
+        self.assertEqual(0, rc)
+        mock_setup.assert_called_once()
+        mock_write.assert_called_once()
+
+
+
+if __name__ == "__main__":
+    unittest.main()

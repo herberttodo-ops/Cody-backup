@@ -1,0 +1,3829 @@
+import contextlib
+import dataclasses
+import threading
+from datetime import datetime, timezone
+import time
+import unittest
+
+import pytest
+from unittest.mock import patch
+
+from lib import health
+from lib import fanout
+from lib import http
+from lib import pipeline
+from lib import polymarket
+from lib import rerank
+from lib import schema
+from lib import subproc
+
+
+class DepthSettingsOverrideTests(unittest.TestCase):
+    def ___LONG_STRING___(self):
+        settings = pipeline._resolve_depth_settings("deep", {})
+        self.assertEqual(pipeline.DEPTH_SETTINGS["deep"], settings)
+
+    def ___LONG_STRING___(self):
+        before = dict(pipeline.DEPTH_SETTINGS["deep"])
+        settings = pipeline._resolve_depth_settings(
+            "deep", {"_max_per_source": 60, "_max_results": 200}
+        )
+        self.assertEqual(60, settings["per_stream_limit"])
+        self.assertEqual(200, settings["pool_limit"])
+        self.assertEqual(200, settings["rerank_limit"])
+        # Module-level defaults must be untouched (issue #716 regression guard).
+        self.assertEqual(before, pipeline.DEPTH_SETTINGS["deep"])
+
+    def test_overrides_can_also_lower_caps(self):
+        settings = pipeline._resolve_depth_settings("deep", {"_max_results": 10})
+        self.assertEqual(10, settings["rerank_limit"])
+
+    def ___LONG_STRING___(self):
+        # 0 is a valid explicit value (e.g. disable a source), not "unset".
+        settings = pipeline._resolve_depth_settings(
+            "deep", {"_max_results": 0, "_max_per_source": 0}
+        )
+        self.assertEqual(0, settings["pool_limit"])
+        self.assertEqual(0, settings["rerank_limit"])
+        self.assertEqual(0, settings["per_stream_limit"])
+
+
+class PipelineV3Tests(unittest.TestCase):
+    def ___LONG_STRING___(self):
+        calls = 0
+
+        def response(url, body, **kwargs):
+            nonlocal calls
+            calls += 1
+            if calls > 1:
+                raise http.HTTPError("timed out")
+            return {
+                "candidates": [{"content": {"parts": [{"text": '{"scores": []}'}]}}],
+                "usageMetadata": {
+                    "promptTokenCount": 10,
+                    "candidatesTokenCount": 1,
+                    "totalTokenCount": 11,
+                },
+            }
+
+        with patch.object(pipeline, "available_sources", return_value=["reddit"]), patch.object(
+            pipeline, "_retrieve_stream",
+            side_effect=lambda **kwargs: pipeline._mock_stream_results(
+                kwargs["source"], kwargs["subquery"]
+            ),
+        ), patch.object(pipeline, "_retry_thin_sources"), patch.object(
+            pipeline.providers.http, "post", side_effect=response
+        ):
+            report = pipeline.run(
+                topic="AI coding agents",
+                config={"GOOGLE_API_KEY": "dummy-key", "LAST30DAYS_REASONING_PROVIDER": "gemini"},
+                depth="quick",
+                requested_sources=["reddit"],
+                web_backend="none",
+                external_plan={
+                    "intent": "research",
+                    "freshness_mode": "balanced_recent",
+                    "cluster_mode": "topic",
+                    "subqueries": [{
+                        "label": "primary",
+                        "search_query": "AI coding agents",
+                        "ranking_query": "AI coding agents",
+                        "sources": ["reddit"],
+                    }],
+                },
+            )
+
+        self.assertGreaterEqual(calls, 2)
+        self.assertIsNone(schema.to_agent_export(report)["usage"])
+
+    def ___LONG_STRING___(self):
+        calls = []
+
+        def response(url, body, **kwargs):
+            self.assertIn("generativelanguage.googleapis.com", url)
+            calls.append(body)
+            prompt_tokens = len(calls) * 10
+            return {
+                "candidates": [{"content": {"parts": [{"text": '{"scores": []}'}]}}],
+                "usageMetadata": {
+                    "promptTokenCount": prompt_tokens,
+                    "candidatesTokenCount": 1,
+                    "totalTokenCount": prompt_tokens + 1,
+                },
+            }
+
+        with patch.object(pipeline, "available_sources", return_value=["reddit"]), patch.object(
+            pipeline, "_retrieve_stream",
+            side_effect=lambda **kwargs: pipeline._mock_stream_results(
+                kwargs["source"], kwargs["subquery"]
+            ),
+        ), patch.object(pipeline, "_retry_thin_sources"), patch.object(
+            pipeline.providers.http, "post", side_effect=response
+        ):
+            report = pipeline.run(
+                topic="AI coding agents",
+                config={"GOOGLE_API_KEY": "dummy-key", "LAST30DAYS_REASONING_PROVIDER": "gemini"},
+                depth="quick",
+                requested_sources=["reddit"],
+                web_backend="none",
+                external_plan={
+                    "intent": "research",
+                    "freshness_mode": "balanced_recent",
+                    "cluster_mode": "topic",
+                    "subqueries": [{
+                        "label": "primary",
+                        "search_query": "AI coding agents",
+                        "ranking_query": "AI coding agents",
+                        "sources": ["reddit"],
+                    }],
+                },
+            )
+
+        self.assertGreaterEqual(len(calls), 2)
+        expected = {
+            "calls": len(calls),
+            "promptTokens": sum(i * 10 for i in range(1, len(calls) + 1)),
+            "completionTokens": len(calls),
+            "totalTokens": sum(i * 10 + 1 for i in range(1, len(calls) + 1)),
+        }
+        self.assertEqual(expected, schema.to_agent_export(report)["usage"])
+
+    def ___LONG_STRING___(self):
+        report = pipeline.run(
+            topic="test topic",
+            config={"LAST30DAYS_REASONING_PROVIDER": "gemini"},
+            depth="quick",
+            requested_sources=["reddit", "x", "grounding"],
+            mock=True,
+        )
+        self.assertEqual("test topic", report.topic)
+        self.assertTrue(report.ranked_candidates)
+        self.assertTrue(report.clusters)
+        self.assertIn("x", report.items_by_source)
+        # Grounding items now enter the ranked pool (web search backends produce real items)
+        self.assertIn("grounding", report.items_by_source)
+        self.assertEqual("gemini", report.provider_runtime.reasoning_provider)
+
+    def test_empty_explicit_plan_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "intent"):
+            pipeline.run(
+                topic="test topic",
+                config={"LAST30DAYS_REASONING_PROVIDER": "gemini"},
+                depth="quick",
+                external_plan={},
+                mock=True,
+            )
+
+    def ___LONG_STRING___(self):
+        # Issue #1073: --plan sources are a contract at default/deep.
+        plan = {
+            "intent": "opinion",
+            "freshness_mode": "balanced_recent",
+            "cluster_mode": "debate",
+            "subqueries": [
+                {
+                    "label": "primary",
+                    "search_query": "late diagnosed autism adults",
+                    "ranking_query": "What are people saying about late diagnosed autism in adults?",
+                    "sources": ["reddit", "x", "youtube"],
+                    "weight": 1.0,
+                }
+            ],
+        }
+        report = pipeline.run(
+            topic="late diagnosed autism adults",
+            config={"LAST30DAYS_REASONING_PROVIDER": "gemini"},
+            depth="default",
+            requested_sources=["reddit", "x", "youtube", "hackernews", "polymarket", "github"],
+            mock=True,
+            web_backend="none",
+            external_plan=plan,
+        )
+        self.assertEqual(
+            ["reddit", "x", "youtube"],
+            report.query_plan.subqueries[0].sources,
+        )
+        self.assertNotIn("hackernews", report.items_by_source)
+        self.assertNotIn("polymarket", report.items_by_source)
+        self.assertNotIn("github", report.items_by_source)
+
+    def ___LONG_STRING___(self):
+        """Unit 5: The unified planner trace emits one summary line plus one
+        line per subquery on every run, regardless of --debug. 2026-04-19
+        Hermes Agent Use Cases failure: retrieval-breadth issues were invisible
+        because the internal planner path logged nothing.
+        """
+        import io
+        import contextlib
+        buf = io.StringIO()
+        with contextlib.redirect_stderr(buf):
+            pipeline.run(
+                topic="test topic",
+                config={"LAST30DAYS_REASONING_PROVIDER": "gemini"},
+                depth="quick",
+                requested_sources=["reddit", "x", "grounding"],
+                mock=True,
+            )
+        output = buf.getvalue()
+        self.assertIn("[Planner] Plan: intent=", output)
+        self.assertIn("subqueries=", output)
+        self.assertIn("source=", output)
+        # At least one per-subquery line.
+        self.assertIn("[Planner]   sq1 label=", output)
+
+    def ___LONG_STRING___(self):
+        plan = {
+            "intent": "news",
+            "freshness_mode": "balanced_recent",
+            "cluster_mode": "timeline",
+            "subqueries": [
+                {
+                    "label": "primary",
+                    "search_query": "test topic",
+                    "ranking_query": "What happened with test topic?",
+                    "sources": ["grounding"],
+                }
+            ],
+            "source_weights": {"grounding": 1.0},
+        }
+        report = pipeline.run(
+            topic="test topic",
+            config={"LAST30DAYS_REASONING_PROVIDER": "auto"},
+            depth="quick",
+            requested_sources=["grounding"],
+            web_backend="parallel",
+            external_plan=plan,
+        )
+        # Anchor on the stable source key, not the exact wording of the
+        # grounding.py error message. Phrasing can shift (e.g., when the
+        # missing-key check moves or the message is reworded) without
+        # changing the contract that the grounding source registers an
+        # error when its required backend key is unset.
+        self.assertIn("grounding", report.errors_by_source)
+
+    def ___LONG_STRING___(self):
+        def mcp_response(message, _api_key, _session_id=None):
+            results = {
+                "initialize": {"protocolVersion": "2025-03-26"},
+                "notifications/initialized": {},
+                "tools/list": {"tools": [{"name": "web_search"}]},
+                "tools/call": {"structuredContent": {"results": [{
+                    "url": "https://example.com/update",
+                    "title": "Test topic update",
+                    "publish_date": "2026-08-01",
+                    "excerpts": ["New evidence about test topic"],
+                }]}},
+            }
+            return {"result": results[message["method"]]}, None
+
+        with patch("lib.parallel_mcp._request", side_effect=mcp_response):
+            report = pipeline.run(
+                topic="test topic",
+                config={"LAST30DAYS_REASONING_PROVIDER": "auto", "LAST30DAYS_NATIVE_SEARCH": "1"},
+                depth="quick",
+                requested_sources=["grounding"],
+                web_backend="parallel-mcp",
+                as_of_date="2026-08-26",
+            )
+        self.assertNotIn("grounding", report.errors_by_source)
+        self.assertEqual(1, len(report.items_by_source["grounding"]))
+        self.assertEqual("2026-08-01", report.items_by_source["grounding"][0].published_at)
+
+    def ___LONG_STRING___(self):
+        report = pipeline.run(
+            topic="Listen Labs",
+            config={"LAST30DAYS_REASONING_PROVIDER": "gemini"},
+            depth="quick",
+            requested_sources=["jobs"],
+            mock=True,
+            hiring_signals_mode=True,
+        )
+        self.assertIn("jobs", report.items_by_source)
+        self.assertIn("hiring_signals", report.artifacts)
+        self.assertTrue(report.artifacts["hiring_signals"]["include"])
+
+    def ___LONG_STRING___(self):
+        report = pipeline.run(
+            topic="Listen Labs",
+            config={"LAST30DAYS_REASONING_PROVIDER": "gemini"},
+            depth="quick",
+            mock=True,
+            hiring_signals_mode=True,
+        )
+        self.assertEqual(["jobs"], sorted(report.items_by_source))
+        self.assertTrue(report.artifacts["hiring_signals"]["include"])
+
+    def ___LONG_STRING___(self):
+        report = pipeline.run(
+            topic="Listen Labs",
+            config={"LAST30DAYS_REASONING_PROVIDER": "gemini"},
+            depth="quick",
+            requested_sources=["grounding", "x"],
+            mock=True,
+        )
+        self.assertEqual({"grounding", "x"}, set(report.items_by_source))
+        self.assertTrue(
+            all("jobs" not in subquery.sources for subquery in report.query_plan.subqueries)
+        )
+
+    def ___LONG_STRING___(self):
+        report = pipeline.run(
+            topic="Listen Labs",
+            config={"LAST30DAYS_REASONING_PROVIDER": "gemini"},
+            depth="quick",
+            requested_sources=["grounding", "x"],
+            mock=True,
+            hiring_signals_mode=True,
+        )
+        self.assertEqual({"grounding", "jobs", "x"}, set(report.items_by_source))
+
+    def ___LONG_STRING___(self):
+        report = pipeline.run(
+            topic="Listen Labs",
+            config={"LAST30DAYS_REASONING_PROVIDER": "gemini"},
+            depth="quick",
+            mock=True,
+        )
+        self.assertIn("jobs", report.items_by_source)
+        self.assertIn("hiring_signals", report.artifacts)
+
+    def ___LONG_STRING___(self):
+        report = pipeline.run(
+            topic="how to deploy on Fly.io",
+            config={"LAST30DAYS_REASONING_PROVIDER": "gemini"},
+            depth="quick",
+            mock=True,
+        )
+        self.assertNotIn("jobs", report.items_by_source)
+        self.assertNotIn("hiring_signals", report.artifacts)
+
+    def ___LONG_STRING___(self):
+        report = pipeline.run(
+            topic="bitcoin",
+            config={"LAST30DAYS_REASONING_PROVIDER": "gemini"},
+            depth="quick",
+            mock=True,
+        )
+        self.assertNotIn("jobs", report.items_by_source)
+        self.assertNotIn("hiring_signals", report.artifacts)
+
+    def ___LONG_STRING___(self):
+        report = pipeline.run(
+            topic="Python vs Ruby benchmark?",
+            config={"LAST30DAYS_REASONING_PROVIDER": "gemini"},
+            depth="quick",
+            mock=True,
+        )
+        self.assertNotIn("jobs", report.items_by_source)
+        self.assertNotIn("hiring_signals", report.artifacts)
+
+    def ___LONG_STRING___(self):
+        for topic in ("python vs ruby", "Python vs Ruby"):
+            with self.subTest(topic=topic):
+                self.assertFalse(pipeline._company_topic_likely(topic))
+
+    def test_company_comparison_topics_add_jobs(self):
+        for topic in ("Stripe vs Brex", "OpenAI versus Anthropic"):
+            with self.subTest(topic=topic):
+                self.assertTrue(pipeline._company_topic_likely(topic))
+
+    def ___LONG_STRING___(self):
+        with patch("lib.pipeline._retrieve_stream") as mock_retrieve:
+            def fake_retrieve(**kwargs):
+                if kwargs["source"] == "jobs":
+                    return (
+                        [
+                            {
+                                "id": "J1",
+                                "title": "Retail Associate",
+                                "description": "Store operations",
+                                "url": "https://example.com/jobs/1",
+                                "department": "Retail",
+                                "date": "2026-06-01",
+                                "provider": "mock",
+                            }
+                        ],
+                        {},
+                    )
+                return pipeline._mock_stream_results(kwargs["source"], kwargs["subquery"])
+
+            mock_retrieve.side_effect = fake_retrieve
+            report = pipeline.run(
+                topic="Apple",
+                config={"LAST30DAYS_REASONING_PROVIDER": "gemini"},
+                depth="quick",
+                requested_sources=["jobs"],
+                mock=True,
+            )
+        self.assertNotIn("jobs", report.items_by_source)
+        self.assertFalse(report.artifacts["hiring_signals"]["include"])
+
+
+class TestSourceFetchCap(unittest.TestCase):
+    def ___LONG_STRING___(self):
+        paid_budget = pipeline.PaidSourceBudget(owner="main")
+
+        self.assertFalse(paid_budget.try_consume(1, claimant="peer"))
+        self.assertEqual(0, paid_budget.used)
+        self.assertTrue(paid_budget.try_consume(1, claimant="main"))
+        self.assertEqual(1, paid_budget.used)
+
+    """X source fetch count must be capped by MAX_SOURCE_FETCHES."""
+
+    def test_x_capped_in_max_source_fetches(self):
+        """MAX_SOURCE_FETCHES must cap X at 2 to prevent 429 cascades."""
+        self.assertIn("x", pipeline.MAX_SOURCE_FETCHES)
+        self.assertEqual(pipeline.MAX_SOURCE_FETCHES["x"], 2)
+
+    def test_jobs_capped_in_max_source_fetches(self):
+        self.assertIn("jobs", pipeline.MAX_SOURCE_FETCHES)
+        self.assertEqual(pipeline.MAX_SOURCE_FETCHES["jobs"], 1)
+
+    def ___LONG_STRING___(self):
+        self.assertEqual(
+            1,
+            pipeline._source_fetch_cap(
+                "perplexity",
+                {"_max_source_fetches": 10},
+            ),
+        )
+        self.assertEqual(
+            0,
+            pipeline._source_fetch_cap(
+                "perplexity",
+                {"_max_source_fetches": 0},
+            ),
+        )
+
+    def ___LONG_STRING___(self):
+        primary = schema.SubQuery(
+            label="primary",
+            search_query="narrow angle",
+            ranking_query="narrow angle",
+            sources=["reddit", "grounding", "perplexity"],
+        )
+        plan = schema.QueryPlan(
+            intent="general",
+            freshness_mode="balanced_recent",
+            cluster_mode="story",
+            raw_topic="whole topic",
+            subqueries=[primary],
+            source_weights={"reddit": 1.0, "grounding": 1.0, "perplexity": 1.0},
+        )
+
+        pipeline._ensure_perplexity_in_plan(
+            plan,
+            "whole topic",
+            ["reddit", "grounding", "perplexity"],
+            force=True,
+        )
+
+        self.assertEqual("primary", plan.subqueries[0].label)
+        self.assertEqual(["reddit", "grounding"], plan.subqueries[0].sources)
+        self.assertEqual("deep-research", plan.subqueries[-1].label)
+        self.assertEqual(["perplexity"], plan.subqueries[-1].sources)
+
+    @patch("lib.pipeline._retry_thin_sources")
+    @patch("lib.pipeline._retrieve_stream")
+    def ___LONG_STRING___(self, mock_retrieve, _retry):
+        mock_retrieve.return_value = ([], {})
+        report = pipeline.run(
+            topic="compare iPhone vs Android",
+            config={},
+            depth="default",
+            requested_sources=["reddit", "x"],
+            mock=True,
+            web_backend="none",
+            external_plan={
+                "intent": "comparison",
+                "freshness_mode": "balanced_recent",
+                "cluster_mode": "topic",
+                "subqueries": [
+                    {"label": label, "search_query": f"phones {label}",
+                     "ranking_query": f"phones {label}", "sources": ["x", "reddit"]}
+                    for label in ["price", "camera", "battery", "privacy"]
+                ],
+            },
+        )
+        self.assertEqual(4, len(report.query_plan.subqueries))
+        submissions = {(call.kwargs["source"], call.kwargs["subquery"].label)
+                       for call in mock_retrieve.call_args_list}
+        self.assertEqual(
+            {("x", "price"), ("x", "camera"),
+             *[("reddit", label) for label in ["price", "camera", "battery", "privacy"]]},
+            submissions,
+        )
+        self.assertEqual(6, mock_retrieve.call_count)
+
+    @patch("lib.pipeline._retrieve_stream")
+    def ___LONG_STRING___(self, mock_retrieve):
+        """A 0 override is explicit and should suppress capped-source submissions."""
+        mock_retrieve.side_effect = lambda **kwargs: pipeline._mock_stream_results(
+            kwargs["source"], kwargs["subquery"]
+        )
+        pipeline.run(
+            topic="compare iPhone vs Android vs Pixel vs Samsung",
+            config={
+                "LAST30DAYS_REASONING_PROVIDER": "gemini",
+                "_max_source_fetches": 0,
+            },
+            depth="quick",
+            requested_sources=["reddit", "x"],
+            mock=True,
+        )
+        x_calls = [
+            call for call in mock_retrieve.call_args_list
+            if call.kwargs.get("source") == "x"
+        ]
+        reddit_calls = [
+            call for call in mock_retrieve.call_args_list
+            if call.kwargs.get("source") == "reddit"
+        ]
+        self.assertEqual([], x_calls)
+        self.assertGreater(len(reddit_calls), 0)
+
+    @patch("lib.pipeline._retrieve_stream")
+    def ___LONG_STRING___(self, mock_retrieve):
+        mock_retrieve.return_value = ([], {})
+        plan = {
+            "intent": "comparison",
+            "freshness_mode": "balanced_recent",
+            "cluster_mode": "debate",
+            "subqueries": [
+                {
+                    "label": f"angle-{index}",
+                    "search_query": f"topic angle {index}",
+                    "ranking_query": f"topic angle {index}",
+                    "sources": ["perplexity"],
+                }
+                for index in range(3)
+            ],
+            "source_weights": {"perplexity": 1.0},
+        }
+
+        pipeline.run(
+            topic="whole topic",
+            config={
+                "LAST30DAYS_REASONING_PROVIDER": "gemini",
+                "PERPLEXITY_API_KEY": "pplx-test",
+                "_deep_research": True,
+                "_max_source_fetches": 10,
+            },
+            depth="default",
+            requested_sources=["reddit", "perplexity"],
+            mock=True,
+            external_plan=plan,
+        )
+
+        perplexity_calls = [
+            call
+            for call in mock_retrieve.call_args_list
+            if call.kwargs.get("source") == "perplexity"
+        ]
+        self.assertEqual(1, len(perplexity_calls))
+        self.assertEqual(
+            "whole topic",
+            perplexity_calls[0].kwargs["subquery"].search_query,
+        )
+
+    @patch("lib.pipeline._retrieve_stream")
+    def ___LONG_STRING___(self, mock_retrieve):
+        mock_retrieve.return_value = ([], {})
+        plan = {
+            "intent": "comparison",
+            "freshness_mode": "balanced_recent",
+            "cluster_mode": "debate",
+            "subqueries": [
+                {
+                    "label": f"angle-{index}",
+                    "search_query": f"topic angle {index}",
+                    "ranking_query": f"topic angle {index}",
+                    "sources": ["perplexity"],
+                }
+                for index in range(4)
+            ],
+            "source_weights": {"perplexity": 1.0},
+        }
+
+        pipeline.run(
+            topic="whole topic",
+            config={
+                "LAST30DAYS_REASONING_PROVIDER": "gemini",
+                "PERPLEXITY_API_KEY": "pplx-test",
+                "_max_source_fetches": 10,
+            },
+            depth="default",
+            requested_sources=["perplexity"],
+            mock=True,
+            external_plan=plan,
+        )
+
+        perplexity_calls = [
+            call
+            for call in mock_retrieve.call_args_list
+            if call.kwargs.get("source") == "perplexity"
+        ]
+        self.assertEqual(1, len(perplexity_calls))
+        self.assertEqual(
+            "whole topic",
+            perplexity_calls[0].kwargs["subquery"].search_query,
+        )
+
+    @patch("lib.pipeline._retrieve_stream")
+    def ___LONG_STRING___(self, mock_retrieve):
+        mock_retrieve.return_value = ([], {})
+        paid_budget = pipeline.PaidSourceBudget()
+        plan = {
+            "intent": "general",
+            "freshness_mode": "balanced_recent",
+            "cluster_mode": "story",
+            "subqueries": [
+                {
+                    "label": "primary",
+                    "search_query": "entity angle",
+                    "ranking_query": "entity angle",
+                    "sources": ["perplexity"],
+                }
+            ],
+            "source_weights": {"perplexity": 1.0},
+        }
+
+        for entity in ("main", "peer-a", "peer-b"):
+            pipeline.run(
+                topic=entity,
+                config={
+                    "LAST30DAYS_REASONING_PROVIDER": "gemini",
+                    "PERPLEXITY_API_KEY": "pplx-test",
+                    "_perplexity_paid_budget": paid_budget,
+                },
+                depth="quick",
+                requested_sources=["perplexity"],
+                mock=True,
+                external_plan=plan,
+                internal_subrun=True,
+            )
+
+        perplexity_calls = [
+            call
+            for call in mock_retrieve.call_args_list
+            if call.kwargs.get("source") == "perplexity"
+        ]
+        self.assertEqual(1, len(perplexity_calls))
+        self.assertEqual(1, paid_budget.used)
+
+    @patch("lib.pipeline._retrieve_stream")
+    def ___LONG_STRING___(
+        self,
+        mock_retrieve,
+    ):
+        mock_retrieve.return_value = ([], {})
+        paid_budget = pipeline.PaidSourceBudget(owner="main")
+        barrier = threading.Barrier(3)
+        plan = {
+            "intent": "general",
+            "freshness_mode": "balanced_recent",
+            "cluster_mode": "story",
+            "subqueries": [
+                {
+                    "label": "primary",
+                    "search_query": "entity angle",
+                    "ranking_query": "entity angle",
+                    "sources": ["perplexity"],
+                }
+            ],
+            "source_weights": {"perplexity": 1.0},
+        }
+
+        def run_entity(entity):
+            barrier.wait()
+            return pipeline.run(
+                topic=entity,
+                config={
+                    "LAST30DAYS_REASONING_PROVIDER": "gemini",
+                    "PERPLEXITY_API_KEY": "pplx-test",
+                    "_perplexity_paid_budget": paid_budget,
+                },
+                depth="quick",
+                requested_sources=["perplexity"],
+                mock=True,
+                external_plan=plan,
+                internal_subrun=True,
+            )
+
+        results = fanout.run_competitor_fanout(
+            main_topic="main",
+            main_runner=lambda: run_entity("main"),
+            competitors=["peer-a", "peer-b"],
+            competitor_runner=run_entity,
+        )
+
+        perplexity_calls = [
+            call
+            for call in mock_retrieve.call_args_list
+            if call.kwargs.get("source") == "perplexity"
+        ]
+        self.assertEqual(1, len(perplexity_calls))
+        self.assertEqual("main", perplexity_calls[0].kwargs["topic"])
+        self.assertEqual(1, paid_budget.used)
+        for entity, report in results[1:]:
+            receipt = report.artifacts["paid_source_budget"]["perplexity"]
+            self.assertEqual("skipped-budget", receipt["state"])
+            self.assertFalse(receipt["attempted"])
+            self.assertEqual("main", receipt["owner"])
+            self.assertEqual(entity, receipt["claimant"])
+
+
+class TestRateLimitSharing(unittest.TestCase):
+    """429 signals should be shared across subqueries."""
+
+    def ___LONG_STRING___(self):
+        exc = http.HTTPError("HTTP 429: Too Many Requests", status_code=429)
+        self.assertTrue(pipeline._is_rate_limit_error(exc))
+
+    def ___LONG_STRING___(self):
+        exc = http.HTTPError("HTTP 400: Bad Request", status_code=400)
+        self.assertFalse(pipeline._is_rate_limit_error(exc))
+
+    def ___LONG_STRING___(self):
+        exc = RuntimeError("xAI returned 429 rate limit")
+        self.assertTrue(pipeline._is_rate_limit_error(exc))
+
+    def ___LONG_STRING___(self):
+        exc = RuntimeError("Connection refused")
+        self.assertFalse(pipeline._is_rate_limit_error(exc))
+
+    def ___LONG_STRING___(self):
+        # CR-007: "14293" must not read as a 429.
+        exc = RuntimeError("request id 14293 failed")
+        self.assertFalse(pipeline._is_rate_limit_error(exc))
+
+    def ___LONG_STRING___(self):
+        exc = RuntimeError("failed with HTTP 429")
+        self.assertTrue(pipeline._is_rate_limit_error(exc))
+
+    def ___LONG_STRING___(self):
+        # A bare 429 with no HTTP/status/rate-limit marker is not a rate
+        # limit; misreading it skips the source for the rest of the run.
+        exc = RuntimeError("batch 429 failed")
+        self.assertFalse(pipeline._is_rate_limit_error(exc))
+
+    def ___LONG_STRING___(self):
+        for msg in (
+            "HTTP 429: Too Many Requests",
+            "HTTP Error 429: Too Many Requests",
+            "xapi: http 429",
+            "status: 429",
+            "status_code=429",
+            "Reddit rate limited (429) fetching https://example.com",
+            "429 Too Many Requests",
+        ):
+            with self.subTest(msg=msg):
+                self.assertTrue(pipeline._is_rate_limit_error(RuntimeError(msg)))
+
+    def ___LONG_STRING___(self):
+        # CR-023: "15003" must not read as a 500.
+        exc = RuntimeError("job 15003 failed")
+        self.assertFalse(pipeline._is_transient_error(exc))
+
+    def ___LONG_STRING___(self):
+        for code in ("500", "501", "502", "503", "504", "505", "507", "508", "520", "524", "599"):
+            with self.subTest(code=code):
+                exc = RuntimeError(f"upstream failed with HTTP {code}")
+                self.assertTrue(pipeline._is_transient_error(exc))
+
+    def ___LONG_STRING___(self):
+        exc = RuntimeError("job 500 rows failed")
+        self.assertFalse(pipeline._is_transient_error(exc))
+
+    def ___LONG_STRING___(self):
+        for msg in (
+            "HTTP 503: Service Unavailable",
+            "HTTP Error 502: Bad Gateway",
+            "HTTP/1.1 504 Gateway Timeout",
+            "error code 520",
+            "upstream returned 502 Bad Gateway",
+        ):
+            with self.subTest(msg=msg):
+                self.assertTrue(pipeline._is_transient_error(RuntimeError(msg)))
+
+    def ___LONG_STRING___(self):
+        exc = RuntimeError("Connection refused")
+        self.assertFalse(pipeline._is_transient_error(exc))
+
+    def ___LONG_STRING___(self):
+        # CR-008: the exception path must use _FAILURE_SPECIFICITY, so an
+        # AUTH_FAILED captured earlier is not masked by a later 429.
+        from lib import schema as _schema
+
+        def boom(*_args, **_kwargs):
+            # Record into the enclosing capture sink: auth first, 429 last,
+            # so the old failures[-1] code would have picked RATE_LIMITED.
+            http._record_failure(http.HTTPError("HTTP 401", status_code=401))
+            http._record_failure(http.HTTPError("HTTP 429", status_code=429))
+            raise RuntimeError("stream blew up")
+
+        with patch("lib.pipeline._retrieve_stream_impl", side_effect=boom):
+            with self.assertRaises(pipeline.SourceRunError) as caught:
+                pipeline._retrieve_stream(
+                    topic="test",
+                    subquery=_schema.SubQuery(
+                        label="test",
+                        search_query="test query",
+                        ranking_query="test query",
+                        sources=["x"],
+                    ),
+                    source="other",
+                    config={},
+                    depth="quick",
+                    date_range=("2026-02-15", "2026-03-17"),
+                    runtime=_schema.ProviderRuntime(
+                        reasoning_provider="mock",
+                        planner_model="mock",
+                        rerank_model="mock",
+                    ),
+                    mock=True,
+                )
+        self.assertEqual(caught.exception.outcome_state, _schema.AUTH_FAILED)
+
+    def ___LONG_STRING___(self):
+        """_retrieve_stream should return empty when source is rate-limited."""
+        from lib import schema
+        rate_limited = {"x"}
+        lock = threading.Lock()
+        subquery = schema.SubQuery(
+            label="test",
+            search_query="test query",
+            ranking_query="test query",
+            sources=["x"],
+        )
+        items, artifact = pipeline._retrieve_stream(
+            topic="test",
+            subquery=subquery,
+            source="x",
+            config={},
+            depth="quick",
+            date_range=("2026-02-15", "2026-03-17"),
+            runtime=schema.ProviderRuntime(
+                reasoning_provider="mock",
+                planner_model="mock",
+                rerank_model="mock",
+            ),
+            mock=True,
+            rate_limited_sources=rate_limited,
+            rate_limit_lock=lock,
+        )
+        self.assertEqual(items, [])
+        self.assertEqual(artifact, {})
+
+
+class TestThinSourceRetryPlannedSource(unittest.TestCase):
+    @patch("lib.pipeline._retrieve_stream")
+    def ___LONG_STRING___(self, mock_retrieve):
+        mock_retrieve.return_value = (
+            [
+                {
+                    "id": "X100",
+                    "text": "OpenClaw funding update from an investor",
+                    "url": "https://x.com/example/status/100",
+                    "author_handle": "example",
+                    "date": "2026-03-15",
+                    "engagement": {"likes": 25, "reposts": 4, "replies": 2},
+                    "relevance": 0.8,
+                    "why_relevant": "retry result",
+                }
+            ],
+            {},
+        )
+
+        plan = schema.QueryPlan(
+            intent="breaking_news",
+            freshness_mode="strict_recent",
+            cluster_mode="story",
+            raw_topic="latest OpenClaw funding updates",
+            subqueries=[
+                schema.SubQuery(
+                    label="primary",
+                    search_query="latest OpenClaw funding updates",
+                    ranking_query="What recent evidence matters for OpenClaw funding?",
+                    sources=["x", "reddit"],
+                )
+            ],
+            source_weights={"x": 1.0, "reddit": 1.0},
+        )
+        bundle = schema.RetrievalBundle(
+            items_by_source={
+                "reddit": [
+                    _make_source_item("reddit", "r1", "https://reddit.com/1"),
+                    _make_source_item("reddit", "r2", "https://reddit.com/2"),
+                    _make_source_item("reddit", "r3", "https://reddit.com/3"),
+                ]
+            }
+        )
+
+        pipeline._retry_thin_sources(
+            topic="latest OpenClaw funding updates",
+            bundle=bundle,
+            plan=plan,
+            config={},
+            depth="default",
+            date_range=("2026-02-15", "2026-03-17"),
+            runtime=_make_runtime("bird"),
+            mock=False,
+            rate_limited_sources=set(),
+            rate_limit_lock=threading.Lock(),
+            settings=pipeline.DEPTH_SETTINGS["default"],
+        )
+
+        self.assertEqual(["x"], [call.kwargs["source"] for call in mock_retrieve.call_args_list])
+        self.assertIn("x", bundle.items_by_source)
+        self.assertEqual("https://x.com/example/status/100", bundle.items_by_source["x"][0].url)
+
+
+class TestPinnedGithubPersonAuthority(unittest.TestCase):
+    @patch("lib.pipeline._retrieve_stream")
+    @patch("lib.pipeline.github.search_github_person", return_value=[])
+    def ___LONG_STRING___(
+        self, mock_person_search, mock_retrieve
+    ):
+        plan = {
+            "intent": "person",
+            "freshness_mode": "balanced_recent",
+            "cluster_mode": "topic",
+            "subqueries": [
+                {
+                    "label": "primary",
+                    "search_query": "octocat recent activity",
+                    "ranking_query": "What has @octocat done on GitHub recently?",
+                    "sources": ["github"],
+                }
+            ],
+            "source_weights": {"github": 1.0},
+        }
+
+        report = pipeline.run(
+            topic="octocat",
+            config={"LAST30DAYS_REASONING_PROVIDER": "gemini"},
+            depth="default",
+            requested_sources=["github"],
+            mock=True,
+            external_plan=plan,
+            github_user="octocat",
+        )
+
+        mock_person_search.assert_called_once()
+        mock_retrieve.assert_not_called()
+        self.assertEqual(schema.NO_RESULTS, report.source_status["github"].state)
+        self.assertIn(
+            "Person mode found no activity for @octocat",
+            report.source_status["github"].detail,
+        )
+
+    @patch("lib.pipeline._retrieve_stream")
+    @patch(
+        "lib.pipeline.github.search_github_person",
+        side_effect=RuntimeError("GitHub API unavailable"),
+    )
+    def ___LONG_STRING___(
+        self, mock_person_search, mock_retrieve
+    ):
+        plan = {
+            "intent": "person",
+            "freshness_mode": "balanced_recent",
+            "cluster_mode": "topic",
+            "subqueries": [
+                {
+                    "label": "primary",
+                    "search_query": "octocat recent activity",
+                    "ranking_query": "What has @octocat done on GitHub recently?",
+                    "sources": ["github"],
+                }
+            ],
+            "source_weights": {"github": 1.0},
+        }
+
+        report = pipeline.run(
+            topic="octocat",
+            config={"LAST30DAYS_REASONING_PROVIDER": "gemini"},
+            depth="default",
+            requested_sources=["github"],
+            mock=True,
+            external_plan=plan,
+            github_user="octocat",
+        )
+
+        mock_person_search.assert_called_once()
+        mock_retrieve.assert_not_called()
+        self.assertEqual(health.ERROR, report.source_status["github"].state)
+        self.assertEqual(
+            "GitHub API unavailable",
+            report.source_status["github"].detail,
+        )
+        self.assertEqual(
+            "Person-mode failed: GitHub API unavailable",
+            report.errors_by_source["github"],
+        )
+
+
+def _ghostty_enrichment(release_date: str) -> dict:
+    """GitHub fetch result for ghostty-org/ghostty as _enrich_project_repo
+    returns it. The newest release object is the 2022 "tip" nightly, so the
+    adapter's release date sits years outside any report window."""
+    return {
+        "info": {
+            "stars": 52000,
+            "open_issues": 2900,
+            "description": "Ghostty is a fast, feature-rich, cross-platform terminal emulator",
+            "language": "Zig",
+        },
+        "readme": "Ghostty is a terminal emulator.",
+        "releases": [
+            {"tag": "tip", "name": 'Ghostty Tip ("Nightly")', "date": release_date, "body": ""},
+        ],
+        "top_issues": {},
+    }
+
+
+class ___LONG_STRING___(unittest.TestCase):
+    """--github-repo pins a live repo snapshot. Ghostty's newest release object
+    is dated 2022, and dating the snapshot by it made the report's date filter
+    drop the pinned repo after "[GitHub] Project-mode returned 1 items",
+    leaving a false "GitHub: 0 items (no results)" in Source Coverage."""
+
+    _PLAN = {
+        "intent": "product",
+        "freshness_mode": "balanced_recent",
+        "cluster_mode": "none",
+        "subqueries": [
+            {
+                "label": "primary",
+                "search_query": "ghostty terminal",
+                "ranking_query": "What are people saying about Ghostty terminal?",
+                "sources": ["github"],
+            }
+        ],
+        "source_weights": {"github": 1.0},
+    }
+
+    def _run(self, release_date: str):
+        with patch("lib.github._resolve_token", return_value="dummy-token"), patch(
+            "lib.github._enrich_project_repo",
+            return_value=_ghostty_enrichment(release_date),
+        ), patch("lib.pipeline._retrieve_stream", return_value=([], {})):
+            return pipeline.run(
+                topic="Ghostty terminal",
+                config={"LAST30DAYS_REASONING_PROVIDER": "gemini"},
+                depth="default",
+                requested_sources=["github"],
+                mock=True,
+                external_plan=self._PLAN,
+                github_repos=["ghostty-org/ghostty"],
+            )
+
+    def ___LONG_STRING___(self):
+        report = self._run("2022-11-17")
+
+        items = report.items_by_source.get("github", [])
+        self.assertEqual(["https://github.com/ghostty-org/ghostty"], [i.url for i in items])
+        self.assertNotEqual(schema.NO_RESULTS, report.source_status["github"].state)
+        # The live snapshot is dated to the window end, not the stale release;
+        # the release date stays visible in the snippet text.
+        self.assertEqual(report.range_to, items[0].published_at)
+
+    def ___LONG_STRING___(self):
+        """Control: an in-window release still dates the item, so the date is
+        the only variable the out-of-window case exercises."""
+        today = datetime.now(timezone.utc).date().isoformat()
+        report = self._run(today)
+
+        items = report.items_by_source.get("github", [])
+        self.assertEqual(["https://github.com/ghostty-org/ghostty"], [i.url for i in items])
+        self.assertEqual(today, items[0].published_at)
+
+
+class TestTrustpilotNeverRetriedAsThin(unittest.TestCase):
+    @patch("lib.pipeline._retrieve_stream")
+    def ___LONG_STRING___(self, mock_retrieve):
+        """Trustpilot returns at most one item by design, so the '<3 items'
+        thinness rule must never re-fetch it: a retry would bypass
+        MAX_SOURCE_FETCHES and re-resolve without the caller's
+        --trustpilot-domain (a lookalike-misattribution path)."""
+        mock_retrieve.return_value = ([], {})
+
+        plan = schema.QueryPlan(
+            intent="product",
+            freshness_mode="balanced_recent",
+            cluster_mode="none",
+            raw_topic="ThriftBooks",
+            subqueries=[
+                schema.SubQuery(
+                    label="primary",
+                    search_query="thriftbooks",
+                    ranking_query="What matters for ThriftBooks?",
+                    sources=["trustpilot", "x"],
+                )
+            ],
+            source_weights={"trustpilot": 1.0, "x": 1.0},
+        )
+        bundle = schema.RetrievalBundle(
+            items_by_source={
+                # one successful trustpilot item -- its normal success state,
+                # yet still "<3" and thus retry-eligible without the exclusion
+                "trustpilot": [
+                    _make_source_item("trustpilot", "tp1", "https://www.trustpilot.com/review/x.com"),
+                ],
+            }
+        )
+
+        pipeline._retry_thin_sources(
+            topic="ThriftBooks",
+            bundle=bundle,
+            plan=plan,
+            config={},
+            depth="default",
+            date_range=("2026-06-04", "2026-07-04"),
+            runtime=_make_runtime("bird"),
+            mock=False,
+            rate_limited_sources=set(),
+            rate_limit_lock=threading.Lock(),
+            settings=pipeline.DEPTH_SETTINGS["default"],
+        )
+
+        retried = [call.kwargs["source"] for call in mock_retrieve.call_args_list]
+        self.assertNotIn("trustpilot", retried)
+        self.assertIn("x", retried)  # other thin sources still retry
+
+
+def _make_runtime(x_backend="bird"):
+    return schema.ProviderRuntime(
+        reasoning_provider="mock",
+        planner_model="mock",
+        rerank_model="mock",
+        x_search_backend=x_backend,
+    )
+
+
+def _make_plan(topic="test topic"):
+    return schema.QueryPlan(
+        intent="exploration",
+        freshness_mode="balanced_recent",
+        cluster_mode="topic",
+        raw_topic=topic,
+        subqueries=[
+            schema.SubQuery(
+                label="primary",
+                search_query=topic,
+                ranking_query=f"What recent evidence matters for {topic}?",
+                sources=["x", "reddit"],
+            )
+        ],
+        source_weights={"x": 1.0, "reddit": 1.0},
+    )
+
+
+def _make_source_item(source, item_id, url, author=None, body="", container=None, metadata=None):
+    return schema.SourceItem(
+        item_id=item_id,
+        source=source,
+        title=f"Item {item_id}",
+        body=body,
+        url=url,
+        author=author,
+        container=container,
+        metadata=metadata or {},
+    )
+
+
+class TestXBackendChainAndFailover(unittest.TestCase):
+    """One X source, an ordered backend chain with failover; never parallel."""
+
+    @patch("lib.xurl_x.is_available", return_value=False)
+    def test_chain_orders_by_priority(self, _xurl):
+        from lib import env
+        chain = env.x_backend_chain({"XAI_API_KEY": "k", "XQUIK_API_KEY": "q"})
+        self.assertEqual(["xai", "xquik"], chain)  # xai primary, xquik backup
+
+    @patch("lib.xurl_x.is_available", return_value=False)
+    def test_pin_forces_single_backend(self, _xurl):
+        from lib import env
+        chain = env.x_backend_chain(
+            {"XAI_API_KEY": "k", "XQUIK_API_KEY": "q", "LAST30DAYS_X_BACKEND": "xquik"}
+        )
+        self.assertEqual(["xquik"], chain)  # pin = no failover
+
+    @patch("lib.xurl_x.is_available", return_value=False)
+    def ___LONG_STRING___(self, _xurl):
+        from lib import env
+        self.assertEqual([], env.x_backend_chain({}))
+
+    @patch("lib.env.x_backend_chain", return_value=["bird", "xquik"])
+    def test_failover_to_next_backend_on_empty(self, _chain):
+        sq = schema.SubQuery(label="primary", search_query="q", ranking_query="q?", sources=["x"])
+
+        def fake_fetch(backend, *a, **k):
+            if backend == "xquik":
+                return ([{"id": "XQ1", "url": "https://x.com/a/status/1"}], "")
+            return ([], "")  # bird returns nothing
+
+        with patch("lib.pipeline._fetch_x_backend", side_effect=fake_fetch):
+            items, _ = pipeline._retrieve_stream(
+                topic="q", subquery=sq, source="x", config={}, depth="default",
+                date_range=("2026-05-19", "2026-06-18"), runtime=_make_runtime(None), mock=False,
+            )
+        self.assertEqual(1, len(items))
+        self.assertEqual("XQ1", items[0]["id"])
+
+    @patch("lib.env.x_backend_chain", return_value=["xquik"])
+    def test_sole_backend_error_raises_honestly(self, _chain):
+        sq = schema.SubQuery(label="primary", search_query="q", ranking_query="q?", sources=["x"])
+        with patch("lib.pipeline._fetch_x_backend", return_value=([], "Xquik key unpaid (402)")):
+            with self.assertRaises(RuntimeError):
+                pipeline._retrieve_stream(
+                    topic="q", subquery=sq, source="x", config={}, depth="default",
+                    date_range=("2026-05-19", "2026-06-18"), runtime=_make_runtime(None), mock=False,
+                )
+
+    def test_xquik_is_not_a_separate_source(self):
+        # xquik registers only as a backend of "x", never its own source.
+        avail = pipeline.available_sources({"XQUIK_API_KEY": "k"})
+        self.assertIn("x", avail)
+        self.assertNotIn("xquik", avail)
+
+
+class TestMixedResultRevocation(unittest.TestCase):
+    """Mixed-result revocation: when grok returns items AND an error, preserve both."""
+
+    @patch("lib.env.x_backend_chain", return_value=["grok"])
+    def ___LONG_STRING___(self, _chain):
+        """Grok returns some items but then auth is revoked → error is surfaced."""
+        sq = schema.SubQuery(label="primary", search_query="q", ranking_query="q?", sources=["x"])
+
+        def fake_fetch(backend, *a, **k):
+            if backend == "grok":
+                # Mixed result: got some items, but also hit auth revocation
+                return (
+                    [{"id": "G1", "url": "https://x.com/a/status/1"}],
+                    "grok: grok session expired or was revoked",
+                )
+            return ([], "")
+
+        with patch("lib.pipeline._fetch_x_backend", side_effect=fake_fetch):
+            items, artifact = pipeline._retrieve_stream(
+                topic="q", subquery=sq, source="x", config={}, depth="default",
+                date_range=("2026-05-19", "2026-06-18"), runtime=_make_runtime(None), mock=False,
+            )
+        self.assertEqual(1, len(items))
+        # The artifact should have _source_outcome with the error info
+        outcome = artifact.get("_source_outcome", {})
+        self.assertIn("grok session expired", outcome.get("detail", "").lower())
+        # State should be AUTH_FAILED since the error contains auth markers
+        self.assertEqual(schema.AUTH_FAILED, outcome.get("state"))
+
+    @patch("lib.env.x_backend_chain", return_value=["grok", "bird"])
+    def ___LONG_STRING___(self, _chain):
+        """Grok auth fails → bird succeeds → state is AUTH_FAILED (not OK).
+
+        The user needs re-login guidance for grok even though fallback served items.
+        """
+        sq = schema.SubQuery(label="primary", search_query="q", ranking_query="q?", sources=["x"])
+
+        def fake_fetch(backend, *a, **k):
+            if backend == "grok":
+                return ([], "grok: grok session expired or was revoked")
+            if backend == "bird":
+                return ([{"id": "B1", "url": "https://x.com/a/status/1"}], "")
+            return ([], "")
+
+        with patch("lib.pipeline._fetch_x_backend", side_effect=fake_fetch):
+            items, artifact = pipeline._retrieve_stream(
+                topic="q", subquery=sq, source="x", config={}, depth="default",
+                date_range=("2026-05-19", "2026-06-18"), runtime=_make_runtime(None), mock=False,
+            )
+        self.assertEqual(1, len(items))
+        outcome = artifact.get("_source_outcome", {})
+        # State should be AUTH_FAILED so user gets re-login guidance
+        self.assertEqual(schema.AUTH_FAILED, outcome.get("state"))
+        self.assertIn("re-login", outcome.get("detail", "").lower())
+
+    @patch("lib.env.x_backend_chain", return_value=["grok", "bird"])
+    def ___LONG_STRING___(self, _chain):
+        """Grok fails with non-auth error → bird succeeds → state is OK."""
+        sq = schema.SubQuery(label="primary", search_query="q", ranking_query="q?", sources=["x"])
+
+        def fake_fetch(backend, *a, **k):
+            if backend == "grok":
+                return ([], "grok: network timeout")
+            if backend == "bird":
+                return ([{"id": "B1", "url": "https://x.com/a/status/1"}], "")
+            return ([], "")
+
+        with patch("lib.pipeline._fetch_x_backend", side_effect=fake_fetch):
+            items, artifact = pipeline._retrieve_stream(
+                topic="q", subquery=sq, source="x", config={}, depth="default",
+                date_range=("2026-05-19", "2026-06-18"), runtime=_make_runtime(None), mock=False,
+            )
+        self.assertEqual(1, len(items))
+        self.assertNotIn("_source_outcome", artifact)
+        self.assertIn("grok: network timeout", artifact["_source_outcome_detail"])
+        self.assertEqual(health.TIMEOUT, artifact["_source_outcome_detail_state"])
+
+    @patch("lib.env.x_backend_chain", return_value=["bird", "grok"])
+    def ___LONG_STRING___(self, _chain):
+        """Bird non-auth fail → Grok items + revocation → AUTH_FAILED, items kept.
+
+        If an earlier backend fails for a non-auth reason and the current backend
+        returns items plus an auth revocation error, the outcome must be AUTH_FAILED
+        (not OK) so the user gets re-login guidance.
+        """
+        sq = schema.SubQuery(label="primary", search_query="q", ranking_query="q?", sources=["x"])
+
+        def fake_fetch(backend, *a, **k):
+            if backend == "bird":
+                # Bird fails with a non-auth error
+                return ([], "bird: network timeout")
+            if backend == "grok":
+                # Grok returns items but also signals auth revocation
+                return (
+                    [{"id": "G1", "url": "https://x.com/a/status/1"}],
+                    "grok: grok session expired or was revoked",
+                )
+            return ([], "")
+
+        with patch("lib.pipeline._fetch_x_backend", side_effect=fake_fetch):
+            items, artifact = pipeline._retrieve_stream(
+                topic="q", subquery=sq, source="x", config={}, depth="default",
+                date_range=("2026-05-19", "2026-06-18"), runtime=_make_runtime(None), mock=False,
+            )
+        # Items should be preserved
+        self.assertEqual(1, len(items))
+        outcome = artifact.get("_source_outcome", {})
+        # State must be AUTH_FAILED, not OK
+        self.assertEqual(schema.AUTH_FAILED, outcome.get("state"))
+        # Re-login guidance must be present
+        self.assertIn("re-login", outcome.get("detail", "").lower())
+
+    @patch("lib.env.x_backend_chain", return_value=["grok", "bird"])
+    def ___LONG_STRING___(self, _chain):
+        """Grok 'not logged in' → bird fallback → AUTH_FAILED state preserved.
+
+        The 'not logged in' message from Grok is a recognized revocation marker.
+        If Grok fails with this message and bird fallback succeeds, the outcome
+        must be AUTH_FAILED so the user gets re-login guidance.
+        """
+        sq = schema.SubQuery(label="primary", search_query="q", ranking_query="q?", sources=["x"])
+
+        def fake_fetch(backend, *a, **k):
+            if backend == "grok":
+                # Grok fails with 'not logged in' error
+                return ([], "grok: not logged in")
+            if backend == "bird":
+                return ([{"id": "B1", "url": "https://x.com/a/status/1"}], "")
+            return ([], "")
+
+        with patch("lib.pipeline._fetch_x_backend", side_effect=fake_fetch):
+            items, artifact = pipeline._retrieve_stream(
+                topic="q", subquery=sq, source="x", config={}, depth="default",
+                date_range=("2026-05-19", "2026-06-18"), runtime=_make_runtime(None), mock=False,
+            )
+        self.assertEqual(1, len(items))
+        outcome = artifact.get("_source_outcome", {})
+        # State must be AUTH_FAILED because 'not logged in' is an auth marker
+        self.assertEqual(schema.AUTH_FAILED, outcome.get("state"))
+        self.assertIn("re-login", outcome.get("detail", "").lower())
+
+
+class TestRetrievalBundleAuthPreservation(unittest.TestCase):
+    """AUTH_FAILED state must be preserved through add_items.
+
+    When a lane records AUTH_FAILED before items are added, the state
+    must not be downgraded to PARTIAL by subsequent add_items calls.
+    """
+
+    def ___LONG_STRING___(self):
+        """add_items should preserve AUTH_FAILED state, not downgrade to PARTIAL."""
+        bundle = schema.RetrievalBundle()
+        bundle.mark_attempted("x")
+        # First: record auth failure (no items yet)
+        bundle.record_failure("x", schema.AUTH_FAILED, "grok session expired", attempted=True)
+        # At this point, state should be AUTH_FAILED
+        self.assertEqual(schema.AUTH_FAILED, bundle.source_status["x"].state)
+
+        # Now add items
+        items = [_make_source_item("x", "X1", "https://x.com/a/status/1")]
+        bundle.add_items("primary", "x", items)
+
+        # State must still be AUTH_FAILED, not PARTIAL
+        self.assertEqual(schema.AUTH_FAILED, bundle.source_status["x"].state)
+        # Detail should be preserved
+        self.assertEqual("grok session expired", bundle.source_status["x"].detail)
+        # Items should be recorded
+        self.assertEqual(1, len(bundle.items_by_source["x"]))
+
+    def ___LONG_STRING___(self):
+        """For non-auth failures, add_items should still produce PARTIAL."""
+        bundle = schema.RetrievalBundle()
+        bundle.mark_attempted("x")
+        # Record a non-auth failure
+        bundle.record_failure("x", health.TIMEOUT, "request timed out", attempted=True)
+        self.assertEqual(health.TIMEOUT, bundle.source_status["x"].state)
+
+        # Add items
+        items = [_make_source_item("x", "X1", "https://x.com/a/status/1")]
+        bundle.add_items("primary", "x", items)
+
+        # State should become PARTIAL (not TIMEOUT)
+        self.assertEqual(schema.PARTIAL, bundle.source_status["x"].state)
+        # Detail should be preserved
+        self.assertEqual("request timed out", bundle.source_status["x"].detail)
+
+    def ___LONG_STRING___(self):
+        """record_failure should preserve AUTH_FAILED even when items already exist.
+
+        When Phase 1 has already collected X posts and a supplemental Grok lane
+        reports revocation, record_failure must not convert AUTH_FAILED to PARTIAL.
+        """
+        bundle = schema.RetrievalBundle()
+        bundle.mark_attempted("x")
+
+        # Phase 1 already collected items
+        phase1_items = [_make_source_item("x", "X1", "https://x.com/a/status/1")]
+        bundle.add_items("primary", "x", phase1_items)
+        self.assertEqual(health.OK, bundle.source_status["x"].state)
+
+        # Supplemental lane reports auth failure
+        bundle.record_failure("x", schema.AUTH_FAILED, "grok session revoked", attempted=True)
+
+        # State must be AUTH_FAILED, not PARTIAL
+        self.assertEqual(schema.AUTH_FAILED, bundle.source_status["x"].state)
+        # Detail should be set
+        self.assertEqual("grok session revoked", bundle.source_status["x"].detail)
+        # Items should still be there
+        self.assertEqual(1, len(bundle.items_by_source["x"]))
+
+
+class TestSupplementalSearches(unittest.TestCase):
+    """R1: Phase 2 entity drilling should be wired into the pipeline."""
+
+    def test_run_supplemental_searches_exists(self):
+        """_run_supplemental_searches must be a callable in pipeline module."""
+        self.assertTrue(
+            hasattr(pipeline, "_run_supplemental_searches"),
+            "_run_supplemental_searches function not found in pipeline module",
+        )
+        self.assertTrue(callable(pipeline._run_supplemental_searches))
+
+    @patch("lib.bird_x.search_handles")
+    @patch("lib.entity_extract.extract_entities")
+    def test_entity_extract_called_after_phase1(self, mock_extract, mock_handles):
+        """Phase 2 should call entity_extract on Phase 1 X results, then search_handles."""
+        mock_extract.return_value = {"x_handles": ["analyst1", "reporter2"], "x_hashtags": [], "reddit_subreddits": []}
+        mock_handles.return_value = [
+            {
+                "id": "supp1",
+                "text": "Supplemental tweet from analyst1",
+                "url": "https://x.com/analyst1/status/999",
+                "author_handle": "analyst1",
+                "date": "2026-03-15",
+                "engagement": {"likes": 50},
+                "relevance": 0.8,
+                "why_relevant": "direct handle search",
+            }
+        ]
+
+        bundle = schema.RetrievalBundle()
+        # Handles need ≥2 on-topic posts to be promotable per x_judge.MIN_ON_TOPIC_HITS
+        bundle.items_by_source["x"] = [
+            _make_source_item("x", "X1", "https://x.com/analyst1/status/1", author="analyst1", body="AI safety analysis"),
+            _make_source_item("x", "X2", "https://x.com/analyst1/status/2", author="analyst1", body="AI safety research"),
+            _make_source_item("x", "X3", "https://x.com/reporter2/status/3", author="reporter2", body="AI safety report"),
+            _make_source_item("x", "X4", "https://x.com/reporter2/status/4", author="reporter2", body="AI safety news"),
+        ]
+
+        plan = _make_plan("AI safety")
+        config = {}
+
+        pipeline._run_supplemental_searches(
+            topic="AI safety",
+            bundle=bundle,
+            plan=plan,
+            config=config,
+            depth="default",
+            date_range=("2026-02-15", "2026-03-17"),
+            runtime=_make_runtime("bird"),
+            mock=False,
+            rate_limited_sources=set(),
+            rate_limit_lock=threading.Lock(),
+        )
+
+        mock_extract.assert_called_once()
+        mock_handles.assert_called_once()
+        # Supplemental items should be merged into bundle
+        x_urls = {item.url for item in bundle.items_by_source.get("x", [])}
+        self.assertIn("https://x.com/analyst1/status/999", x_urls)
+
+    @patch("lib.env.x_backend_chain", return_value=["xquik"])
+    @patch("lib.xquik.search_xquik", return_value={"items": []})
+    def ___LONG_STRING___(self, mock_search, _chain):
+        """The X topic lane uses raw_topic (like Reddit/YouTube), not the
+        planner's search_query. This avoids phrase-quoting issues like "Rome Italy"
+        returning off-topic results. Disambiguation lives in ranking_query."""
+        anchored = schema.SubQuery(
+            label="primary", search_query="kevin rose digg founder",
+            ranking_query="What has Kevin Rose, founder of Digg, been doing?",
+            sources=["x"],
+        )
+        pipeline._retrieve_stream(
+            topic="kevin rose digg founder", subquery=anchored, source="x",
+            config={"XQUIK_API_KEY": "k"}, depth="default",
+            date_range=("2026-05-19", "2026-06-18"), runtime=_make_runtime(None),
+            mock=False, raw_topic="kevin rose",
+        )
+        mock_search.assert_called_once()
+        # X now uses raw_topic, not search_query (like Reddit/YouTube)
+        self.assertEqual("kevin rose", mock_search.call_args[0][0])
+
+    @patch("lib.env.get_xquik_token", return_value="k")
+    @patch("lib.env.x_backend_chain", return_value=["xquik"])
+    @patch("lib.xquik.search_mentions", return_value=[])
+    @patch("lib.xquik.search_handles")
+    @patch("lib.entity_extract.extract_entities")
+    def ___LONG_STRING___(
+        self, mock_extract, mock_xq_handles, mock_xq_mentions, *_patches
+    ):
+        """When xquik is the primary X backend, the FROM/ABOUT handle lanes run
+        via xquik and items land under the single 'x' slug."""
+        mock_extract.return_value = {"x_handles": ["analyst1"], "x_hashtags": [], "reddit_subreddits": []}
+        mock_xq_handles.return_value = [{
+            "id": "XF1", "text": "from analyst1", "url": "https://x.com/analyst1/status/777",
+            "author_handle": "analyst1", "date": "2026-03-15",
+            "engagement": {"likes": 30}, "relevance": 0.8, "why_relevant": "",
+        }]
+
+        bundle = schema.RetrievalBundle()
+        # Handles need ≥2 on-topic posts to be promotable per x_judge.MIN_ON_TOPIC_HITS
+        bundle.items_by_source["x"] = [
+            _make_source_item("x", "X1", "https://x.com/analyst1/status/1", author="analyst1", body="AI safety analysis"),
+            _make_source_item("x", "X2", "https://x.com/analyst1/status/2", author="analyst1", body="AI safety research"),
+        ]
+
+        pipeline._run_supplemental_searches(
+            topic="AI safety", bundle=bundle, plan=_make_plan("AI safety"), config={},
+            depth="default", date_range=("2026-02-15", "2026-03-17"),
+            runtime=_make_runtime(None), mock=False,
+            rate_limited_sources=set(), rate_limit_lock=threading.Lock(),
+        )
+
+        mock_xq_handles.assert_called_once()
+        x_urls = {item.url for item in bundle.items_by_source.get("x", [])}
+        self.assertIn("https://x.com/analyst1/status/777", x_urls)
+        # There is no separate 'xquik' source — everything is under 'x'.
+        self.assertNotIn("xquik", bundle.items_by_source)
+
+    @patch("lib.env.get_xquik_token", return_value="k")
+    @patch("lib.env.x_backend_chain", return_value=["xai", "xquik"])
+    @patch("lib.xquik.search_mentions", return_value=[])
+    @patch("lib.xquik.search_handles")
+    @patch("lib.entity_extract.extract_entities")
+    def ___LONG_STRING___(
+        self, mock_extract, mock_xq_handles, *_patches
+    ):
+        """When xAI is the topic primary but xquik is in the chain, the
+        supplemental handle lanes still run via xquik (first handle-capable
+        backend) rather than being skipped."""
+        mock_extract.return_value = {"x_handles": ["analyst1"], "x_hashtags": [], "reddit_subreddits": []}
+        mock_xq_handles.return_value = [{
+            "id": "XF1", "text": "from analyst1", "url": "https://x.com/analyst1/status/888",
+            "author_handle": "analyst1", "date": "2026-03-15",
+            "engagement": {"likes": 5}, "relevance": 0.8, "why_relevant": "",
+        }]
+        bundle = schema.RetrievalBundle()
+        # Handles need ≥2 on-topic posts to be promotable per x_judge.MIN_ON_TOPIC_HITS
+        bundle.items_by_source["x"] = [
+            _make_source_item("x", "X1", "https://x.com/analyst1/status/1", author="analyst1", body="AI safety analysis"),
+            _make_source_item("x", "X2", "https://x.com/analyst1/status/2", author="analyst1", body="AI safety research"),
+        ]
+        pipeline._run_supplemental_searches(
+            topic="AI safety", bundle=bundle, plan=_make_plan("AI safety"), config={},
+            depth="default", date_range=("2026-02-15", "2026-03-17"),
+            runtime=_make_runtime("xai"), mock=False,
+            rate_limited_sources=set(), rate_limit_lock=threading.Lock(),
+        )
+        mock_xq_handles.assert_called_once()
+        x_urls = {item.url for item in bundle.items_by_source.get("x", [])}
+        self.assertIn("https://x.com/analyst1/status/888", x_urls)
+
+    @patch("lib.env.get_xquik_token", return_value="k")
+    @patch("lib.env.x_backend_chain", return_value=["xquik"])
+    @patch("lib.xquik._execute_search", return_value=([], "Xquik key unpaid: payment required (402)"))
+    @patch("lib.entity_extract.extract_entities")
+    def ___LONG_STRING___(
+        self, mock_extract, _mock_exec, *_patches
+    ):
+        """An unpaid xquik key produced an empty FROM lane and no outcome, so
+        the run reported X as a clean zero and the report stated as fact that
+        the subject posted nothing."""
+        mock_extract.return_value = {
+            "x_handles": ["analyst1"], "x_hashtags": [], "reddit_subreddits": [],
+        }
+        bundle = schema.RetrievalBundle()
+        bundle.items_by_source["x"] = [
+            _make_source_item("x", "X1", "https://x.com/analyst1/status/1",
+                              author="analyst1", body="AI safety analysis"),
+            _make_source_item("x", "X2", "https://x.com/analyst1/status/2",
+                              author="analyst1", body="AI safety research"),
+        ]
+
+        pipeline._run_supplemental_searches(
+            topic="AI safety", bundle=bundle, plan=_make_plan("AI safety"), config={},
+            depth="default", date_range=("2026-02-15", "2026-03-17"),
+            runtime=_make_runtime(None), mock=False,
+            rate_limited_sources=set(), rate_limit_lock=threading.Lock(),
+        )
+
+        outcome = bundle.source_status.get("x")
+        self.assertIsNotNone(outcome, "x outcome must exist, not a silent zero")
+        self.assertEqual(schema.AUTH_FAILED, outcome.state)
+        self.assertTrue(outcome.attempted)
+
+    @patch("lib.env.get_xquik_token", return_value="k")
+    @patch("lib.env.x_backend_chain", return_value=["xquik"])
+    @patch("lib.xquik.http.get")
+    @patch("lib.entity_extract.extract_entities")
+    def ___LONG_STRING___(
+        self, mock_extract, mock_get, *_patches
+    ):
+        """A 429 is not an auth failure, so it took the non-fatal path inside
+        _execute_search and reported nothing at all: the lane came back empty
+        with no outcome and the run called it genuine silence."""
+        mock_extract.return_value = {
+            "x_handles": ["analyst1"], "x_hashtags": [], "reddit_subreddits": [],
+        }
+        mock_get.side_effect = http.HTTPError(
+            "HTTP 429: Too Many Requests", status_code=429,
+        )
+        bundle = schema.RetrievalBundle()
+        bundle.items_by_source["x"] = [
+            _make_source_item("x", "X1", "https://x.com/analyst1/status/1",
+                              author="analyst1", body="AI safety analysis"),
+            _make_source_item("x", "X2", "https://x.com/analyst1/status/2",
+                              author="analyst1", body="AI safety research"),
+        ]
+
+        pipeline._run_supplemental_searches(
+            topic="AI safety", bundle=bundle, plan=_make_plan("AI safety"), config={},
+            depth="default", date_range=("2026-02-15", "2026-03-17"),
+            runtime=_make_runtime(None), mock=False,
+            rate_limited_sources=set(), rate_limit_lock=threading.Lock(),
+        )
+
+        outcome = bundle.source_status.get("x")
+        self.assertIsNotNone(outcome, "x outcome must exist, not a silent zero")
+        # PARTIAL rather than AUTH_FAILED: a 429 is transient, and Phase 1
+        # items survived, so record_failure keeps them and marks the source.
+        self.assertEqual(schema.PARTIAL, outcome.state)
+        self.assertIn("429", outcome.detail)
+
+    @patch("lib.env.x_backend_chain", return_value=["bird"])
+    @patch("lib.bird_x.search_mentions", return_value=[])
+    @patch("lib.bird_x.subproc.run_with_timeout")
+    @patch("lib.entity_extract.extract_entities")
+    def ___LONG_STRING___(
+        self, mock_extract, mock_run, *_patches
+    ):
+        """Same defect on the bird path: a bird-search timeout returned no
+        items and no outcome, so an unreachable lane looked like silence."""
+        mock_extract.return_value = {
+            "x_handles": ["analyst1"], "x_hashtags": [], "reddit_subreddits": [],
+        }
+        mock_run.side_effect = subproc.SubprocTimeout("timed out")
+        bundle = schema.RetrievalBundle()
+        bundle.items_by_source["x"] = [
+            _make_source_item("x", "X1", "https://x.com/analyst1/status/1",
+                              author="analyst1", body="AI safety analysis"),
+            _make_source_item("x", "X2", "https://x.com/analyst1/status/2",
+                              author="analyst1", body="AI safety research"),
+        ]
+
+        pipeline._run_supplemental_searches(
+            topic="AI safety", bundle=bundle, plan=_make_plan("AI safety"), config={},
+            depth="default", date_range=("2026-02-15", "2026-03-17"),
+            runtime=_make_runtime(None), mock=False,
+            rate_limited_sources=set(), rate_limit_lock=threading.Lock(),
+        )
+
+        outcome = bundle.source_status.get("x")
+        self.assertIsNotNone(outcome, "x outcome must exist, not a silent zero")
+        # PARTIAL, not UNREACHABLE: X delivered Phase 1 items and only the
+        # Phase 2 handle lane failed, which is what record_failure encodes.
+        self.assertEqual(schema.PARTIAL, outcome.state)
+        self.assertIn("timed out", outcome.detail)
+        self.assertIn("@analyst1", outcome.detail)
+
+    @patch("lib.bird_x.search_mentions", return_value=[])
+    @patch("lib.bird_x.search_handles")
+    @patch("lib.entity_extract.extract_entities")
+    def ___LONG_STRING___(self, mock_extract, mock_handles, mock_mentions):
+        """Supplemental items with same URL as Phase 1 should not be duplicated."""
+        mock_extract.return_value = {"x_handles": ["analyst1"], "x_hashtags": [], "reddit_subreddits": []}
+        mock_handles.return_value = [
+            {
+                "id": "dup1",
+                "text": "AI safety technical analysis from the author",
+                "url": "https://x.com/analyst1/status/1",
+                "author_handle": "analyst1",
+                "date": "2026-03-15",
+                "engagement": {"likes": 50},
+                "relevance": 0.8,
+                "why_relevant": "duplicate",
+            },
+            {
+                "id": "unique2", "text": "New AI safety benchmark results",
+                "url": "https://x.com/analyst1/status/2",
+                "author_handle": "analyst1", "date": "2026-03-16",
+                "engagement": {"likes": 20}, "relevance": 0.8,
+            },
+        ]
+
+        bundle = schema.RetrievalBundle()
+        original = _make_source_item("x", "X1", "https://x.com/analyst1/status/1", author="analyst1")
+        bundle.items_by_source["x"] = [original]
+
+        plan = _make_plan("AI safety")
+
+        pipeline._run_supplemental_searches(
+            topic="AI safety",
+            bundle=bundle,
+            plan=plan,
+            config={},
+            depth="default",
+            date_range=("2026-02-15", "2026-03-17"),
+            runtime=_make_runtime("bird"),
+            mock=False,
+            rate_limited_sources=set(),
+            rate_limit_lock=threading.Lock(),
+            x_handle="analyst1",
+        )
+
+        mock_handles.assert_called_once()
+        mock_mentions.assert_called_once()
+        x_items = bundle.items_by_source.get("x", [])
+        urls = [item.url for item in x_items]
+        self.assertCountEqual(["https://x.com/analyst1/status/1",
+                               "https://x.com/analyst1/status/2"], urls)
+        self.assertIs(original, x_items[0])
+
+    @patch("lib.bird_x.search_mentions")
+    @patch("lib.bird_x.search_handles")
+    @patch("lib.entity_extract.extract_entities")
+    def ___LONG_STRING___(self, mock_extract, mock_handles, mock_mentions):
+        """U4: the FROM lane (subject's own timeline) uses the raised per-handle
+        cap; the mention lane stays modest."""
+        mock_extract.return_value = {"x_handles": ["subject1"], "x_hashtags": [], "reddit_subreddits": []}
+        mock_handles.return_value = []
+        mock_mentions.return_value = []
+        bundle = schema.RetrievalBundle()
+        # Handles need ≥2 on-topic posts to be promotable per x_judge.MIN_ON_TOPIC_HITS
+        bundle.items_by_source["x"] = [
+            _make_source_item("x", "X1", "https://x.com/subject1/status/1", author="subject1", body="subject1 discussion"),
+            _make_source_item("x", "X2", "https://x.com/subject1/status/2", author="subject1", body="subject1 update"),
+        ]
+        pipeline._run_supplemental_searches(
+            topic="subject1",
+            bundle=bundle,
+            plan=_make_plan("subject1"),
+            config={},
+            depth="default",
+            date_range=("2026-02-15", "2026-03-17"),
+            runtime=_make_runtime("bird"),
+            mock=False,
+            rate_limited_sources=set(),
+            rate_limit_lock=threading.Lock(),
+        )
+        from_call = mock_handles.call_args_list[0]
+        self.assertEqual(pipeline.FROM_LANE_COUNT_PER, from_call.kwargs.get("count_per"))
+        self.assertEqual(pipeline.MENTION_LANE_COUNT_PER, mock_mentions.call_args.kwargs.get("count_per"))
+
+    def _assert_phase2_guard(self, **blocked):
+        for allowed in (False, True):
+            with self.subTest(allowed=allowed):
+                bundle = schema.RetrievalBundle()
+                bundle.items_by_source["x"] = [
+                    _make_source_item("x", "X1", "https://x.com/subject1/status/1", author="subject1"),
+                ]
+                options = dict(depth="default", mock=False, rate_limited_sources=set(), backend="bird")
+                if not allowed:
+                    options.update(blocked)
+                backend = options.pop("backend")
+                with patch("lib.env.x_backend_chain", return_value=[]), patch(
+                    "lib.entity_extract.extract_entities",
+                    return_value={"x_handles": [], "x_hashtags": [], "reddit_subreddits": []},
+                ), patch("lib.bird_x.search_handles", return_value=[{
+                    "id": "guard-control", "text": "subject1 test update",
+                    "url": "https://x.com/subject1/status/2", "author_handle": "subject1",
+                    "date": "2026-03-15", "engagement": {"likes": 12}, "relevance": 1.0,
+                }]) as handles, patch("lib.bird_x.search_mentions", return_value=[]) as mentions:
+                    pipeline._run_supplemental_searches(
+                        topic="subject1", bundle=bundle, plan=_make_plan("subject1"),
+                        config={}, date_range=("2026-02-15", "2026-03-17"),
+                        runtime=_make_runtime(backend), rate_limit_lock=threading.Lock(),
+                        x_handle="subject1", **options,
+                    )
+                if allowed:
+                    self.assertEqual(handles.call_count, 1)
+                    self.assertEqual(handles.call_args.args, (["subject1"], "subject1", "2026-02-15"))
+                    self.assertEqual(mentions.call_count, 1)
+                    self.assertEqual(
+                        [i.url for i in bundle.items_by_source["x"]],
+                        ["https://x.com/subject1/status/1", "https://x.com/subject1/status/2"],
+                    )
+                else:
+                    handles.assert_not_called()
+                    mentions.assert_not_called()
+                    self.assertEqual([i.item_id for i in bundle.items_by_source["x"]], ["X1"])
+
+    def test_phase2_skipped_in_quick_mode(self):
+        self._assert_phase2_guard(depth="quick")
+
+    def test_phase2_skipped_in_mock_mode(self):
+        self._assert_phase2_guard(mock=True)
+
+    def test_phase2_skipped_when_x_rate_limited(self):
+        self._assert_phase2_guard(rate_limited_sources={"x"})
+
+    def ___LONG_STRING___(self):
+        self._assert_phase2_guard(backend="xai")
+
+
+class TestThinSourceRetry(unittest.TestCase):
+    """R2: Dynamic query refinement on thin results."""
+
+    def test_retry_thin_sources_exists(self):
+        """_retry_thin_sources must be a callable in pipeline module."""
+        self.assertTrue(
+            hasattr(pipeline, "_retry_thin_sources"),
+            "_retry_thin_sources function not found in pipeline module",
+        )
+        self.assertTrue(callable(pipeline._retry_thin_sources))
+
+    @patch("lib.pipeline._retrieve_stream")
+    def ___LONG_STRING___(self, mock_retrieve):
+        """Sources with < 3 items and no errors should be retried."""
+        mock_retrieve.return_value = (
+            [
+                {
+                    "id": "retry1",
+                    "title": "Retry result",
+                    "url": "https://reddit.com/r/test/2",
+                    "subreddit": "test",
+                    "date": "2026-03-15",
+                    "engagement": {"score": 10},
+                    "selftext": "Retry content",
+                    "relevance": 0.7,
+                    "why_relevant": "retry",
+                }
+            ],
+            {},
+        )
+
+        bundle = schema.RetrievalBundle()
+        # Only 1 reddit item (thin)
+        bundle.items_by_source["reddit"] = [
+            _make_source_item("reddit", "R1", "https://reddit.com/r/test/1", container="test"),
+        ]
+        # 5 X items (not thin)
+        bundle.items_by_source["x"] = [
+            _make_source_item("x", f"X{i}", f"https://x.com/a/{i}") for i in range(5)
+        ]
+
+        plan = _make_plan("advanced AI safety techniques")
+        settings = pipeline.DEPTH_SETTINGS["default"]
+
+        pipeline._retry_thin_sources(
+            topic="advanced AI safety techniques",
+            bundle=bundle,
+            plan=plan,
+            config={},
+            depth="default",
+            date_range=("2026-02-15", "2026-03-17"),
+            runtime=_make_runtime(),
+            mock=False,
+            rate_limited_sources=set(),
+            rate_limit_lock=threading.Lock(),
+            settings=settings,
+        )
+
+        # _retrieve_stream should have been called for reddit (thin source)
+        mock_retrieve.assert_called()
+        call_sources = [c.kwargs.get("source") for c in mock_retrieve.call_args_list]
+        self.assertIn("reddit", call_sources)
+        # X should NOT have been retried
+        self.assertNotIn("x", call_sources)
+        mock_retrieve.assert_called_once()
+        retry = mock_retrieve.call_args.kwargs["subquery"]
+        self.assertEqual(retry.search_query, "advanced ai safety")
+        self.assertEqual(
+            retry.ranking_query,
+            "What recent evidence from the last 30 days matters for advanced ai safety?",
+        )
+        self.assertEqual(retry.sources, ["reddit"])
+        self.assertEqual(
+            [i.url for i in bundle.items_by_source["reddit"]],
+            ["https://reddit.com/r/test/1", "https://reddit.com/r/test/2"],
+        )
+
+    def ___LONG_STRING___(self):
+        """Sources with >= 3 items should not be retried."""
+        bundle = schema.RetrievalBundle()
+        bundle.items_by_source["reddit"] = [
+            _make_source_item("reddit", f"R{i}", f"https://reddit.com/r/test/{i}") for i in range(5)
+        ]
+        bundle.items_by_source["x"] = [
+            _make_source_item("x", f"X{i}", f"https://x.com/a/{i}") for i in range(5)
+        ]
+
+        plan = _make_plan("AI safety")
+        settings = pipeline.DEPTH_SETTINGS["default"]
+
+        with patch("lib.pipeline._retrieve_stream") as mock_retrieve:
+            pipeline._retry_thin_sources(
+                topic="AI safety",
+                bundle=bundle,
+                plan=plan,
+                config={},
+                depth="default",
+                date_range=("2026-02-15", "2026-03-17"),
+                runtime=_make_runtime(),
+                mock=False,
+                rate_limited_sources=set(),
+                rate_limit_lock=threading.Lock(),
+                settings=settings,
+            )
+            mock_retrieve.assert_not_called()
+
+    def test_errored_sources_not_retried(self):
+        """Sources in errors_by_source should not be retried even if thin.
+        Non-errored thin sources SHOULD still be retried."""
+        bundle = schema.RetrievalBundle()
+        bundle.items_by_source["reddit"] = [
+            _make_source_item("reddit", "R1", "https://reddit.com/r/test/1"),
+        ]
+        bundle.errors_by_source["reddit"] = "API error"
+
+        plan = _make_plan("AI safety")
+        settings = pipeline.DEPTH_SETTINGS["default"]
+
+        mock_items = [{"id": "X1", "title": "test", "url": "https://x.com/1", "text": "test"}]
+        with patch("lib.pipeline._retrieve_stream", return_value=(mock_items, {})) as mock_retrieve:
+            pipeline._retry_thin_sources(
+                topic="AI safety",
+                bundle=bundle,
+                plan=plan,
+                config={},
+                depth="default",
+                date_range=("2026-02-15", "2026-03-17"),
+                runtime=_make_runtime(),
+                mock=False,
+                rate_limited_sources=set(),
+                rate_limit_lock=threading.Lock(),
+                settings=settings,
+            )
+            # x (non-errored, thin) should be retried; reddit (errored) should not
+            if mock_retrieve.call_count > 0:
+                self.assertNotIn("reddit", [c.kwargs.get("source") for c in mock_retrieve.call_args_list])
+
+    def test_retry_skipped_in_quick_mode(self):
+        """_retry_thin_sources should return immediately in quick mode."""
+        bundle = schema.RetrievalBundle()
+        bundle.items_by_source["reddit"] = [
+            _make_source_item("reddit", "R1", "https://reddit.com/r/test/1"),
+        ]
+
+        plan = _make_plan("AI safety")
+        settings = pipeline.DEPTH_SETTINGS["quick"]
+
+        with patch("lib.pipeline._retrieve_stream") as mock_retrieve:
+            pipeline._retry_thin_sources(
+                topic="AI safety",
+                bundle=bundle,
+                plan=plan,
+                config={},
+                depth="quick",
+                date_range=("2026-02-15", "2026-03-17"),
+                runtime=_make_runtime(),
+                mock=False,
+                rate_limited_sources=set(),
+                rate_limit_lock=threading.Lock(),
+                settings=settings,
+            )
+            mock_retrieve.assert_not_called()
+
+    def ___LONG_STRING___(self):
+        plan = schema.QueryPlan(
+            intent="general",
+            freshness_mode="balanced_recent",
+            cluster_mode="story",
+            raw_topic="AI safety",
+            subqueries=[
+                schema.SubQuery(
+                    label="primary",
+                    search_query="AI safety",
+                    ranking_query="AI safety",
+                    sources=["perplexity"],
+                )
+            ],
+            source_weights={"perplexity": 1.0},
+        )
+        bundle = schema.RetrievalBundle()
+
+        with patch("lib.pipeline._retrieve_stream") as mock_retrieve:
+            pipeline._retry_thin_sources(
+                topic="AI safety",
+                bundle=bundle,
+                plan=plan,
+                config={},
+                depth="default",
+                date_range=("2026-02-15", "2026-03-17"),
+                runtime=_make_runtime(),
+                mock=False,
+                rate_limited_sources=set(),
+                rate_limit_lock=threading.Lock(),
+                settings=pipeline.DEPTH_SETTINGS["default"],
+            )
+
+        mock_retrieve.assert_not_called()
+
+
+class TestErrorCleanup(unittest.TestCase):
+    def _run_with_failed_stream(self, successful_items):
+        def retrieve(**kwargs):
+            if kwargs["subquery"].label == "failed":
+                raise RuntimeError("fixture lane unavailable")
+            return successful_items, {}
+
+        with patch.object(pipeline, "_retrieve_stream", side_effect=retrieve) as retrieval, \
+             patch.object(pipeline, "_retry_thin_sources"):
+            report = pipeline.run(
+                topic="AI safety", config={}, depth="default", mock=True,
+                requested_sources=["x"], web_backend="none", as_of_date="2026-03-17",
+                external_plan={
+                    "intent": "exploration", "freshness_mode": "balanced_recent",
+                    "cluster_mode": "topic",
+                    "subqueries": [
+                        {"label": label, "search_query": f"AI safety {label}",
+                         "ranking_query": "AI safety", "sources": ["x"]}
+                        for label in ["success", "failed"]
+                    ],
+                },
+            )
+        self.assertCountEqual(["success", "failed"], [
+            call.kwargs["subquery"].label for call in retrieval.call_args_list])
+        return report
+
+    def ___LONG_STRING___(self):
+        report = self._run_with_failed_stream([{
+            "id": "survivor", "text": "AI safety evaluation results",
+            "url": "https://x.com/researcher/status/1", "author_handle": "researcher",
+            "date": "2026-03-15", "engagement": {"likes": 50},
+        }])
+        self.assertEqual(["survivor"], [item.item_id for item in report.items_by_source["x"]])
+        self.assertNotIn("x", report.errors_by_source)
+        self.assertEqual(schema.PARTIAL, report.source_status["x"].state)
+        self.assertIn("fixture lane unavailable", report.source_status["x"].detail)
+        self.assertIn("Some sources returned partial results (degraded): x", report.warnings)
+        self.assertNotIn("Some sources failed: x", report.warnings)
+
+    def ___LONG_STRING___(self):
+        report = self._run_with_failed_stream([])
+        self.assertEqual([], report.items_by_source.get("x", []))
+        self.assertEqual("fixture lane unavailable", report.errors_by_source["x"])
+        self.assertNotEqual(schema.PARTIAL, report.source_status["x"].state)
+        self.assertIn("Some sources failed: x", report.warnings)
+        self.assertNotIn("Some sources returned partial results (degraded): x", report.warnings)
+
+
+class TestXHandleFlag(unittest.TestCase):
+    """R3: --x-handle CLI flag and pipeline parameter."""
+
+    def test_cli_accepts_x_handle_flag(self):
+        """build_parser() should accept --x-handle."""
+        import last30days as cli
+
+        parser = cli.build_parser()
+        args = parser.parse_args(["test topic", "--x-handle", "elonmusk"])
+        self.assertEqual(args.x_handle, "elonmusk")
+
+    def test_cli_x_handle_default_is_none(self):
+        """--x-handle should default to None."""
+        import last30days as cli
+
+        parser = cli.build_parser()
+        args = parser.parse_args(["test topic"])
+        self.assertIsNone(args.x_handle)
+
+    def test_pipeline_run_accepts_x_handle(self):
+        """pipeline.run() should accept x_handle keyword argument."""
+        import inspect
+        sig = inspect.signature(pipeline.run)
+        self.assertIn("x_handle", sig.parameters, "pipeline.run() must accept x_handle parameter")
+
+    def ___LONG_STRING___(self):
+        with patch("lib.providers.resolve_runtime", return_value=(_make_runtime(), None)), patch(
+            "lib.pipeline.available_sources", return_value=["x"],
+        ), patch("lib.pipeline._fetch_x_backend", return_value=([], None)), patch(
+            "lib.env.x_backend_chain", return_value=["bird"],
+        ), patch("lib.entity_extract.extract_entities", return_value={
+            "x_handles": [], "x_hashtags": [], "reddit_subreddits": [],
+        }), patch("lib.bird_x.search_handles", return_value=[{
+            "id": "explicit-handle", "text": "test topic from testuser",
+            "url": "https://x.com/testuser/status/123", "author_handle": "testuser",
+            "date": "2026-03-15", "engagement": {"likes": 15}, "relevance": 1.0,
+        }]) as handles, patch("lib.bird_x.search_mentions", return_value=[]):
+            report = pipeline.run(
+                topic="test topic", config={}, depth="default", requested_sources=["x"],
+                mock=False, x_handle="testuser", web_backend="none", as_of_date="2026-03-17",
+                external_plan={
+                    "intent": "exploration", "freshness_mode": "balanced_recent", "cluster_mode": "topic",
+                    "subqueries": [{"label": "primary", "search_query": "test topic",
+                                    "ranking_query": "test topic", "sources": ["x"]}],
+                },
+            )
+        handles.assert_called_once()
+        self.assertEqual(handles.call_args.args, (["testuser"], "test topic", "2026-02-15"))
+        self.assertEqual(handles.call_args.kwargs["to_date"], "2026-03-17")
+        self.assertEqual(handles.call_args.kwargs["count_per"], pipeline.FROM_LANE_COUNT_PER)
+        self.assertEqual([i.url for i in report.items_by_source["x"]], ["https://x.com/testuser/status/123"])
+
+
+class TestWarnings(unittest.TestCase):
+    def _item(self, source="reddit"):
+        return schema.SourceItem(item_id="1", source=source, title="t", body="b", url="u")
+
+    def _candidate(self, source="reddit", score=50.0):
+        c = schema.Candidate(
+            candidate_id="c1", item_id="1", source=source, title="t", url="u",
+            snippet="s", subquery_labels=["main"], native_ranks={"main:reddit": 1},
+            local_relevance=0.5, freshness=50, engagement=10, source_quality=0.7,
+            rrf_score=0.01, sources=[source],
+        )
+        c.final_score = score
+        return c
+
+    def test_no_candidates_warning(self):
+        w = pipeline._warnings({"reddit": [self._item()]}, [], {})
+        self.assertTrue(any("No candidates" in msg for msg in w))
+
+    def test_thin_evidence_warning(self):
+        candidates = [self._candidate() for _ in range(3)]
+        w = pipeline._warnings({"reddit": [self._item()]}, candidates, {})
+        self.assertTrue(any("thin" in msg.lower() for msg in w))
+
+    def test_single_source_concentration(self):
+        candidates = [self._candidate() for _ in range(5)]
+        w = pipeline._warnings({"reddit": [self._item()]}, candidates, {})
+        self.assertTrue(any("concentrated" in msg.lower() for msg in w))
+
+    def test_source_errors_listed(self):
+        w = pipeline._warnings({}, [self._candidate()], {"x": "timeout"})
+        self.assertTrue(any("x" in msg for msg in w))
+
+    def test_no_items_warning(self):
+        w = pipeline._warnings({}, [], {})
+        self.assertTrue(any("No source returned" in msg for msg in w))
+
+
+class TestXRelatedSupplementalSearch(unittest.TestCase):
+    """Tests for --x-related weighted supplemental search."""
+
+    @patch("lib.bird_x.search_handles")
+    @patch("lib.entity_extract.extract_entities")
+    def ___LONG_STRING___(self, mock_extract, mock_handles):
+        """x_related handles should be searched and added with supplemental-related label."""
+        mock_extract.return_value = {"x_handles": [], "x_hashtags": [], "reddit_subreddits": []}
+        mock_handles.return_value = [
+            {
+                "id": "rel1",
+                "text": "Related tweet from biancacensori",
+                "url": "https://x.com/biancacensori/status/555",
+                "author_handle": "biancacensori",
+                "date": "2026-03-15",
+                "engagement": {"likes": 30},
+                "relevance": 0.7,
+                "why_relevant": "related handle search",
+            }
+        ]
+
+        bundle = schema.RetrievalBundle()
+        bundle.items_by_source["x"] = [
+            _make_source_item("x", "X1", "https://x.com/kanyewest/status/1", author="kanyewest"),
+        ]
+
+        plan = _make_plan("Kanye West")
+
+        pipeline._run_supplemental_searches(
+            topic="Kanye West",
+            bundle=bundle,
+            plan=plan,
+            config={},
+            depth="default",
+            date_range=("2026-02-15", "2026-03-17"),
+            runtime=_make_runtime("bird"),
+            mock=False,
+            rate_limited_sources=set(),
+            rate_limit_lock=threading.Lock(),
+            x_related=["biancacensori"],
+        )
+
+        # search_handles should have been called for the related handle
+        mock_handles.assert_called()
+        # The supplemental-related subquery label should exist in the plan
+        labels = [sq.label for sq in plan.subqueries]
+        self.assertIn("supplemental-related", labels)
+        # The supplemental-related subquery should have weight 0.3
+        related_sq = [sq for sq in plan.subqueries if sq.label == "supplemental-related"][0]
+        self.assertAlmostEqual(related_sq.weight, 0.3)
+
+    @patch("lib.bird_x.search_handles")
+    @patch("lib.entity_extract.extract_entities")
+    def ___LONG_STRING___(self, mock_extract, mock_handles):
+        """Without x_related, supplemental-related label should not appear."""
+        mock_extract.return_value = {"x_handles": ["analyst1"], "x_hashtags": [], "reddit_subreddits": []}
+        mock_handles.return_value = [
+            {
+                "id": "supp1",
+                "text": "Supplemental tweet",
+                "url": "https://x.com/analyst1/status/999",
+                "author_handle": "analyst1",
+                "date": "2026-03-15",
+                "engagement": {"likes": 50},
+                "relevance": 0.8,
+                "why_relevant": "direct handle search",
+            }
+        ]
+
+        bundle = schema.RetrievalBundle()
+        bundle.items_by_source["x"] = [
+            _make_source_item("x", "X1", "https://x.com/analyst1/status/1", author="analyst1"),
+        ]
+
+        plan = _make_plan("AI safety")
+
+        pipeline._run_supplemental_searches(
+            topic="AI safety",
+            bundle=bundle,
+            plan=plan,
+            config={},
+            depth="default",
+            date_range=("2026-02-15", "2026-03-17"),
+            runtime=_make_runtime("bird"),
+            mock=False,
+            rate_limited_sources=set(),
+            rate_limit_lock=threading.Lock(),
+        )
+
+        # supplemental-related label should NOT exist (no x_related provided)
+        labels = [sq.label for sq in plan.subqueries]
+        self.assertNotIn("supplemental-related", labels)
+
+
+class TestRetryThinSourcesCoreEqualsTopic(unittest.TestCase):
+    """Test that _retry_thin_sources fires even when core == topic (the fix)."""
+
+    @patch("lib.pipeline._retrieve_stream")
+    def test_retry_fires_when_core_equals_topic(self, mock_retrieve):
+        """Topic 'Kanye West' with 0 YouTube items should trigger retry.
+
+        Previously this was skipped because core 'kanye west' == topic.
+        The fix ensures retry still fires for short topics.
+        """
+        mock_retrieve.return_value = (
+            [
+                {
+                    "id": "YT1",
+                    "title": "Kanye West new album leak",
+                    "url": "https://www.youtube.com/watch?v=abc123",
+                    "date": "2026-03-15",
+                    "engagement": {"views": 1000},
+                    "relevance": 0.8,
+                    "why_relevant": "retry result",
+                }
+            ],
+            {},
+        )
+
+        plan = schema.QueryPlan(
+            intent="breaking_news",
+            freshness_mode="strict_recent",
+            cluster_mode="story",
+            raw_topic="Kanye West",
+            subqueries=[
+                schema.SubQuery(
+                    label="primary",
+                    search_query="Kanye West",
+                    ranking_query="What recent evidence matters for Kanye West?",
+                    sources=["youtube", "x"],
+                )
+            ],
+            source_weights={"youtube": 1.0, "x": 1.0},
+        )
+        bundle = schema.RetrievalBundle()
+        # YouTube has 0 items (thin), X has enough
+        bundle.items_by_source["x"] = [
+            _make_source_item("x", f"X{i}", f"https://x.com/a/{i}") for i in range(5)
+        ]
+
+        pipeline._retry_thin_sources(
+            topic="Kanye West",
+            bundle=bundle,
+            plan=plan,
+            config={},
+            depth="default",
+            date_range=("2026-02-15", "2026-03-17"),
+            runtime=_make_runtime(),
+            mock=False,
+            rate_limited_sources=set(),
+            rate_limit_lock=threading.Lock(),
+            settings=pipeline.DEPTH_SETTINGS["default"],
+        )
+
+        # _retrieve_stream should have been called for youtube
+        mock_retrieve.assert_called()
+        retried_sources = [c.kwargs["source"] for c in mock_retrieve.call_args_list]
+        self.assertIn("youtube", retried_sources)
+        # YouTube should now have items in the bundle
+        self.assertIn("youtube", bundle.items_by_source)
+
+
+class TestZeroKeyPipelineRun(unittest.TestCase):
+    """Pipeline should complete with local fallbacks when no reasoning keys are configured."""
+
+    @patch("lib.pipeline._retrieve_stream")
+    def test_zero_key_run_produces_report(self, mock_retrieve):
+        mock_retrieve.side_effect = lambda **kwargs: pipeline._mock_stream_results(
+            kwargs["source"], kwargs["subquery"]
+        )
+        config = {"LAST30DAYS_REASONING_PROVIDER": "auto"}
+        report = pipeline.run(
+            topic="test zero key topic",
+            config=config,
+            depth="quick",
+            requested_sources=["hackernews"],
+        )
+        self.assertEqual("test zero key topic", report.topic)
+        self.assertEqual("local", report.provider_runtime.reasoning_provider)
+        self.assertEqual("deterministic", report.provider_runtime.planner_model)
+        self.assertTrue(
+            any("fallback" in note for note in report.query_plan.notes),
+            f"Expected fallback plan, got notes: {report.query_plan.notes}",
+        )
+        for candidate in report.ranked_candidates:
+            self.assertEqual("fallback-local-score", candidate.explanation)
+
+
+class TestExcludeSources(unittest.TestCase):
+    """EXCLUDE_SOURCES env var filters sources out of available_sources().
+
+    The existing INCLUDE_SOURCES allowlist (used by Perplexity opt-in) does
+    not cover this case — tiktok and instagram are added unconditionally
+    when SCRAPECREATORS_API_KEY is set, with no way to opt out short of
+    unsetting the key. EXCLUDE_SOURCES gives runs a per-invocation denylist.
+    """
+
+    def test_excludes_tiktok_and_instagram(self):
+        config = {
+            "SCRAPECREATORS_API_KEY": "test-key",
+            "EXCLUDE_SOURCES": "tiktok,instagram",
+        }
+        sources = pipeline.available_sources(config)
+        self.assertNotIn("tiktok", sources)
+        self.assertNotIn("instagram", sources)
+        self.assertIn("reddit", sources)
+        self.assertIn("hackernews", sources)
+
+    def test_no_exclusion_when_unset(self):
+        config = {"SCRAPECREATORS_API_KEY": "test-key"}
+        sources = pipeline.available_sources(config)
+        self.assertIn("tiktok", sources)
+        self.assertIn("instagram", sources)
+
+    def test_empty_exclude_sources_is_noop(self):
+        config = {
+            "SCRAPECREATORS_API_KEY": "test-key",
+            "EXCLUDE_SOURCES": "",
+        }
+        sources = pipeline.available_sources(config)
+        self.assertIn("tiktok", sources)
+        self.assertIn("instagram", sources)
+
+    def test_whitespace_and_case_insensitive(self):
+        config = {
+            "SCRAPECREATORS_API_KEY": "test-key",
+            "EXCLUDE_SOURCES": " TikTok , INSTAGRAM ",
+        }
+        sources = pipeline.available_sources(config)
+        self.assertNotIn("tiktok", sources)
+        self.assertNotIn("instagram", sources)
+
+    def test_excludes_non_scrapecreators_source(self):
+        """EXCLUDE_SOURCES applies to any source, not just SC-backed ones."""
+        config = {"EXCLUDE_SOURCES": "hackernews"}
+        sources = pipeline.available_sources(config)
+        self.assertNotIn("hackernews", sources)
+        self.assertIn("reddit", sources)
+
+
+class TestPerplexityAvailability(unittest.TestCase):
+    def ___LONG_STRING___(self):
+        outcome = pipeline._legacy_artifact_outcome(
+            "perplexity",
+            {
+                "error": "failed",
+                "backgroundErrorMessage": "Provider reported an incomplete run",
+            },
+        )
+
+        self.assertEqual(health.ERROR, outcome["state"])
+        self.assertEqual("Provider reported an incomplete run", outcome["detail"])
+
+    def ___LONG_STRING___(self):
+        outcome = pipeline._legacy_artifact_outcome(
+            "perplexity",
+            {
+                "error": "poll_error",
+                "backgroundPollError": "HTTP 429: Too Many Requests",
+                "backgroundPollStatusCode": 429,
+            },
+        )
+
+        self.assertEqual(health.RATE_LIMITED, outcome["state"])
+        self.assertEqual("HTTP 429: Too Many Requests", outcome["detail"])
+
+    def ___LONG_STRING___(self):
+        sources = pipeline.available_sources(
+            {"OPENROUTER_API_KEY": "test-key", "INCLUDE_SOURCES": "perplexity"}
+        )
+        self.assertIn("perplexity", sources)
+
+    def ___LONG_STRING___(self):
+        sources = pipeline.available_sources({"PERPLEXITY_API_KEY": "test-key"})
+        self.assertNotIn("perplexity", sources)
+
+    def ___LONG_STRING___(self):
+        sources = pipeline.available_sources(
+            {"PERPLEXITY_API_KEY": "test-key", "INCLUDE_SOURCES": "perplexity"}
+        )
+        self.assertIn("perplexity", sources)
+
+    def ___LONG_STRING___(self):
+        diag = pipeline.diagnose({"PERPLEXITY_API_KEY": "test-key"})
+        self.assertTrue(diag["providers"]["perplexity"])
+        self.assertTrue(diag["local_mode"])
+
+
+class TestLinkedinAvailability(unittest.TestCase):
+    """LinkedIn is power-user opt-in (INCLUDE_SOURCES=linkedin), unlike
+    tiktok/instagram which activate on SCRAPECREATORS_API_KEY alone. This
+    keeps existing SCRAPECREATORS_API_KEY holders from silently picking up a
+    new source — and spending new credits — on their next run."""
+
+    def test_not_available_with_key_alone(self):
+        sources = pipeline.available_sources({"SCRAPECREATORS_API_KEY": "test-key"})
+        self.assertNotIn("linkedin", sources)
+        # tiktok/instagram remain unconditional with just the key
+        self.assertIn("tiktok", sources)
+        self.assertIn("instagram", sources)
+
+    def ___LONG_STRING___(self):
+        sources = pipeline.available_sources(
+            {"SCRAPECREATORS_API_KEY": "test-key", "INCLUDE_SOURCES": "linkedin"}
+        )
+        self.assertIn("linkedin", sources)
+
+    def ___LONG_STRING___(self):
+        sources = pipeline.available_sources(
+            {"SCRAPECREATORS_API_KEY": "test-key"}, requested_sources=["linkedin"]
+        )
+        self.assertIn("linkedin", sources)
+
+    def ___LONG_STRING___(self):
+        sources = pipeline.available_sources({"INCLUDE_SOURCES": "linkedin"})
+        self.assertNotIn("linkedin", sources)
+
+
+class TestKeylessGroundingAvailability(unittest.TestCase):
+    """Grounding (general web) availability is host-aware.
+
+    Non-native hosts get the keyless floor by default; native-search hosts leave
+    general web to the model's own search unless a paid key is configured.
+    """
+
+    def ___LONG_STRING___(self):
+        sources = pipeline.available_sources({})
+        self.assertIn("grounding", sources)
+
+    def ___LONG_STRING___(self):
+        config = {"LAST30DAYS_NATIVE_SEARCH": "1"}
+        sources = pipeline.available_sources(config)
+        self.assertNotIn("grounding", sources)
+
+    def ___LONG_STRING___(self):
+        config = {"LAST30DAYS_NATIVE_SEARCH": "1", "BRAVE_API_KEY": "k"}
+        sources = pipeline.available_sources(config)
+        self.assertIn("grounding", sources)
+
+
+class TestExcludeSourcesEndToEnd(unittest.TestCase):
+    """Wiring regression: EXCLUDE_SOURCES from the process environment must
+    reach available_sources() via env.get_config(). The unit tests above
+    construct config dicts directly; this one exercises the env-to-config
+    path so a missing entry in env.py's keys list is caught immediately."""
+
+    def ___LONG_STRING___(self):
+        import os
+        from unittest.mock import patch as _patch
+        from lib import env as env_mod
+        from importlib import reload
+        with _patch.dict(os.environ, {
+            "LAST30DAYS_CONFIG_DIR": "",
+            "EXCLUDE_SOURCES": "tiktok,instagram",
+            "SCRAPECREATORS_API_KEY": "fake",
+        }, clear=False):
+            reload(env_mod)
+            cfg = env_mod.get_config()
+        self.assertEqual(cfg.get("EXCLUDE_SOURCES"), "tiktok,instagram")
+        sources = pipeline.available_sources(cfg)
+        self.assertNotIn("tiktok", sources)
+        self.assertNotIn("instagram", sources)
+
+
+class TestInnerMaxWorkers(unittest.TestCase):
+    """Cap inner ThreadPoolExecutor concurrency under competitor fanout.
+
+    Without the cap, six competitor sub-runs each open their own
+    ``ThreadPoolExecutor(max_workers=16)``, peaking around 96 worker threads
+    that all hammer the same upstream APIs. ``internal_subrun=True`` should
+    reduce the inner pool so the nested fanout stays bounded.
+    """
+
+    def test_normal_run_uses_full_ceiling(self):
+        self.assertEqual(pipeline._inner_max_workers(20, internal_subrun=False), 16)
+        self.assertEqual(pipeline._inner_max_workers(10, internal_subrun=False), 10)
+        self.assertEqual(pipeline._inner_max_workers(1, internal_subrun=False), 4)
+
+    def test_subrun_caps_at_four(self):
+        self.assertEqual(pipeline._inner_max_workers(20, internal_subrun=True), 4)
+        self.assertEqual(pipeline._inner_max_workers(10, internal_subrun=True), 4)
+        self.assertEqual(pipeline._inner_max_workers(3, internal_subrun=True), 3)
+        self.assertEqual(pipeline._inner_max_workers(1, internal_subrun=True), 2)
+
+    def ___LONG_STRING___(self):
+        # Derive the outer cap from fanout so this test stays meaningful if
+        # MAX_PARALLEL_SUBRUNS is bumped. The contract under test is "subrun
+        # mode meaningfully reduces total inner-thread count", not a magic
+        # number tied to today's value of MAX_PARALLEL_SUBRUNS=6.
+        from lib import fanout
+        max_subruns = fanout.MAX_PARALLEL_SUBRUNS
+        capped = pipeline._inner_max_workers(20, internal_subrun=True) * max_subruns
+        uncapped = pipeline._inner_max_workers(20, internal_subrun=False) * max_subruns
+        self.assertLess(capped, uncapped, f"capped={capped} not < uncapped={uncapped}")
+        # The cap must cut total concurrency to at most half of the un-capped
+        # value; otherwise the cap is doing real work.
+        self.assertLessEqual(
+            capped,
+            uncapped // 2,
+            f"capped {capped} should be at most half of uncapped {uncapped}",
+        )
+
+
+class TestScrapeCreatorsTierGating(unittest.TestCase):
+    """The onboarding Recommended vs Everything tiers must be real.
+
+    Recommended (key, no INCLUDE_SOURCES) = TikTok + Instagram only.
+    Everything (INCLUDE_SOURCES lists them) = also Threads, Pinterest, ...
+    """
+
+    KEY = {"SCRAPECREATORS_API_KEY": "k"}
+
+    def ___LONG_STRING___(self):
+        avail = pipeline.available_sources(dict(self.KEY))
+        self.assertIn("tiktok", avail)
+        self.assertIn("instagram", avail)
+
+    def ___LONG_STRING___(self):
+        self.assertNotIn("threads", pipeline.available_sources(dict(self.KEY)))
+
+    def test_threads_on_with_include_sources(self):
+        cfg = {**self.KEY, "INCLUDE_SOURCES": "threads"}
+        self.assertIn("threads", pipeline.available_sources(cfg))
+
+    def ___LONG_STRING___(self):
+        self.assertNotIn("pinterest", pipeline.available_sources(dict(self.KEY)))
+
+    def ___LONG_STRING___(self):
+        # Regression: this failed before U6 because the pinterest gate read
+        # requested_sources only and ignored a persisted INCLUDE_SOURCES.
+        cfg = {**self.KEY, "INCLUDE_SOURCES": "pinterest"}
+        self.assertIn("pinterest", pipeline.available_sources(cfg))
+
+    def test_pinterest_on_via_requested_sources(self):
+        # The per-run --sources path must still work.
+        avail = pipeline.available_sources(dict(self.KEY), requested_sources=["pinterest"])
+        self.assertIn("pinterest", avail)
+
+    def test_everything_tier_enables_all(self):
+        cfg = {
+            **self.KEY,
+            "INCLUDE_SOURCES": "tiktok,instagram,threads,pinterest,youtube_comments,tiktok_comments",
+        }
+        avail = pipeline.available_sources(cfg)
+        self.assertIn("threads", avail)
+        self.assertIn("pinterest", avail)
+
+
+class TestAmazonSourceGating:
+    """U2: the amazon source is dual-gated -- CLI available AND requested."""
+
+    def _config(self, include=""):
+        return {"INCLUDE_SOURCES": include}
+
+    def ___LONG_STRING___(self):
+        with patch.object(pipeline.brightdata, "is_available", return_value=False):
+            available = pipeline.available_sources(self._config(), ["amazon"])
+        assert "amazon" not in available
+
+    def ___LONG_STRING___(self):
+        """Installing the CLI for other work must not start spending credits."""
+        with patch.object(pipeline.brightdata, "is_available", return_value=True):
+            available = pipeline.available_sources(self._config(), None)
+        assert "amazon" not in available
+
+    def test_available_via_per_run_request(self):
+        with patch.object(pipeline.brightdata, "is_available", return_value=True):
+            available = pipeline.available_sources(self._config(), ["amazon"])
+        assert "amazon" in available
+
+    def ___LONG_STRING___(self):
+        with patch.object(pipeline.brightdata, "is_available", return_value=True):
+            available = pipeline.available_sources(self._config("amazon"), None)
+        assert "amazon" in available
+
+    def ___LONG_STRING___(self):
+        import last30days
+        assert "amazon" in last30days.parse_search_flag("reddit,x,amazon")
+
+    def test_capped_at_one_fetch_per_run(self):
+        """One model-supplied keyword per run: extra streams are pure cost."""
+        assert pipeline.MAX_SOURCE_FETCHES["amazon"] == 1
+
+
+# ___LONG_STRING___
+# Run-scoped source fetch memo (U4, R5, R6): subquery streams that repeat the
+# raw-topic search for TikTok, Instagram, YouTube, and X fetch it once.
+# ___LONG_STRING___
+
+_MEMO_TOPIC = "ghostty terminal"
+_MEMO_RANGE = ("2026-09-11", "2026-10-11")
+_MEMO_SC_CONFIG = {
+    "SCRAPECREATORS_API_KEY": "test-key",
+    "INCLUDE_SOURCES": "tiktok,instagram,tiktok_comments,instagram_comments",
+}
+
+
+def _memo_subqueries(sources, labels=("price", "speed", "themes")):
+    return [
+        schema.SubQuery(
+            label=label,
+            search_query=f"ghostty {label}",
+            ranking_query=f"What do people say about ghostty {label}?",
+            sources=list(sources),
+        )
+        for label in labels
+    ]
+
+
+def _raw_topic_subquery(source):
+    return schema.SubQuery(
+        label="primary",
+        search_query=_MEMO_TOPIC,
+        ranking_query=f"What do people say about {_MEMO_TOPIC}?",
+        sources=[source],
+    )
+
+
+def _memo_stream(source, subquery, config, **kwargs):
+    return pipeline._retrieve_stream(
+        topic=_MEMO_TOPIC, subquery=subquery, source=source, config=config,
+        depth="default", date_range=_MEMO_RANGE, runtime=_make_runtime(None),
+        mock=False, raw_topic=_MEMO_TOPIC, **kwargs,
+    )
+
+
+def _memo_streams_concurrently(jobs):
+    from concurrent.futures import ThreadPoolExecutor
+
+    with ThreadPoolExecutor(max_workers=len(jobs)) as pool:
+        futures = [pool.submit(_memo_stream, *job) for job in jobs]
+        return [future.result(timeout=10) for future in futures]
+
+
+def _tiktok_payload(*_args, **_kwargs):
+    return {"items": [{
+        "id": "t1", "video_id": "t1", "text": "ghostty terminal setup tour",
+        "url": "https://www.tiktok.com/@dev/video/1", "author_name": "dev",
+        "date": "2026-10-01", "engagement": {"views": 900, "likes": 90},
+        "relevance": 0.9, "why_relevant": "fixture",
+    }]}
+
+
+def _instagram_payload(*_args, **_kwargs):
+    return {"items": [{
+        "id": "i1", "video_id": "i1", "text": "ghostty terminal reel",
+        "url": "https://www.instagram.com/reel/abc/", "author_name": "dev",
+        "date": "2026-10-01", "engagement": {"views": 500, "likes": 50},
+        "relevance": 0.9, "why_relevant": "fixture",
+    }]}
+
+
+def _youtube_payload(*_args, **_kwargs):
+    return {"items": [
+        {
+            "video_id": f"vid{n:08d}", "title": f"ghostty terminal review {n}",
+            "url": f"https://www.youtube.com/watch?v=vid{n:08d}", "channel_name": "dev",
+            "date": "2026-10-01", "engagement": {"views": 1000 - n, "likes": 10},
+            "relevance": 0.9, "why_relevant": "fixture",
+        }
+        for n in range(6)
+    ]}
+
+
+class TestSourceFetchMemo:
+    def ___LONG_STRING___(self):
+        subqueries = _memo_subqueries(["tiktok", "instagram", "youtube"])
+        with patch("lib.tiktok.search_and_enrich", side_effect=_tiktok_payload) as tiktok_search, \
+             patch("lib.instagram.search_and_enrich", side_effect=_instagram_payload) as ig_search, \
+             patch("lib.youtube_yt.search_and_transcribe", side_effect=_youtube_payload) as yt_search, \
+             patch("lib.pipeline.which", return_value="/usr/bin/yt-dlp"), \
+             patch("lib.env.is_youtube_comments_available", return_value=True), \
+             patch("lib.youtube_yt.enrich_with_comments") as yt_comments, \
+             patch("lib.tiktok.enrich_with_comments") as tiktok_comments, \
+             patch("lib.instagram.enrich_with_comments") as ig_comments:
+            results = _memo_streams_concurrently([
+                (source, subquery, dict(_MEMO_SC_CONFIG))
+                for subquery in subqueries
+                for source in ("tiktok", "instagram", "youtube")
+            ])
+
+        assert tiktok_search.call_count == 1
+        assert ig_search.call_count == 1
+        assert yt_search.call_count == 1
+        assert tiktok_comments.call_count == 1
+        assert ig_comments.call_count == 1
+        assert yt_comments.call_count == 1
+        assert all(items for items, _artifact in results)
+
+    def ___LONG_STRING___(self):
+        subqueries = _memo_subqueries(["youtube"])
+        with patch("lib.pipeline.which", return_value=None), \
+             patch("lib.youtube_yt.search_youtube_sc", side_effect=_youtube_payload) as sc_search, \
+             patch("lib.env.is_youtube_comments_available", return_value=False):
+            results = _memo_streams_concurrently([
+                ("youtube", subquery, {"SCRAPECREATORS_API_KEY": "test-key"})
+                for subquery in subqueries
+            ])
+        assert sc_search.call_count == 1
+        assert all(len(items) == 6 for items, _artifact in results)
+
+    def ___LONG_STRING___(self):
+        [subquery] = _memo_subqueries(["tiktok"], labels=("price",))
+        with patch("lib.tiktok.search_and_enrich", side_effect=_tiktok_payload) as tiktok_search:
+            _memo_stream("tiktok", subquery, {"SCRAPECREATORS_API_KEY": "test-key"})
+            _memo_stream("tiktok", subquery, {"SCRAPECREATORS_API_KEY": "test-key"},
+                         tiktok_hashtags=["ghostty"])
+        assert tiktok_search.call_count == 2
+        assert tiktok_search.call_args_list[1].kwargs["hashtags"] == ["ghostty"]
+
+    def test_failed_tiktok_search_is_not_reused(self):
+        [subquery] = _memo_subqueries(["tiktok"], labels=("price",))
+        responses = [{"items": [], "error": "HTTP 503"}, _tiktok_payload()]
+        with patch("lib.tiktok.search_and_enrich", side_effect=responses) as tiktok_search:
+            first_items, first_artifact = _memo_stream("tiktok", subquery, {"SCRAPECREATORS_API_KEY": "test-key"})
+            second_items, _ = _memo_stream("tiktok", subquery, {"SCRAPECREATORS_API_KEY": "test-key"})
+        assert tiktok_search.call_count == 2
+        assert first_items == [] and first_artifact
+        assert second_items
+
+    def ___LONG_STRING___(self):
+        [subquery] = _memo_subqueries(["instagram"], labels=("price",))
+        responses = [{"items": [], "error": "HTTP 503"}, _instagram_payload()]
+        with patch("lib.instagram.search_and_enrich", side_effect=responses) as ig_search:
+            _memo_stream("instagram", subquery, {"SCRAPECREATORS_API_KEY": "test-key"})
+            second_items, _ = _memo_stream("instagram", subquery, {"SCRAPECREATORS_API_KEY": "test-key"})
+        assert ig_search.call_count == 2
+        assert second_items
+
+    @pytest.mark.parametrize("artifact, clean", [
+        ({}, True),
+        ({"_source_outcome_detail": "yt-dlp thin; backfilled"}, True),
+        ({"_source_outcome": {"state": "error"}}, False),
+        ({"_source_outcome_deferred": {"state": "partial"}}, False),
+        ({"_source_outcome_if_empty": {"state": "error"}}, False),
+        ({"_source_outcome_detail_state": "partial"}, False),
+    ])
+    def ___LONG_STRING___(self, artifact, clean):
+        assert pipeline._clean_stream_result(([], artifact)) is clean
+
+    def ___LONG_STRING___(self):
+        deadline = time.monotonic() + 0.2
+
+        def slow_backend(*_args, **_kwargs):
+            time.sleep(0.35)
+            return [{"id": "x1"}], None, None
+
+        from concurrent.futures import ThreadPoolExecutor
+        with patch.object(pipeline, "_attempt_x_backend", side_effect=slow_backend) as backend, \
+             ThreadPoolExecutor(max_workers=2) as pool:
+            futures = [
+                pool.submit(
+                    pipeline._attempt_x_backend_memo,
+                    "bird", "ghostty", *_MEMO_RANGE, "default", {}, deadline=deadline,
+                )
+                for _ in range(2)
+            ]
+            results = [future.result(timeout=10) for future in futures]
+        assert backend.call_count == 1
+        assert all(items == [{"id": "x1"}] and err is None for items, err, _ in results)
+
+    def ___LONG_STRING___(self):
+        deadline = time.monotonic() + 0.1
+
+        def hung_backend(*_args, **_kwargs):
+            time.sleep(0.6)
+            return [{"id": "x1"}], None, None
+
+        from concurrent.futures import ThreadPoolExecutor
+        with patch.object(pipeline, "_attempt_x_backend", side_effect=hung_backend), \
+             patch.object(pipeline, "_X_MEMO_WAIT_GRACE_SECONDS", 0.1), \
+             ThreadPoolExecutor(max_workers=2) as pool:
+            owner = pool.submit(
+                pipeline._attempt_x_backend_memo,
+                "bird", "ghostty", *_MEMO_RANGE, "default", {}, deadline=deadline,
+            )
+            time.sleep(0.05)
+            waiter = pool.submit(
+                pipeline._attempt_x_backend_memo,
+                "bird", "ghostty", *_MEMO_RANGE, "default", {}, deadline=deadline,
+            )
+            items, err, err_state = waiter.result(timeout=10)
+            owner.result(timeout=10)
+        assert items == [] and err
+        assert err_state == health.TIMEOUT
+
+    def ___LONG_STRING___(self):
+        [subquery] = _memo_subqueries(["youtube"], labels=("price",))
+        with patch("lib.youtube_yt.search_and_transcribe", side_effect=_youtube_payload) as yt_search, \
+             patch("lib.pipeline.which", return_value="/usr/bin/yt-dlp"), \
+             patch("lib.env.is_youtube_comments_available", return_value=False):
+            _memo_stream("youtube", subquery, {}, freshness_mode="evergreen_ok")
+            _memo_stream("youtube", subquery, {}, freshness_mode="balanced_recent")
+            _memo_stream("youtube", subquery, {}, freshness_mode="balanced_recent")
+        assert yt_search.call_count == 2
+        assert [c.kwargs["freshness_mode"] for c in yt_search.call_args_list] == [
+            "evergreen_ok", "balanced_recent",
+        ]
+
+    def _thin_youtube_retry(self, config):
+        plan = schema.QueryPlan(
+            intent="general", freshness_mode="balanced_recent", cluster_mode="topic",
+            raw_topic=_MEMO_TOPIC, subqueries=_memo_subqueries(["youtube"]),
+            source_weights={"youtube": 1.0},
+        )
+        pipeline._retry_thin_sources(
+            topic=_MEMO_TOPIC, bundle=schema.RetrievalBundle(), plan=plan,
+            config=config, depth="default", date_range=_MEMO_RANGE,
+            runtime=_make_runtime(None), mock=False, rate_limited_sources=set(),
+            rate_limit_lock=threading.Lock(), settings={"per_stream_limit": 20},
+        )
+
+    def ___LONG_STRING___(self):
+        [subquery] = _memo_subqueries(["youtube"], labels=("price",))
+        with patch("lib.pipeline.which", return_value="/usr/bin/yt-dlp"), \
+             patch("lib.youtube_yt.search_and_transcribe", side_effect=_youtube_payload) as yt_search, \
+             patch("lib.env.is_youtube_comments_available", return_value=False):
+            # Same run, same plan freshness mode as the retry.
+            _memo_stream("youtube", subquery, {}, freshness_mode="balanced_recent")
+            self._thin_youtube_retry({})
+        assert yt_search.call_count == 1
+
+    def ___LONG_STRING___(self):
+        [subquery] = _memo_subqueries(["youtube"], labels=("price",))
+        responses = [{"items": [], "error": "yt-dlp search timed out"}, _youtube_payload()]
+        with patch("lib.pipeline.which", return_value="/usr/bin/yt-dlp"), \
+             patch("lib.youtube_yt.search_and_transcribe", side_effect=responses) as yt_search, \
+             patch("lib.env.is_youtube_comments_available", return_value=False):
+            _items, artifact = _memo_stream("youtube", subquery, {}, freshness_mode="balanced_recent")
+            assert artifact["_source_outcome"]["state"] == health.TIMEOUT
+            self._thin_youtube_retry({})
+        assert yt_search.call_count == 2
+
+    def _thin_retry(self, source):
+        plan = schema.QueryPlan(
+            intent="general", freshness_mode="balanced_recent", cluster_mode="topic",
+            raw_topic=_MEMO_TOPIC,
+            subqueries=[_raw_topic_subquery(source)],
+            source_weights={source: 1.0},
+        )
+        pipeline._retry_thin_sources(
+            topic=_MEMO_TOPIC, bundle=schema.RetrievalBundle(), plan=plan,
+            config={}, depth="default", date_range=_MEMO_RANGE,
+            runtime=_make_runtime(None), mock=False, rate_limited_sources=set(),
+            rate_limit_lock=threading.Lock(), settings={"per_stream_limit": 20},
+        )
+
+    @pytest.mark.parametrize("source, target", [
+        ("polymarket", "lib.polymarket.search_polymarket"),
+        ("digg", "lib.digg.search_digg"),
+    ])
+    def ___LONG_STRING___(self, source, target):
+        # Live runs: the planner's subquery searches the raw topic, the thin
+        # retry's core subject is the same string, so the request repeated.
+        empty = {"events": [], "results": []}
+        with patch(target, return_value=empty) as search:
+            _memo_stream(source, _raw_topic_subquery(source), {})
+            self._thin_retry(source)
+        assert search.call_count == 1
+
+    @pytest.mark.parametrize("source, target", [
+        ("polymarket", "lib.polymarket.search_polymarket"),
+        ("digg", "lib.digg.search_digg"),
+    ])
+    def ___LONG_STRING___(self, source, target):
+        failed = {"events": [], "results": [], "error": "HTTP 503"}
+        with patch(target, side_effect=[failed, {"events": [], "results": []}]) as search:
+            _items, artifact = _memo_stream(source, _raw_topic_subquery(source), {})
+            assert artifact.get("_source_outcome")
+            self._thin_retry(source)
+        assert search.call_count == 2
+
+    def ___LONG_STRING___(self):
+        with patch("lib.digg.search_digg", return_value={"events": [], "results": []}) as search:
+            for subquery in _memo_subqueries(["digg"], labels=("price", "speed")):
+                _memo_stream("digg", subquery, {})
+        assert search.call_count == 2
+
+    def ___LONG_STRING___(self):
+        hints = {"kind": "product", "aliases": ["Ghostty"], "related": []}
+        with patch("lib.polymarket.search_polymarket", return_value={"events": []}) as search:
+            for subquery in _memo_subqueries(["polymarket"], labels=("price", "speed")):
+                _memo_stream("polymarket", subquery, {"_polymarket_hints": hints})
+        assert search.call_count == 1
+        args, kwargs = search.call_args
+        assert args[0] == _MEMO_TOPIC
+        assert kwargs["hints"] == polymarket.PolymarketHints.coerce(hints)
+
+    def ___LONG_STRING___(self):
+        subqueries = _memo_subqueries(["x"], labels=("price", "speed"))
+        posts = [{
+            "id": "X1", "text": "ghostty terminal is fast", "author_handle": "dev",
+            "url": "https://x.com/dev/status/1", "date": "2026-10-01",
+        }]
+        judged_with: list[str] = []
+
+        def _judge(items, _topic, *, ranking_query=""):
+            judged_with.append(ranking_query)
+            return {"on_topic_items": list(items), "on_topic_ratio": 1.0}
+
+        with patch("lib.env.x_backend_chain", return_value=["bird"]), \
+             patch("lib.pipeline._fetch_x_backend", return_value=(posts, "")) as fetch, \
+             patch("lib.x_judge.should_retry_x_search", return_value=False), \
+             patch("lib.x_judge.judge_x_corpus", side_effect=_judge):
+            results = [_memo_stream("x", subquery, {}) for subquery in subqueries]
+
+        assert fetch.call_count == 1
+        assert sorted(judged_with) == sorted(sq.ranking_query for sq in subqueries)
+        assert all(len(items) == 1 for items, _artifact in results)
+
+    def _parity_report(self):
+        plan = {
+            "intent": "general", "freshness_mode": "balanced_recent", "cluster_mode": "story",
+            "subqueries": [
+                {"label": sq.label, "search_query": sq.search_query,
+                 "ranking_query": sq.ranking_query, "sources": list(sq.sources)}
+                for sq in _memo_subqueries(["tiktok", "instagram", "youtube"])
+            ],
+        }
+        with patch("lib.tiktok.search_and_enrich", side_effect=_tiktok_payload), \
+             patch("lib.instagram.search_and_enrich", side_effect=_instagram_payload), \
+             patch("lib.youtube_yt.search_and_transcribe", side_effect=_youtube_payload), \
+             patch("lib.youtube_yt.search_youtube_sc", return_value={"items": []}), \
+             patch("lib.youtube_yt.backfill_transcripts"), \
+             patch("lib.pipeline.which", return_value="/usr/bin/yt-dlp"), \
+             patch("lib.env.is_youtube_comments_available", return_value=False), \
+             patch("lib.tiktok.enrich_with_comments"), \
+             patch("lib.instagram.enrich_with_comments"):
+            return pipeline.run(
+                topic=_MEMO_TOPIC, config=dict(_MEMO_SC_CONFIG), depth="default",
+                requested_sources=["tiktok", "instagram", "youtube"], mock=False,
+                external_plan=plan, web_backend="none", save_dir="",
+            )
+
+    def test_report_parity_with_memo_bypassed(self):
+        from lib import fetch_memo
+
+        def _summary(report):
+            return (
+                {source: sorted(item.url for item in items)
+                 for source, items in report.items_by_source.items()},
+                {source: outcome.state for source, outcome in report.source_status.items()},
+                sorted(report.errors_by_source),
+                [candidate.url for candidate in report.ranked_candidates],
+            )
+
+        memoized = _summary(self._parity_report())
+        fetch_memo.reset()
+        with patch("lib.fetch_memo.fetch_once",
+                   side_effect=lambda _key, fetch, **_kwargs: fetch()):
+            bypassed = _summary(self._parity_report())
+
+        assert memoized == bypassed
+        assert set(memoized[0]) == {"tiktok", "instagram", "youtube"}
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+
+_DIGG_ARTICLE = "https://example-observatory.org/news/webb-water"
+
+
+_DIGG_STORY_SCORES = [150, 1286, 239, 473, 180, 610, 95, 820, 330, 77, 560, 205, 444, 68, 915]
+
+
+def _digg_story_rows(count: int = 5, ordinary: int = 0) -> list[dict]:
+    """``count`` stories that name the topic in their title and are big enough
+    to be prominent, then ``ordinary`` ones that name it in their title too
+    and have a higher Digg Score, with too few sources to be prominent."""
+    from lib import digg
+
+    subjects = [
+        "orbit measured", "water vapor found", "funding approved",
+        "mirror alignment finished", "naming contest opened",
+    ]
+    rows = [
+        {
+            "clusterId": f"11111111-2222-3333-4444-{n:012d}",
+            "clusterUrlId": f"story{n}",
+            "url": f"https://digg.com/science/story{n}",
+            "topic": "science",
+            "title": f"Webb telescope exoplanet {subject}",
+            "tldr": f"Astronomers report on the exoplanet's {subject}.",
+            "diggScore": score,
+            "sourceCount": 37,
+            "postCount": 37,
+            "uniqueAuthors": 29,
+            "publishedAt": "2026-11-08T15:02:00Z",
+            "firstPostAge": "3d",
+        }
+        for n, score in enumerate(_DIGG_STORY_SCORES[:count], start=1)
+        for subject in [subjects[n - 1] if n <= len(subjects) else f"finding {n} published"]
+    ]
+    rows += [
+        {
+            "clusterId": f"99999999-2222-3333-4444-{n:012d}",
+            "clusterUrlId": f"survey{n}",
+            "url": f"https://digg.com/science/survey{n}",
+            "topic": "science",
+            "title": f"Sky survey part {n} covers Webb telescope exoplanet",
+            "tldr": "The survey lists a new exoplanet.",
+            "diggScore": 2000 + n,
+            "sourceCount": 3,
+            "postCount": 3,
+            "uniqueAuthors": 3,
+            "publishedAt": "2026-11-08T15:02:00Z",
+            "firstPostAge": "3d",
+        }
+        for n in range(1, ordinary + 1)
+    ]
+    return digg.parse_digg_response(
+        {"results": rows}, query="webb telescope exoplanet", from_date="2026-10-12",
+    )
+
+
+def _hn_row(n: int, title: str, url: str) -> dict:
+    return {
+        "id": f"HN{n}",
+        "title": title,
+        "url": url,
+        "hn_url": f"https://news.ycombinator.com/item?id=4590000{n}",
+        "author": f"reader{n}",
+        "date": "2026-11-09",
+        "engagement": {"points": 120, "comments": 40},
+        "relevance": 0.8,
+        "why_relevant": "fixture",
+    }
+
+
+class DiggStoryConfirmationRunTests(unittest.TestCase):
+    """A Digg story's sources mark matching items from other sources in a run."""
+
+    # The top-scored story (story2, Digg Score 1286) lists the article one
+    # Hacker News item links to.
+    TOP_STORY = "11111111-2222-3333-4444-___ID___"
+
+    def _run(
+        self, depth: str, cli, *, supplemental=None, digg_only_on_retry=False, digg_rows=None,
+    ):
+        def fake_retrieve(**kwargs):
+            if kwargs["source"] == "digg":
+                if digg_only_on_retry and kwargs["subquery"].label != "retry":
+                    return [], {}
+                return (digg_rows if digg_rows is not None else _digg_story_rows()), {}
+            if kwargs["source"] == "hackernews":
+                return [
+                    _hn_row(
+                        1, "Webb telescope finds water vapor on a rocky exoplanet",
+                        "https://www.example-observatory.org/news/webb-water/",
+                    ),
+                    _hn_row(
+                        2, "Exoplanet survey budget for the Webb telescope team",
+                        "https://example-observatory.org/news/another-story",
+                    ),
+                ], {}
+            return [], {}
+
+        patches = [
+            patch.object(pipeline, "_retrieve_stream", side_effect=fake_retrieve),
+            patch("lib.digg.shutil.which", return_value="/fake/digg-pp-cli"),
+            patch("lib.digg.subproc.run_with_timeout", side_effect=cli),
+        ]
+        if supplemental is not None:
+            patches.append(patch.object(pipeline, "_run_supplemental_searches", side_effect=supplemental))
+        for active in patches:
+            active.start()
+            self.addCleanup(active.stop)
+        return pipeline.run(
+            topic="webb telescope exoplanet", config={}, depth=depth, mock=True,
+            requested_sources=["digg", "hackernews"], web_backend="none",
+            as_of_date="2026-11-11",
+        )
+
+    def _cli(self, calls: list):
+        import json as _json
+
+        def run(cmd, *, timeout, **_bounds):
+            calls.append(list(cmd))
+            rows = []
+            if cmd[2] == self.TOP_STORY:
+                rows = [
+                    {
+                        "kind": "webpage", "body": "", "xUrl": _DIGG_ARTICLE,
+                        "title": "Webb finds water", "author": {"display_name": "Example Observatory"},
+                    },
+                    {
+                        "kind": "x", "body": "Water vapor on a rocky world.",
+                        "xUrl": "https://x.com/astro_ana/status/___ID___",
+                        "author": {"username": "astro_ana", "display_name": "Ana"},
+                    },
+                ]
+            return subproc.SubprocResult(
+                returncode=0, stdout=_json.dumps({"meta": {}, "results": rows}), stderr="",
+            )
+
+        return run
+
+    @staticmethod
+    def _hn(report):
+        return {
+            candidate.source_items[0].item_id: candidate
+            for candidate in report.ranked_candidates
+            if candidate.source == "hackernews"
+        }
+
+    def ___LONG_STRING___(self):
+        calls: list = []
+        report = self._run("default", self._cli(calls))
+
+        hn = self._hn(report)
+        self.assertEqual(
+            "https://digg.com/science/story2", hn["HN1"].metadata["digg_story"]["url"],
+        )
+        self.assertNotIn("digg_story", hn["HN2"].metadata)
+        unmarked = dataclasses.replace(hn["HN1"], metadata={
+            key: value for key, value in hn["HN1"].metadata.items() if key != "digg_story"
+        })
+        self.assertGreater(hn["HN1"].final_score, rerank._final_score(unmarked))
+        self.assertEqual(5, len(calls))
+        for call in calls:
+            self.assertEqual(["digg-pp-cli", "posts"], call[:2])
+            self.assertEqual(["--agent", "--limit", "40"], call[3:])
+        self.assertIn(self.TOP_STORY, [call[2] for call in calls])
+        top_story = next(
+            item for item in report.items_by_source["digg"] if item.item_id == "story2"
+        )
+        self.assertEqual(["astro_ana"], [post["username"] for post in top_story.metadata["posts"]])
+
+    def ___LONG_STRING___(self):
+        calls: list = []
+        report = self._run("default", self._cli(calls), digg_only_on_retry=True)
+
+        self.assertEqual(5, len(calls))
+        self.assertIn(self.TOP_STORY, [call[2] for call in calls])
+        self.assertEqual(
+            "https://digg.com/science/story2",
+            self._hn(report)["HN1"].metadata["digg_story"]["url"],
+        )
+        top_story = next(
+            item for item in report.items_by_source["digg"] if item.item_id == "story2"
+        )
+        self.assertEqual(["astro_ana"], [post["username"] for post in top_story.metadata["posts"]])
+
+    def ___LONG_STRING___(self):
+        # The prune runs after reranking, and the confirmation feeds the
+        # rerank score, so a story that is not certain to survive it is left
+        # out of the confirmations up front.
+        calls: list = []
+        escapes = rerank.escapes_entity_miss_prune
+        with patch.object(
+            rerank, "escapes_entity_miss_prune",
+            side_effect=lambda candidate, *, topic: (
+                candidate.source != "digg" and escapes(candidate, topic=topic)
+            ),
+        ):
+            report = self._run("default", self._cli(calls))
+
+        self.assertEqual(5, len(calls))
+        self.assertFalse([c for c in report.ranked_candidates if "digg_story" in c.metadata])
+
+    def ___LONG_STRING___(self):
+        calls: list = []
+        seen_at_supplemental: list[int] = []
+        self._run(
+            "default", self._cli(calls),
+            supplemental=lambda **_kwargs: seen_at_supplemental.append(len(calls)),
+        )
+        self.assertEqual([5], seen_at_supplemental)
+        self.assertEqual(5, len(calls))
+
+    def test_quick_run_fetches_no_story_sources(self):
+        calls: list = []
+        report = self._run("quick", self._cli(calls))
+        self.assertEqual([], calls)
+        self.assertTrue(report.items_by_source["digg"])
+        self.assertFalse([c for c in report.ranked_candidates if "digg_story" in c.metadata])
+
+    def ___LONG_STRING___(self):
+        # The highest-scored story names the topic in its title and has too
+        # few sources to be prominent. It lists the article a Hacker News item
+        # links to, and no other story does.
+        import json as _json
+
+        calls: list = []
+        article = {
+            "kind": "webpage", "body": "", "xUrl": _DIGG_ARTICLE,
+            "title": "Webb finds water", "author": {"display_name": "Example Observatory"},
+        }
+
+        def cli(cmd, *, timeout, **_bounds):
+            calls.append(cmd[2])
+            rows = [article] if cmd[2].startswith("99999999") else []
+            return subproc.SubprocResult(
+                returncode=0, stdout=_json.dumps({"meta": {}, "results": rows}), stderr="",
+            )
+
+        report = self._run("default", cli, digg_rows=_digg_story_rows(ordinary=1))
+
+        self.assertIn("survey1", [item.item_id for item in report.items_by_source["digg"]])
+        self.assertEqual(5, len(calls))
+        self.assertFalse([call for call in calls if call.startswith("99999999")])
+        self.assertFalse([c for c in report.ranked_candidates if "digg_story" in c.metadata])
+
+    def _story_bundle(self, count: int = 5, ordinary: int = 0):
+        from lib import normalize
+
+        stories = normalize.normalize_source_items(
+            "digg", _digg_story_rows(count, ordinary), "2026-10-12", "2026-11-11",
+        )
+        return schema.RetrievalBundle(items_by_source={"digg": stories})
+
+    def _fetch_sources(self, config, seen: list, *, bundle=None, depth: str = "default"):
+        def run(cmd, *, timeout, **kwargs):
+            seen.append({"story": cmd[2], "timeout": timeout, **kwargs})
+            return subproc.SubprocResult(returncode=0, stdout='{"results": []}', stderr="")
+
+        with patch("lib.digg.shutil.which", return_value="/fake/digg-pp-cli"), \
+                patch("lib.digg.subproc.run_with_timeout", side_effect=run):
+            return pipeline._digg_story_sources(
+                bundle if bundle is not None else self._story_bundle(),
+                topic="webb telescope exoplanet", depth=depth, config=config,
+            )
+
+    @staticmethod
+    def _top_scored(bundle, count: int) -> set[str]:
+        """UUIDs of the ``count`` highest-scored stories that name the topic
+        in their title."""
+        prominent = [
+            item for item in bundle.items_by_source["digg"]
+            if item.title.startswith("Webb telescope exoplanet")
+        ]
+        prominent.sort(key=lambda item: -item.engagement["digg_score"])
+        return {item.metadata["clusterId"] for item in prominent[:count]}
+
+    def ___LONG_STRING___(self):
+        seen: list = []
+        bundle = self._story_bundle(10, ordinary=5)
+        self._fetch_sources({}, seen, bundle=bundle)
+        self.assertEqual(8, len(seen))
+        self.assertEqual(self._top_scored(bundle, 8), {call["story"] for call in seen})
+
+    def ___LONG_STRING___(self):
+        seen: list = []
+        self._fetch_sources({}, seen, bundle=self._story_bundle(2, ordinary=5))
+        self.assertEqual(2, len(seen))
+
+    def ___LONG_STRING___(self):
+        seen: list = []
+        stories = self._fetch_sources({}, seen, bundle=self._story_bundle(0, ordinary=5))
+        self.assertEqual([], seen)
+        self.assertEqual({}, stories)
+
+    def ___LONG_STRING___(self):
+        seen: list = []
+        bundle = self._story_bundle(15)
+        self._fetch_sources({}, seen, bundle=bundle, depth="deep")
+        self.assertEqual(12, len(seen))
+        self.assertEqual(self._top_scored(bundle, 12), {call["story"] for call in seen})
+
+    def ___LONG_STRING___(self):
+        seen: list = []
+        cancel = threading.Event()
+        deadline = time.monotonic() + 2
+        self._fetch_sources({"_research_deadline": deadline, "_enrich_cancel": cancel}, seen)
+        self.assertEqual(5, len(seen))
+        for call in seen:
+            self.assertLessEqual(call["timeout"], 2)
+            self.assertEqual(deadline, call["deadline_monotonic"])
+            self.assertIs(cancel, call["cancel"])
+
+    def ___LONG_STRING___(self):
+        # A hosted run keeps its retrieval deadline on a copy of the config,
+        # so this call sees none. It still must not start an open-ended fetch.
+        seen: list = []
+        before = time.monotonic()
+        self._fetch_sources({}, seen)
+        self.assertEqual(5, len(seen))
+        for call in seen:
+            self.assertIsNotNone(call["deadline_monotonic"])
+            self.assertLessEqual(call["deadline_monotonic"], time.monotonic() + 40)
+            self.assertGreaterEqual(call["deadline_monotonic"], before)
+
+    def ___LONG_STRING___(self):
+        seen: list = []
+        self._fetch_sources({"_comparison_entity_count": 3}, seen)
+        self.assertEqual(3, len(seen))
+
+    def _second_pass_calls(
+        self, first_count: int, *, total: int = 5, first_ordinary: int = 0,
+        depth: str = "default", call_seconds: float = 0, timeouts_out: list | None = None,
+    ) -> list:
+        """Story UUIDs a pass after the retry reads, given how many prominent
+        stories (and ordinary ones) the first pass held; the rest of ``total``
+        arrive from the retry. Each call takes ``call_seconds`` on a fake
+        clock, one call at a time so the seconds add up."""
+        calls: list = []
+        timeouts: list = []
+        bundle = self._story_bundle(total, first_ordinary)
+        stories = bundle.items_by_source["digg"]
+        bundle.items_by_source["digg"] = stories[:first_count] + stories[total:]
+        spent = pipeline._DiggSourcesSpent()
+        clock = [1000.0]
+
+        def slow_run(cmd, *, timeout, **kwargs):
+            calls.append(cmd[2])
+            timeouts.append(timeout)
+            clock[0] += call_seconds
+            return subproc.SubprocResult(returncode=0, stdout='{"results": []}', stderr="")
+
+        patches = [
+            patch("lib.digg.shutil.which", return_value="/fake/digg-pp-cli"),
+            patch("lib.digg.subproc.run_with_timeout", side_effect=slow_run),
+        ]
+        if call_seconds:
+            patches += [
+                patch("lib.digg.SOURCES_CONCURRENCY", 1),
+                patch("lib.digg.time.monotonic", side_effect=lambda: clock[0]),
+            ]
+        with contextlib.ExitStack() as stack:
+            for active in patches:
+                stack.enter_context(active)
+            pipeline._digg_story_sources(
+                bundle, topic="webb telescope exoplanet", depth=depth, config={}, spent=spent,
+            )
+            first_calls = len(calls)
+            bundle.items_by_source["digg"] = stories
+            pipeline._digg_story_sources(
+                bundle, topic="webb telescope exoplanet", depth=depth, config={}, spent=spent,
+            )
+        self.assertEqual(first_count, first_calls)
+        if timeouts_out is not None:
+            timeouts_out.extend(timeouts[first_calls:])
+        return calls[first_calls:]
+
+    def ___LONG_STRING___(self):
+        # Two first-pass calls of 15s each leave 10s of the 40s allowance.
+        timeouts: list = []
+        calls = self._second_pass_calls(2, depth="deep", call_seconds=15, timeouts_out=timeouts)
+        self.assertEqual(1, len(calls))
+        self.assertLessEqual(timeouts[0], 10)
+
+    def ___LONG_STRING___(self):
+        self.assertEqual([], self._second_pass_calls(2, depth="deep", call_seconds=20))
+
+    def ___LONG_STRING___(self):
+        self.assertEqual(5, len(self._second_pass_calls(0)))
+
+    def ___LONG_STRING___(self):
+        # Five of the eight were offered to the first pass.
+        bundle = self._story_bundle(11)
+        stories = bundle.items_by_source["digg"]
+        bundle.items_by_source["digg"] = stories[5:]
+        calls = self._second_pass_calls(5, total=11)
+        self.assertEqual(3, len(calls))
+        self.assertEqual(self._top_scored(bundle, 3), set(calls))
+
+    def ___LONG_STRING___(self):
+        calls = self._second_pass_calls(2, total=12, first_ordinary=5)
+        self.assertEqual(6, len(calls))
+        self.assertFalse([call for call in calls if call.startswith("99999999")])
+
+    def ___LONG_STRING___(self):
+        self.assertEqual([], self._second_pass_calls(8, total=11))
+
+    def ___LONG_STRING___(self):
+        def timing_out(cmd, *, timeout, **_bounds):
+            raise subproc.SubprocTimeout("posts timed out")
+
+        report = self._run("default", timing_out)
+        self.assertEqual(5, len(report.items_by_source["digg"]))
+        self.assertTrue(self._hn(report))
+        self.assertFalse([c for c in report.ranked_candidates if "digg_story" in c.metadata])
+
+
+class DiggQuoteEnrichmentByCliShapeTests(unittest.TestCase):
+    """After de-duplication only clusters from digg-pp-cli 2026.10.x fetch quotes."""
+
+    def _finalize(self, rows: list[dict]) -> list[list[str]]:
+        from lib import normalize
+
+        calls: list[list[str]] = []
+
+        def cli(cmd, *, timeout, env=None, on_pid=None):
+            calls.append(list(cmd))
+            return subproc.SubprocResult(returncode=0, stdout='{"results": []}', stderr="")
+
+        items = normalize.normalize_source_items("digg", rows, "2026-10-12", "2026-11-11")
+        with patch("lib.digg.shutil.which", return_value="/fake/digg-pp-cli"), \
+             patch("lib.digg.subproc.run_with_timeout", side_effect=cli):
+            pipeline._finalize_items_by_source({"digg": items}, topic="exoplanet", config={})
+        return calls
+
+    def ___LONG_STRING___(self):
+        calls = self._finalize([{
+            "id": "abc123xy", "title": "Sample cluster", "url": "https://di.gg/ai/abc123xy",
+            "tldr": "A short summary.", "date": "2026-11-08",
+            "engagement": {"postCount": 5, "uniqueAuthors": 3, "rank": 1, "rank_score": 50.0},
+            "posts": [],
+        }])
+        self.assertEqual(
+            [["digg-pp-cli", "posts", "abc123xy", "--agent", "--by", "rank", "--limit", "5"]],
+            calls,
+        )
+
+    def ___LONG_STRING___(self):
+        self.assertEqual([], self._finalize(_digg_story_rows(count=2)))
+
+
+_BAR_WORDS = (
+    "harbor lantern orchard glacier violin tractor pepper canyon meadow saddle "
+    "furnace pelican compass marble thistle walnut anchor bonnet cobalt dynamo "
+    "ember falcon garnet hammock iguana jasmine kettle lagoon mitten nutmeg"
+).split()
+
+
+def _bar_words(n: int) -> str:
+    """Three words that differ enough between stories to survive de-duplication."""
+    return " ".join(_BAR_WORDS[(n + step) % len(_BAR_WORDS)] for step in (0, 11, 17))
+
+
+def _digg_bar_rows(specs: list[tuple[str, str, int, int]]) -> list[dict]:
+    """Parsed all-topic stories from (title, summary, Digg Score, source count)."""
+    from lib import digg
+
+    return digg.parse_digg_response(
+        {
+            "results": [
+                {
+                    "clusterId": f"11111111-2222-3333-4444-{n:012d}",
+                    "clusterUrlId": f"story{n}",
+                    "url": f"https://digg.com/tech/story{n}",
+                    "topic": "tech",
+                    "title": title,
+                    "tldr": summary,
+                    "diggScore": score,
+                    "sourceCount": sources,
+                    "postCount": sources,
+                    "uniqueAuthors": 9,
+                    "publishedAt": "2026-11-08T15:02:00Z",
+                    "firstPostAge": "3d",
+                }
+                for n, (title, summary, score, sources) in enumerate(specs, start=1)
+            ]
+        },
+        query="fixture",
+        from_date="2026-10-12",
+    )
+
+
+def _digg_legacy_rows(titles: list[str]) -> list[dict]:
+    """Clusters in the shape digg-pp-cli 2026.10.x returns: no story UUID."""
+    return [
+        {
+            "id": f"legacy{n}", "title": title, "url": f"https://di.gg/ai/legacy{n}",
+            "tldr": f"Notes on {_bar_words(n + 5)}.", "date": "2026-11-08",
+            "engagement": {"postCount": 5, "uniqueAuthors": 3, "rank": n, "rank_score": 51.0 - n},
+            "posts": [], "relevance": 0.6, "why_relevant": "fixture",
+        }
+        for n, title in enumerate(titles, start=1)
+    ]
+
+
+def _digg_score_of(item) -> float:
+    return item.engagement["digg_score"]
+
+
+class DepthSettingsDiggLimitTests(unittest.TestCase):
+    def ___LONG_STRING___(self):
+        self.assertEqual(20, pipeline._resolve_depth_settings("default", {})["digg_stream_limit"])
+        self.assertEqual(30, pipeline._resolve_depth_settings("deep", {})["digg_stream_limit"])
+        quick = pipeline._resolve_depth_settings("quick", {})
+        self.assertEqual(quick["per_stream_limit"], quick["digg_stream_limit"])
+
+    def ___LONG_STRING___(self):
+        settings = pipeline._resolve_depth_settings("deep", {"_max_per_source": 5})
+        self.assertEqual(5, settings["digg_stream_limit"])
+        self.assertEqual(5, settings["per_stream_limit"])
+        self.assertEqual(30, pipeline.DEPTH_SETTINGS["deep"]["digg_stream_limit"])
+
+
+class DiggBarRunTests(unittest.TestCase):
+    """What a run keeps of each Digg search, and in which order."""
+
+    def _run(self, topic: str, digg_rows, *, depth: str = "default", config=None):
+        """Run with Digg only. ``digg_rows(subquery)`` is what each search returns.
+
+        Returns the report, the retrieval bundle and the labels of the Digg
+        searches made, in order.
+        """
+        searches: list[str] = []
+        bundles: list[schema.RetrievalBundle] = []
+
+        def fake_retrieve(**kwargs):
+            if kwargs["source"] != "digg":
+                return [], {}
+            searches.append(kwargs["subquery"].label)
+            return digg_rows(kwargs["subquery"]), {}
+
+        def cli(cmd, *, timeout, **_bounds):
+            return subproc.SubprocResult(
+                returncode=0, stdout='{"meta": {}, "results": []}', stderr="",
+            )
+
+        patches = [
+            patch.object(pipeline, "_retrieve_stream", side_effect=fake_retrieve),
+            patch("lib.digg.shutil.which", return_value="/fake/digg-pp-cli"),
+            patch("lib.digg.subproc.run_with_timeout", side_effect=cli),
+            patch.object(
+                pipeline, "_run_supplemental_searches",
+                side_effect=lambda **kwargs: bundles.append(kwargs["bundle"]),
+            ),
+        ]
+        for active in patches:
+            active.start()
+            self.addCleanup(active.stop)
+        report = pipeline.run(
+            topic=topic, config=dict(config or {}), depth=depth, mock=True,
+            requested_sources=["digg"], web_backend="none", as_of_date="2026-11-11",
+        )
+        return report, bundles[0], searches
+
+    @staticmethod
+    def _stream(bundle, label: str = "primary"):
+        return bundle.items_by_source_and_query.get((label, "digg"), [])
+
+    def ___LONG_STRING___(self):
+        rows = _digg_bar_rows([
+            (f"Report on {_bar_words(n)}", f"Details about {_bar_words(n + 3)}.", 300, 37)
+            for n in range(20)
+        ])
+        report, _bundle, searches = self._run("Ghostty", lambda _subquery: rows)
+
+        self.assertEqual([], report.items_by_source.get("digg", []))
+        outcome = report.source_status["digg"]
+        self.assertEqual(schema.NO_RESULTS, outcome.state)
+        self.assertIn("20 of 20 stories dropped", outcome.detail)
+        self.assertNotIn("digg", report.errors_by_source)
+        self.assertEqual(["primary"], searches)
+
+    def ___LONG_STRING___(self):
+        # The same event told twice. The copy that names the topic only in
+        # its summary comes first, and de-duplication keeps the earlier of
+        # two similar stories, so the bar has to run before it.
+        summary = (
+            "OpenAI says its newest model release drew record developer signups "
+            "in the first week, according to figures the company shared."
+        )
+        rows = _digg_bar_rows([
+            ("Newest model release draws record developer signups in first week", summary, 300, 37),
+            ("OpenAI newest model release draws record developer signups in first week", summary, 250, 30),
+        ])
+        report, bundle, _searches = self._run("OpenAI", lambda _subquery: rows)
+
+        self.assertEqual(["story2"], [item.item_id for item in self._stream(bundle)])
+        self.assertIn("1 of 2 stories dropped", report.source_status["digg"].detail)
+
+    def ___LONG_STRING___(self):
+        # Each search has one telling of the event, so no single stream
+        # de-duplicates them. The merged Digg items are de-duplicated again,
+        # ranked by local score, where the small copy can come first.
+        summary = (
+            "OpenAI says its newest model release drew record developer signups "
+            "in the first week, according to figures the company shared."
+        )
+        small = _digg_bar_rows([
+            ("OpenAI newest model release draws record developer signups in first week", summary, 30, 3),
+        ])
+        big = _digg_bar_rows([
+            ("unused", "unused", 1, 1),
+            ("OpenAI newest model release draws record developer signups in the first week", summary, 900, 60),
+        ])[1:]
+        from lib import normalize
+
+        items = [
+            *normalize.normalize_source_items("digg", small, "2026-10-12", "2026-11-11"),
+            *normalize.normalize_source_items("digg", big, "2026-10-12", "2026-11-11"),
+        ]
+        items[0].local_rank_score, items[1].local_rank_score = 0.9, 0.4
+
+        finalized = pipeline._finalize_items_by_source({"digg": items}, topic="OpenAI")
+
+        self.assertEqual(["story2"], [item.item_id for item in finalized["digg"]])
+
+    def ___LONG_STRING___(self):
+        rows = _digg_bar_rows([
+            (f"Report on {_bar_words(n)}", f"Details about {_bar_words(n + 3)}.", 300, 37)
+            for n in range(8)
+        ])
+        report, _bundle, _searches = self._run("Ghostty", lambda _subquery: rows, depth="quick")
+
+        self.assertEqual([], report.items_by_source.get("digg", []))
+        self.assertEqual(schema.NO_RESULTS, report.source_status["digg"].state)
+        self.assertIn("8 of 8 stories dropped", report.source_status["digg"].detail)
+
+    def ___LONG_STRING___(self):
+        rows = _digg_bar_rows(
+            [
+                (f"OpenAI {_bar_words(n)}", f"Details about {_bar_words(n + 3)}.", 41 + n, 37)
+                for n in range(29)
+            ]
+            + [("OpenAI Releases GPT-6.1 Terra", "The model ships to everyone.", 226, 37)]
+        )
+        _report, bundle, _searches = self._run("OpenAI", lambda _subquery: rows)
+
+        stream = self._stream(bundle)
+        self.assertEqual("OpenAI Releases GPT-6.1 Terra", stream[0].title)
+        self.assertEqual([226] + list(range(69, 50, -1)), [_digg_score_of(item) for item in stream])
+
+    def ___LONG_STRING___(self):
+        rows = _digg_bar_rows([
+            # Ordinary: the title names OpenAI, with too few sources.
+            ("OpenAI hires a lab director", "The former executive starts next month.", 92, 3),
+            ("OpenAI opens a harbor office", "Staff move in next month.", 50, 10),
+            # Ordinary: the title names OpenAI, with too low a Digg Score.
+            ("OpenAI: the most relevant recent evidence from the last 30 days", "A digest.", 39, 37),
+            ("OpenAI signs an orchard deal", "The largest of the year.", 300, 37),
+            ("Maine fishing season opens", "Anglers head out.", 652, 37),
+            ("Glacier survey finishes early on OpenAI compute", "The team thanked its sponsor.", 500, 4),
+            # Dropped: big, and names OpenAI only in its summary.
+            ("Kevin Weil launches Warp Sciences", "The former OpenAI executive starts a lab.", 700, 37),
+        ])
+        report, bundle, _searches = self._run("OpenAI", lambda _subquery: rows)
+
+        stream = self._stream(bundle)
+        self.assertEqual(["story4", "story2"], [item.item_id for item in stream[:2]])
+        ordinary = stream[2:]
+        self.assertEqual({"story1", "story3", "story6"}, {item.item_id for item in ordinary})
+        self.assertEqual(
+            sorted(ordinary, key=lambda item: item.local_rank_score or 0.0, reverse=True),
+            ordinary,
+        )
+        self.assertNotEqual(
+            sorted(ordinary, key=_digg_score_of, reverse=True), ordinary,
+            "ordinary stories must not be ordered by Digg Score",
+        )
+        self.assertIn("2 of 7 stories dropped", report.source_status["digg"].detail)
+        self.assertEqual(health.OK, report.source_status["digg"].state)
+
+    def ___LONG_STRING___(self):
+        _report, _bundle, searches = self._run("OpenAI", lambda _subquery: [])
+        self.assertEqual(["primary", "retry"], searches)
+
+    def ___LONG_STRING___(self):
+        rows = _digg_bar_rows([
+            ("Kevin Weil launches Warp Sciences", "The former OpenAI executive starts a lab.", 92, 37),
+            ("Maine fishing season opens", "Anglers head out.", 652, 37),
+            ("OpenAI hires a lab director", "The former executive starts next month.", 900, 3),
+            ("OpenAI signs an orchard deal", "The largest of the year.", 300, 37),
+        ])
+        report, bundle, searches = self._run(
+            "OpenAI", lambda subquery: rows if subquery.label == "retry" else [],
+        )
+
+        self.assertEqual(["primary", "retry"], searches)
+        self.assertEqual(
+            ["story4", "story3"], [item.item_id for item in bundle.items_by_source["digg"]],
+        )
+        self.assertIn("2 of 4 stories dropped", report.source_status["digg"].detail)
+
+    def test_max_per_source_caps_digg_stories(self):
+        rows = _digg_bar_rows([
+            (f"OpenAI {_bar_words(n)}", f"Details about {_bar_words(n + 3)}.", 41 + n, 37)
+            for n in range(10)
+        ])
+        _report, bundle, _searches = self._run(
+            "OpenAI", lambda _subquery: rows, config={"_max_per_source": 5},
+        )
+        self.assertEqual([50, 49, 48, 47, 46], [_digg_score_of(item) for item in self._stream(bundle)])
+
+    def ___LONG_STRING___(self):
+        # The capability searches of an enablement plan leave the named tool
+        # out on purpose, so their stories are not held to naming the topic.
+        rows = _digg_bar_rows(
+            [("Grok bot gains computer control tools", "A guide to the MCP servers.", 50, 10)]
+            + [
+                (f"MCP server for {_bar_words(n)}", f"Agents get {_bar_words(n + 3)}.", 20, 3)
+                for n in range(12)
+            ]
+            + [("Grok expands", "A funding round.", 900, 37)]
+        )
+        report, bundle, _searches = self._run(
+            "best Grok AI bot to control my computer",
+            lambda subquery: rows if subquery.label == "capability-1" else [],
+        )
+
+        stream = self._stream(bundle, "capability-1")
+        self.assertEqual(14, len(stream))
+        self.assertEqual(
+            sorted(stream, key=lambda item: item.local_rank_score or 0.0, reverse=True), stream,
+        )
+        self.assertNotEqual("Grok expands", stream[0].title)
+        self.assertNotIn("dropped", report.source_status["digg"].detail or "")
+
+    def ___LONG_STRING___(self):
+        rows = _digg_legacy_rows([f"Report on {_bar_words(n)}" for n in range(15)])
+        report, bundle, _searches = self._run("Ghostty", lambda _subquery: rows)
+
+        self.assertEqual(
+            pipeline.DEPTH_SETTINGS["default"]["per_stream_limit"], len(self._stream(bundle)),
+        )
+        self.assertNotIn("dropped", report.source_status["digg"].detail or "")
+
+
+class DiggRelevanceFloorTests(unittest.TestCase):
+    """Which Digg items the shared relevance floor still judges."""
+
+    RANKING_QUERY = (
+        "Which noise cancelling headphones compare best on battery comfort and price, "
+        "and what did OpenAI announce?"
+    )
+
+    def _kept(self, rows: list[dict]) -> list[str]:
+        return [
+            item.item_id
+            for item in pipeline._normalize_score_dedupe(
+                "digg", rows, "2026-10-12", "2026-11-11",
+                freshness_mode="balanced_recent", ranking_query=self.RANKING_QUERY,
+            )
+        ]
+
+    def ___LONG_STRING___(self):
+        rows = _digg_bar_rows(
+            [("Noise cancelling headphones compared on battery, comfort and price", "A review.", 50, 10)]
+            + [(f"Report on {_bar_words(n)}", f"Details about {_bar_words(n + 3)}.", 5, 2) for n in range(40)]
+            + [("OpenAI device teased", "A short clip.", 226, 37)]
+        )
+        self.assertIn("story42", self._kept(rows))
+
+    def ___LONG_STRING___(self):
+        rows = _digg_legacy_rows(
+            ["Noise cancelling headphones compared on battery, comfort and price"]
+            + [f"Report on {_bar_words(n)}" for n in range(3)]
+        )
+        for row in rows[1:]:
+            row["relevance"] = 0.05
+        self.assertEqual(["legacy1"], self._kept(rows))

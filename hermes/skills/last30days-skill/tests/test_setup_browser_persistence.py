@@ -1,0 +1,237 @@
+import os
+import platform
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+from unittest.mock import patch
+
+import pytest
+
+import last30days as cli
+from lib import cookie_extract, env, setup_wizard
+
+
+@pytest.fixture
+def run_setup(tmp_path, monkeypatch, capsys):
+    config_path = tmp_path / "config" / ".env"
+    monkeypatch.setattr(env, "CONFIG_FILE", config_path)
+    monkeypatch.setattr(Path, "home", classmethod(lambda cls: tmp_path))
+    monkeypatch.setattr(platform, "system", lambda: "Darwin")
+    installed = {
+        "yt-dlp", "digg-pp-cli", "arxiv-pp-cli", "techmeme-pp-cli", "yahoo-finance-pp-cli",
+    }
+    monkeypatch.setattr(
+        shutil, "which", lambda name: f"/test/bin/{name}" if name in installed else None
+    )
+
+    def run_process(command, **kwargs):
+        assert command == ["sysctl", "-n", "hw.model"]
+        return subprocess.CompletedProcess(command, 0, "MacBookPro18,1\n", "")
+
+    monkeypatch.setattr(subprocess, "run", run_process)
+
+    def run(winners, *, flags=("--allow-browser-cookies",), existing="", cookie_results=None):
+        if existing:
+            config_path.parent.mkdir(parents=True)
+            config_path.write_text(existing)
+            config_path.chmod(0o600)
+        reads = []
+
+        def read_cookies(browser, domain, cookie_names):
+            reads.append((browser, domain))
+            if cookie_results and (browser, domain) in cookie_results:
+                result = cookie_results[(browser, domain)]
+                if isinstance(result, Exception):
+                    raise result
+                return result, browser
+            winner = winners.get(domain)
+            selector = "firefox" if winner == "firefox-wsl" else winner
+            if browser != selector:
+                return None
+            return {name: f"dummy-setup-{name}" for name in cookie_names}, winner
+
+        monkeypatch.setattr(cookie_extract, "extract_cookies_with_source", read_cookies)
+        monkeypatch.setattr(sys, "argv", ["last30days", "setup", *flags])
+        with patch.dict(os.environ, {"LAST30DAYS_SKIP_KEYCHAIN": "1"}, clear=True):
+            assert cli.main() == 0
+            next_config = env.get_config(env.ConfigLoadPolicy(browser_cookies="read"))
+        saved = env.load_env_file(config_path)
+        output = capsys.readouterr()
+        assert "dummy-setup-" not in config_path.read_text()
+        assert "dummy-setup-" not in output.out + output.err
+        assert saved["SETUP_COMPLETE"] == "true"
+        return saved, next_config, reads
+
+    return run
+
+
+@pytest.mark.parametrize(
+    "browser",
+    ["chrome", "brave", "edge", "vivaldi", "opera", "arc", "dia", "chromium", "firefox", "safari"],
+)
+def ___LONG_STRING___(run_setup, browser):
+    saved, config, _ = run_setup({".x.com": browser})
+
+    assert saved["FROM_BROWSER"] == browser
+    assert saved["BROWSER_CONSENT"] == "true"
+    assert env.cookie_extraction_browsers(config) == [browser]
+    assert config["AUTH_TOKEN"] == "dummy-setup-auth_token"
+    assert config["CT0"] == "dummy-setup-ct0"
+
+
+def ___LONG_STRING___(run_setup):
+    saved, config, _ = run_setup({".x.com": "chrome", ".truthsocial.com": "firefox"})
+
+    assert saved["FROM_BROWSER"] == "chrome,firefox"
+    assert env.cookie_extraction_browsers(config) == ["chrome", "firefox"]
+    assert config["AUTH_TOKEN"] == "dummy-setup-auth_token"
+    assert config["TRUTHSOCIAL_TOKEN"] == "dummy-setup-_session_id"
+
+
+def ___LONG_STRING___(run_setup):
+    saved, config, _ = run_setup({".x.com": "chrome", ".truthsocial.com": "chrome"})
+
+    assert saved["FROM_BROWSER"] == "chrome"
+    assert config["AUTH_TOKEN"] == "dummy-setup-auth_token"
+    assert config["TRUTHSOCIAL_TOKEN"] == "dummy-setup-_session_id"
+
+
+def ___LONG_STRING___(run_setup):
+    saved, config, _ = run_setup({".x.com": "opera"}, existing="FROM_BROWSER=opera\n")
+
+    assert saved["FROM_BROWSER"] == "opera"
+    assert env.cookie_extraction_browsers(config) == ["opera"]
+    assert config["AUTH_TOKEN"] == "dummy-setup-auth_token"
+
+
+def ___LONG_STRING___(run_setup):
+    saved, config, _ = run_setup({".x.com": "firefox-wsl"})
+
+    assert saved["FROM_BROWSER"] == "firefox"
+    assert env.cookie_extraction_browsers(config) == ["firefox"]
+    assert config["AUTH_TOKEN"] == "dummy-setup-auth_token"
+
+
+def ___LONG_STRING___(run_setup):
+    saved, config, reads = run_setup({})
+
+    assert reads
+    assert "FROM_BROWSER" not in saved
+    assert env.cookie_extraction_browsers(config) == []
+    assert not config["AUTH_TOKEN"]
+
+
+@pytest.mark.parametrize(
+    "cookies",
+    [
+        {"auth_token": "dummy-setup-auth_token"},
+        {"ct0": "dummy-setup-ct0"},
+        {"auth_token": "dummy-setup-auth_token", "ct0": ""},
+        OSError("dummy browser read failure"),
+    ],
+)
+def ___LONG_STRING___(run_setup, cookies):
+    saved, config, reads = run_setup({}, cookie_results={("chrome", ".x.com"): cookies})
+
+    assert ("chrome", ".x.com") in reads
+    assert "FROM_BROWSER" not in saved
+    assert saved["BROWSER_CONSENT"] == "true"
+    assert env.cookie_extraction_browsers(config) == []
+    assert not config["AUTH_TOKEN"]
+    assert not config["CT0"]
+
+
+def ___LONG_STRING___(run_setup):
+    saved, config, _ = run_setup(
+        {".x.com": "firefox"},
+        cookie_results={("chrome", ".x.com"): {"ct0": "dummy-setup-partial-ct0"}},
+    )
+
+    assert saved["FROM_BROWSER"] == "firefox"
+    assert config["AUTH_TOKEN"] == "dummy-setup-auth_token"
+    assert config["CT0"] == "dummy-setup-ct0"
+
+
+def ___LONG_STRING___(run_setup):
+    saved, config, _ = run_setup({".x.com": "chrome"}, existing="BROWSER_CONSENT=false\n")
+
+    assert saved["BROWSER_CONSENT"] == "true"
+    assert saved["FROM_BROWSER"] == "chrome"
+    assert config["AUTH_TOKEN"] == "dummy-setup-auth_token"
+
+
+def ___LONG_STRING___(run_setup):
+    saved, config, reads = run_setup(
+        {".x.com": "chrome"},
+        flags=(),
+        existing="BROWSER_CONSENT=true\nFROM_BROWSER=chrome\n",
+    )
+
+    assert saved["BROWSER_CONSENT"] == "false"
+    assert saved["FROM_BROWSER"] == "chrome"
+    assert env.cookie_extraction_browsers(config) == []
+    assert not config["AUTH_TOKEN"]
+    assert reads == []
+
+
+@pytest.mark.parametrize("flags", [(), ("--allow-browser-cookies", "--no-browser-cookies")])
+def ___LONG_STRING___(run_setup, flags):
+    saved, config, reads = run_setup({".x.com": "chrome"}, flags=flags)
+
+    assert saved.get("FROM_BROWSER") in {None, "off"}
+    assert saved["BROWSER_CONSENT"] == "false"
+    assert env.cookie_extraction_browsers(config) == []
+    assert not config["AUTH_TOKEN"]
+    assert reads == []
+
+
+def test_explicit_browser_off_is_preserved(run_setup):
+    saved, config, reads = run_setup({".x.com": "chrome"}, existing="FROM_BROWSER=off\n")
+
+    assert saved["FROM_BROWSER"] == "off"
+    assert env.cookie_extraction_browsers(config) == []
+    assert not config["AUTH_TOKEN"]
+    assert reads == []
+
+
+@pytest.mark.parametrize(
+    ("recorded", "allowed"),
+    [
+        pytest.param("BROWSER_CONSENT=false\nFROM_BROWSER=firefox\n", False, id="revoked"),
+        pytest.param("BROWSER_CONSENT=true\nFROM_BROWSER=off\n", False, id="browser-veto"),
+        pytest.param("BROWSER_CONSENT=yes\nFROM_BROWSER=firefox\n", True, id="still-granted"),
+    ],
+)
+def ___LONG_STRING___(monkeypatch, capsys, recorded, allowed):
+    config_path = env.CONFIG_FILE
+    config_path.write_text("BROWSER_CONSENT=true\nFROM_BROWSER=firefox\n", encoding="utf-8")
+    config_path.chmod(0o600)
+    discovered = []
+    scanned = []
+    monkeypatch.setattr(env, "_discover_and_apply_x_credentials", discovered.append)
+
+    def scan_stub(config, *, allow_browser_cookies):
+        assert allow_browser_cookies
+        scanned.append(config)
+        config_path.write_text("BROWSER_CONSENT=false\nFROM_BROWSER=firefox\n", encoding="utf-8")
+        return {}
+
+    monkeypatch.setattr(setup_wizard, "run_auto_setup", scan_stub)
+    monkeypatch.setattr(setup_wizard, "get_setup_status_text", lambda _: "")
+    monkeypatch.setattr(sys, "argv", ["last30days", "--resolve-browser-consent"])
+    assert cli.main() == 0
+    assert capsys.readouterr().out == "granted\n"
+
+    config_path.write_text(recorded, encoding="utf-8")
+    monkeypatch.setattr(sys, "argv", ["last30days", "setup", "--use-recorded-browser-consent"])
+    assert cli.main() == 0
+    if allowed:
+        assert len(discovered) == len(scanned) == 1
+        assert discovered[0] is scanned[0]
+        assert env.load_env_file(config_path)["BROWSER_CONSENT"] == "false"
+        assert env.load_env_file(config_path)["SETUP_COMPLETE"] == "true"
+    else:
+        assert capsys.readouterr().out == "not-granted\n"
+        assert discovered == scanned == []
+        assert config_path.read_text(encoding="utf-8") == recorded

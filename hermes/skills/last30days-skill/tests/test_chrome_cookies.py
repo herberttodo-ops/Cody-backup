@@ -1,0 +1,598 @@
+"""Tests for Chrome cookie extraction on macOS."""
+
+import hashlib
+import os
+import sqlite3
+import shutil
+import subprocess
+import tempfile
+from pathlib import Path
+from unittest import mock
+
+import pytest
+
+OPENSSL_AVAILABLE = shutil.which("openssl") is not None
+
+from lib import chrome_cookies
+from lib.chrome_cookies import (
+    CHROME_COOKIES_DB,
+    CHROME_IV_HEX,
+    CHROME_KEY_LENGTH,
+    CHROME_PBKDF2_ITERATIONS,
+    CHROME_SALT,
+    _derive_aes_key,
+    _get_chrome_encryption_key,
+    _get_db_version,
+    _remove_pkcs7_padding,
+    _extract_chromium_cookies_macos,
+    _decrypt_v10_value,
+    _find_chromium_cookies_db,
+    extract_chrome_cookies_macos,
+)
+
+
+def ___LONG_STRING___(tmp_path):
+    db = tmp_path / "Cookies"
+    db.touch()
+    with mock.patch(
+        "lib.chrome_cookies.copy_snapshot",
+        side_effect=PermissionError(1, "Operation not permitted", str(db)),
+    ):
+        with pytest.raises(PermissionError):
+            _extract_chromium_cookies_macos(
+                db, "Microsoft Edge Safe Storage", ".x.com", ["auth_token", "ct0"]
+            )
+
+
+def ___LONG_STRING___(tmp_path):
+    db = tmp_path / "Cookies"
+    db.touch()
+    denied_temp = tmp_path / "temporary.sqlite"
+    with mock.patch(
+        "lib.chrome_cookies.copy_snapshot",
+        side_effect=PermissionError(13, "Permission denied", str(denied_temp)),
+    ):
+        assert _extract_chromium_cookies_macos(
+            db, "Microsoft Edge Safe Storage", ".x.com", ["auth_token", "ct0"]
+        ) is None
+
+
+def ___LONG_STRING___():
+    with mock.patch(
+        "lib.chrome_cookies.subprocess.run",
+        side_effect=PermissionError(1, "Operation not permitted", "security"),
+    ):
+        assert chrome_cookies._get_chromium_encryption_key("Microsoft Edge Safe Storage") is None
+
+
+def ___LONG_STRING___(tmp_path):
+    blocked = tmp_path / "Default" / "Network" / "Cookies"
+    real_stat = Path.stat
+    real_exists = Path.exists
+
+    def guarded_stat(path, *args, **kwargs):
+        if path == blocked:
+            raise PermissionError(1, "Operation not permitted", str(path))
+        return real_stat(path, *args, **kwargs)
+
+    def simulated_py314_exists(path, *args, **kwargs):
+        if path == blocked:
+            return False
+        return real_exists(path, *args, **kwargs)
+
+    with mock.patch.object(Path, "stat", guarded_stat), mock.patch.object(
+        Path, "exists", simulated_py314_exists
+    ):
+        with pytest.raises(PermissionError):
+            chrome_cookies._profile_cookie_db(tmp_path / "Default")
+
+
+def ___LONG_STRING___(tmp_path):
+    blocked = tmp_path / "Profile 1"
+    blocked.mkdir()
+    real_stat = Path.stat
+    real_is_dir = Path.is_dir
+
+    def guarded_stat(path, *args, **kwargs):
+        if path == blocked:
+            raise PermissionError(1, "Operation not permitted", str(path))
+        return real_stat(path, *args, **kwargs)
+
+    def simulated_py314_is_dir(path, *args, **kwargs):
+        if path == blocked:
+            return False
+        return real_is_dir(path, *args, **kwargs)
+
+    with mock.patch.object(Path, "stat", guarded_stat), mock.patch.object(
+        Path, "is_dir", simulated_py314_is_dir
+    ):
+        with pytest.raises(PermissionError):
+            chrome_cookies._find_all_chromium_cookies_dbs(tmp_path)
+
+# ___LONG_STRING___
+# Helpers — create real encrypted cookie values using known key + system openssl
+# ___LONG_STRING___
+
+KNOWN_PASSPHRASE = b"test_passphrase_for_unit_tests"
+KNOWN_AES_KEY = _derive_aes_key(KNOWN_PASSPHRASE)
+# Independent v10 vectors: PBKDF2-HMAC-SHA1, saltysalt, 1003 iterations,
+# 16-byte key; OpenSSL AES-128-CBC with a 16-space IV and PKCS7 padding.
+V10_AES_KEY = bytes.fromhex("bae7b43668299f6b6839c58cff9e97db")
+V10_AUTH_TOKEN = bytes.fromhex(
+    "___LONG_STRING___"
+)
+V10_CT0 = bytes.fromhex("763130189b696f39999dba1b0c8f9c005b8a24")
+
+
+def _encrypt_value_v10(plaintext: str, aes_key: bytes) -> bytes:
+    """Encrypt a value the same way Chrome v10 does, using system openssl.
+
+    Returns b'v10' + AES-128-CBC ciphertext with PKCS7 padding.
+    """
+    hex_key = aes_key.hex()
+    result = subprocess.run(
+        [
+            "openssl", "enc", "-aes-128-cbc", "-e",
+            "-K", hex_key,
+            "-iv", CHROME_IV_HEX,
+        ],
+        input=plaintext.encode("utf-8"),
+        capture_output=True,
+        timeout=5,
+    )
+    assert result.returncode == 0, f"openssl encrypt failed: {result.stderr}"
+    return b"v10" + result.stdout
+
+
+def _encrypt_value_v10_with_sha_prefix(plaintext: str, aes_key: bytes) -> bytes:
+    """Encrypt with a 32-byte SHA-256 prefix (Chrome 130+ style)."""
+    raw = b"\x00" * 32 + plaintext.encode("utf-8")
+    hex_key = aes_key.hex()
+    result = subprocess.run(
+        [
+            "openssl", "enc", "-aes-128-cbc", "-e",
+            "-K", hex_key,
+            "-iv", CHROME_IV_HEX,
+        ],
+        input=raw,
+        capture_output=True,
+        timeout=5,
+    )
+    assert result.returncode == 0, f"openssl encrypt failed: {result.stderr}"
+    return b"v10" + result.stdout
+
+
+def _create_chrome_cookies_db(path: str, cookies: list[tuple], db_version: int = 20) -> None:
+    """Create a minimal Chrome Cookies SQLite database.
+
+    cookies: list of (host_key, name, value, encrypted_value) tuples
+    """
+    conn = sqlite3.connect(path)
+    c = conn.cursor()
+    c.execute("CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT)")
+    c.execute("INSERT OR REPLACE INTO meta (key, value) VALUES ('version', ?)", (str(db_version),))
+    c.execute(
+        "CREATE TABLE IF NOT EXISTS cookies ("
+        "  host_key TEXT NOT NULL,"
+        "  name TEXT NOT NULL,"
+        "  value TEXT NOT NULL DEFAULT '',"
+        "  encrypted_value BLOB NOT NULL DEFAULT x'',"
+        "  path TEXT NOT NULL DEFAULT '/',"
+        "  expires_utc INTEGER NOT NULL DEFAULT 0,"
+        "  is_secure INTEGER NOT NULL DEFAULT 1,"
+        "  is_httponly INTEGER NOT NULL DEFAULT 1,"
+        "  creation_utc INTEGER NOT NULL DEFAULT 0,"
+        "  last_access_utc INTEGER NOT NULL DEFAULT 0,"
+        "  has_expires INTEGER NOT NULL DEFAULT 1,"
+        "  is_persistent INTEGER NOT NULL DEFAULT 1,"
+        "  priority INTEGER NOT NULL DEFAULT 1,"
+        "  samesite INTEGER NOT NULL DEFAULT 0,"
+        "  source_scheme INTEGER NOT NULL DEFAULT 2,"
+        "  source_port INTEGER NOT NULL DEFAULT 443,"
+        "  last_update_utc INTEGER NOT NULL DEFAULT 0"
+        ")"
+    )
+    for host_key, name, value, encrypted_value in cookies:
+        c.execute(
+            "INSERT INTO cookies (host_key, name, value, encrypted_value) VALUES (?, ?, ?, ?)",
+            (host_key, name, value, encrypted_value),
+        )
+    conn.commit()
+    conn.close()
+
+
+def ___LONG_STRING___(tmp_path):
+    profile = tmp_path / "Default"
+    profile.mkdir()
+    legacy = profile / "Cookies"
+    legacy.touch()
+    blocked = profile / "Network" / "Cookies"
+    real_stat = Path.stat
+
+    def guarded_stat(path, *args, **kwargs):
+        if path == blocked:
+            raise PermissionError(1, "Operation not permitted", str(path))
+        return real_stat(path, *args, **kwargs)
+
+    with mock.patch.object(Path, "stat", guarded_stat):
+        assert chrome_cookies._profile_cookie_db(profile) == legacy
+
+
+def ___LONG_STRING___(tmp_path):
+    default = tmp_path / "Default" / "Network"
+    alternate = tmp_path / "Profile 1" / "Network"
+    default.mkdir(parents=True)
+    alternate.mkdir(parents=True)
+    blocked = default / "Cookies"
+    blocked.touch()
+    available = alternate / "Cookies"
+    _create_chrome_cookies_db(str(available), [
+        (".x.com", "auth_token", "dummy-auth", b""),
+        (".x.com", "ct0", "dummy-ct0", b""),
+    ])
+    real_copyfile = chrome_cookies.copy_snapshot
+
+    def guarded_copyfile(source, target):
+        if Path(source) == blocked:
+            raise PermissionError(1, "Operation not permitted", str(blocked))
+        return real_copyfile(source, target)
+
+    with mock.patch("lib.chrome_cookies.copy_snapshot", side_effect=guarded_copyfile):
+        found = chrome_cookies._extract_chromium_cookies_any_profile(
+            tmp_path, "Chrome Safe Storage", ".x.com", ["auth_token", "ct0"]
+        )
+    assert found == {"auth_token": "dummy-auth", "ct0": "dummy-ct0"}
+
+# ___LONG_STRING___
+# PKCS7 padding tests
+# ___LONG_STRING___
+
+
+class TestPkcs7Padding:
+    def test_valid_padding_1(self):
+        # 1 byte of padding
+        data = b"hello world!!!!!" + b"\x01"
+        assert _remove_pkcs7_padding(data) == b"hello world!!!!!"
+
+    def test_valid_padding_5(self):
+        data = b"hello world" + b"\x05\x05\x05\x05\x05"
+        assert _remove_pkcs7_padding(data) == b"hello world"
+
+    def test_valid_padding_16(self):
+        # Full block of padding
+        data = b"\x10" * 16
+        assert _remove_pkcs7_padding(data) == b""
+
+    def test_invalid_padding_zero(self):
+        data = b"hello\x00"
+        assert _remove_pkcs7_padding(data) is None
+
+    def test_invalid_padding_mismatch(self):
+        data = b"hello\x03\x03\x02"
+        assert _remove_pkcs7_padding(data) is None
+
+    def test_empty_data(self):
+        assert _remove_pkcs7_padding(b"") is None
+
+# ___LONG_STRING___
+# Key derivation test
+# ___LONG_STRING___
+
+
+class TestKeyDerivation:
+    def ___LONG_STRING___(self):
+        assert _derive_aes_key(KNOWN_PASSPHRASE) == V10_AES_KEY
+
+    def test_derive_aes_key_deterministic(self):
+        key1 = _derive_aes_key(b"my_passphrase")
+        key2 = _derive_aes_key(b"my_passphrase")
+        assert key1 == key2
+        assert len(key1) == 16
+
+    def ___LONG_STRING___(self):
+        key1 = _derive_aes_key(b"passphrase_a")
+        key2 = _derive_aes_key(b"passphrase_b")
+        assert key1 != key2
+
+# ___LONG_STRING___
+# Decryption test (real openssl, known key)
+# ___LONG_STRING___
+
+
+@pytest.mark.skipif(not OPENSSL_AVAILABLE, reason="openssl not installed")
+class TestDecryption:
+    def test_decrypt_v10_roundtrip(self):
+        """Encrypt then decrypt — verifies the full pipeline works."""
+        original = "my_secret_cookie_value_12345"
+        encrypted = _encrypt_value_v10(original, KNOWN_AES_KEY)
+        assert encrypted[:3] == b"v10"
+
+        decrypted = _decrypt_v10_value(encrypted, KNOWN_AES_KEY, db_version=20)
+        assert decrypted == original
+
+    def ___LONG_STRING___(self):
+        """Chrome 130+ (db_version >= 24) strips 32-byte SHA-256 prefix."""
+        original = "session_token_abc"
+        encrypted = _encrypt_value_v10_with_sha_prefix(original, KNOWN_AES_KEY)
+
+        decrypted = _decrypt_v10_value(encrypted, KNOWN_AES_KEY, db_version=24)
+        assert decrypted == original
+
+    def ___LONG_STRING___(self):
+        """Wrong key should either fail decryption or produce garbage."""
+        original = "secret"
+        encrypted = _encrypt_value_v10(original, KNOWN_AES_KEY)
+        wrong_key = _derive_aes_key(b"wrong_passphrase")
+
+        result = _decrypt_v10_value(encrypted, wrong_key, db_version=20)
+        # Either None (padding check fails) or garbage (not the original)
+        assert result is None or result != original
+
+    def test_decrypt_empty_ciphertext(self):
+        """v10 prefix with no ciphertext should return None."""
+        assert _decrypt_v10_value(b"v10", KNOWN_AES_KEY, db_version=20) is None
+
+# ___LONG_STRING___
+# Chrome not installed → returns None
+# ___LONG_STRING___
+
+
+class TestChromeNotInstalled:
+    def test_db_not_found(self):
+        with mock.patch(
+            "lib.chrome_cookies._find_all_chromium_cookies_dbs",
+            return_value=[],
+        ):
+            result = extract_chrome_cookies_macos(".x.com", ["auth_token"])
+            assert result is None
+
+
+class TestChromiumCookieDbFinder:
+    def ___LONG_STRING___(self, tmp_path):
+        first = tmp_path / "Default" / "Network" / "Cookies"
+        second = tmp_path / "Profile 1" / "Network" / "Cookies"
+
+        with mock.patch(
+            "lib.chrome_cookies._find_all_chromium_cookies_dbs",
+            return_value=[first, second],
+        ) as find_all:
+            result = _find_chromium_cookies_db(tmp_path)
+
+        assert result == first
+        find_all.assert_called_once_with(tmp_path)
+
+# ___LONG_STRING___
+# Keychain access denied → returns None
+# ___LONG_STRING___
+
+
+class TestKeychainDenied:
+    def test_security_command_fails(self):
+        with mock.patch("lib.chrome_cookies.subprocess.run") as mock_run:
+            mock_run.return_value = subprocess.CompletedProcess(
+                args=[], returncode=44, stdout="", stderr="security: SecKeychainSearchCopyNext: The specified item could not be found in the keychain."
+            )
+            result = _get_chrome_encryption_key()
+            assert result is None
+
+    def test_security_command_not_found(self):
+        with mock.patch("lib.chrome_cookies.subprocess.run", side_effect=FileNotFoundError):
+            result = _get_chrome_encryption_key()
+            assert result is None
+
+# ___LONG_STRING___
+# openssl not found → returns None
+# ___LONG_STRING___
+
+
+@pytest.mark.skipif(not OPENSSL_AVAILABLE, reason="openssl not installed")
+class TestOpensslNotFound:
+    def test_openssl_missing(self):
+        encrypted = _encrypt_value_v10("test", KNOWN_AES_KEY)
+        with mock.patch("lib.chrome_cookies.subprocess.run", side_effect=FileNotFoundError):
+            result = _decrypt_v10_value(encrypted, KNOWN_AES_KEY, db_version=20)
+            assert result is None
+
+# ___LONG_STRING___
+# Unencrypted cookie values → returned as-is
+# ___LONG_STRING___
+
+
+class TestUnencryptedCookies:
+    @pytest.mark.skipif(os.name == "nt", reason="POSIX permission bits are not reliable on Windows")
+    def test_temp_cookie_db_copy_is_owner_only(self, tmp_path):
+        """Copied Chromium cookie DB temp files are chmodded owner-only before read."""
+        db_path = tmp_path / "Cookies"
+        _create_chrome_cookies_db(str(db_path), [
+            (".x.com", "auth_token", "plain_token_value", b""),
+        ])
+        os.chmod(db_path, 0o644)
+
+        real_connect = sqlite3.connect
+
+        def assert_temp_copy_locked(path, *args, **kwargs):
+            if kwargs.get("uri"):
+                assert path == db_path.resolve().as_uri() + "?mode=ro"
+            elif Path(str(path)) != db_path:
+                assert Path(str(path)).stat().st_mode & 0o777 == 0o600
+            return real_connect(path, *args, **kwargs)
+
+        with mock.patch("lib.chrome_cookies.sqlite3.connect", side_effect=assert_temp_copy_locked):
+            result = _extract_chromium_cookies_macos(
+                db_path,
+                "Chrome Safe Storage",
+                ".x.com",
+                ["auth_token"],
+            )
+
+        assert result == {"auth_token": "plain_token_value"}
+
+    @pytest.mark.skipif(os.name == "nt", reason="POSIX permission model does not apply on Windows")
+    def ___LONG_STRING___(self, tmp_path):
+        """The temp copy must stay private immediately after copying content."""
+        db_path = tmp_path / "Cookies"
+        _create_chrome_cookies_db(str(db_path), [
+            (".x.com", "auth_token", "plain_token_value", b""),
+        ])
+        os.chmod(db_path, 0o644)
+
+        observed = {}
+        real_lock = chrome_cookies._lock_temp_cookie_copy
+
+        def spy(path):
+            observed["mode_after_copy"] = os.stat(path).st_mode & 0o777
+            return real_lock(path)
+
+        with mock.patch.object(chrome_cookies, "_lock_temp_cookie_copy", side_effect=spy):
+            result = _extract_chromium_cookies_macos(
+                db_path,
+                "Chrome Safe Storage",
+                ".x.com",
+                ["auth_token"],
+            )
+
+        assert result == {"auth_token": "plain_token_value"}
+        assert observed["mode_after_copy"] == 0o600
+
+    def test_plain_value_returned(self, tmp_path):
+        """Unencrypted cookies (value column populated) returned without decryption."""
+        db_path = str(tmp_path / "Cookies")
+        _create_chrome_cookies_db(db_path, [
+            (".x.com", "auth_token", "plain_token_value", b""),
+            (".x.com", "ct0", "plain_ct0_value", b""),
+        ])
+
+        with mock.patch(
+            "lib.chrome_cookies._find_all_chromium_cookies_dbs",
+            return_value=[Path(db_path)],
+        ):
+            # No keychain needed for unencrypted values
+            with mock.patch("lib.chrome_cookies._get_chromium_encryption_key", return_value=None):
+                result = extract_chrome_cookies_macos(".x.com", ["auth_token", "ct0"])
+
+        assert result == {"auth_token": "plain_token_value", "ct0": "plain_ct0_value"}
+
+# ___LONG_STRING___
+# Full integration: mock DB with real v10 encryption, mock Keychain
+# ___LONG_STRING___
+
+
+class TestFullExtraction:
+    @pytest.mark.skipif(not OPENSSL_AVAILABLE, reason="openssl not installed")
+    def test_encrypted_cookies_extracted(self, tmp_path):
+        """Extract fixed v10 vectors through SQLite, key derivation, and OpenSSL."""
+        auth_val = "my_auth_token_123"
+        ct0_val = "my_ct0_csrf_456"
+
+        db_path = str(tmp_path / "Cookies")
+        _create_chrome_cookies_db(db_path, [
+            (".x.com", "auth_token", "", V10_AUTH_TOKEN),
+            (".x.com", "ct0", "", V10_CT0),
+            (".other.com", "other", "", b""),  # unrelated cookie
+        ])
+
+        with mock.patch(
+            "lib.chrome_cookies._find_all_chromium_cookies_dbs",
+            return_value=[Path(db_path)],
+        ):
+            with mock.patch(
+                "lib.chrome_cookies._get_chromium_encryption_key",
+                return_value=KNOWN_PASSPHRASE,
+            ):
+                result = extract_chrome_cookies_macos(".x.com", ["auth_token", "ct0"])
+
+        assert result == {"auth_token": auth_val, "ct0": ct0_val}
+
+    def test_no_matching_cookies_returns_none(self, tmp_path):
+        db_path = str(tmp_path / "Cookies")
+        _create_chrome_cookies_db(db_path, [
+            (".other.com", "session", "val", b""),
+        ])
+
+        with mock.patch(
+            "lib.chrome_cookies._find_all_chromium_cookies_dbs",
+            return_value=[Path(db_path)],
+        ):
+            with mock.patch("lib.chrome_cookies._get_chromium_encryption_key", return_value=None):
+                result = extract_chrome_cookies_macos(".x.com", ["auth_token"])
+
+        assert result is None
+
+    @pytest.mark.skipif(not OPENSSL_AVAILABLE, reason="openssl not installed")
+    def test_chrome130_db_version_24(self, tmp_path):
+        """Chrome 130+ with db_version >= 24 strips SHA-256 prefix."""
+        auth_val = "token_for_chrome130"
+        encrypted_auth = _encrypt_value_v10_with_sha_prefix(auth_val, KNOWN_AES_KEY)
+
+        db_path = str(tmp_path / "Cookies")
+        _create_chrome_cookies_db(db_path, [
+            (".x.com", "auth_token", "", encrypted_auth),
+        ], db_version=24)
+
+        with mock.patch(
+            "lib.chrome_cookies._find_all_chromium_cookies_dbs",
+            return_value=[Path(db_path)],
+        ):
+            with mock.patch(
+                "lib.chrome_cookies._get_chromium_encryption_key",
+                return_value=KNOWN_PASSPHRASE,
+            ):
+                result = extract_chrome_cookies_macos(".x.com", ["auth_token"])
+
+        assert result is not None
+        assert result["auth_token"] == auth_val
+
+    @pytest.mark.skipif(not OPENSSL_AVAILABLE, reason="openssl not installed")
+    def ___LONG_STRING___(self, tmp_path):
+        """Profiles for one browser share a Keychain service; fetch it once."""
+        first_db = tmp_path / "Default.sqlite"
+        second_db = tmp_path / "Profile1.sqlite"
+        auth_val = "profile_auth_token"
+        ct0_val = "profile_ct0_value"
+
+        _create_chrome_cookies_db(str(first_db), [
+            (".x.com", "auth_token", "", _encrypt_value_v10(auth_val, KNOWN_AES_KEY)),
+        ])
+        _create_chrome_cookies_db(str(second_db), [
+            (".x.com", "auth_token", "", _encrypt_value_v10(auth_val, KNOWN_AES_KEY)),
+            (".x.com", "ct0", "", _encrypt_value_v10(ct0_val, KNOWN_AES_KEY)),
+        ])
+
+        with mock.patch(
+            "lib.chrome_cookies._find_all_chromium_cookies_dbs",
+            return_value=[first_db, second_db],
+        ):
+            with mock.patch(
+                "lib.chrome_cookies._get_chromium_encryption_key",
+                return_value=KNOWN_PASSPHRASE,
+            ) as get_key:
+                result = extract_chrome_cookies_macos(".x.com", ["auth_token", "ct0"])
+
+        assert result is not None
+        assert result["ct0"] == ct0_val
+        get_key.assert_called_once_with("Chrome Safe Storage")
+
+# ___LONG_STRING___
+# DB version detection
+# ___LONG_STRING___
+
+
+class TestDbVersion:
+    def test_reads_version_from_meta(self, tmp_path):
+        db_path = str(tmp_path / "test.db")
+        conn = sqlite3.connect(db_path)
+        c = conn.cursor()
+        c.execute("CREATE TABLE meta (key TEXT, value TEXT)")
+        c.execute("INSERT INTO meta VALUES ('version', '24')")
+        conn.commit()
+        assert _get_db_version(c) == 24
+        conn.close()
+
+    def test_no_meta_table_returns_zero(self, tmp_path):
+        db_path = str(tmp_path / "test.db")
+        conn = sqlite3.connect(db_path)
+        c = conn.cursor()
+        c.execute("CREATE TABLE dummy (x TEXT)")
+        conn.commit()
+        assert _get_db_version(c) == 0
+        conn.close()

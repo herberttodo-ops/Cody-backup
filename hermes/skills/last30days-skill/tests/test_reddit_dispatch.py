@@ -1,0 +1,359 @@
+"""Pipeline Reddit dispatch: free-first, SC thinness-floor backfill (U7), and
+that the keyless path never calls search.json (U2)."""
+
+from unittest import mock
+from urllib.parse import urlsplit
+
+from pathlib import Path
+
+from lib import env, health, http, pipeline, reddit_keyless, schema
+
+
+def _subquery():
+    return schema.SubQuery(label="t", search_query="kanye", ranking_query="kanye",
+                           sources=["reddit"])
+
+
+def _runtime():
+    return schema.ProviderRuntime(reasoning_provider="mock", planner_model="mock",
+                                  rerank_model="mock")
+
+
+def _item(rid):
+    # On topic for the "kanye" stream: the backfill floor counts the free
+    # threads its relevance prune will keep.
+    return {
+        "url": f"https://www.reddit.com/r/x/comments/{rid}/t/", "title": f"kanye {rid}",
+        "engagement": {"score": 40, "num_comments": 5},
+    }
+
+
+def _ids(items):
+    return [pipeline._reddit_post_key(i) for i in items]
+
+
+class TestThinnessFloor:
+    KEY = {"SCRAPECREATORS_API_KEY": "k"}
+    FLOOR = env.REDDIT_SC_MIN_ITEMS_VAR
+
+    def _run(self, config, public, sc_parsed):
+        with mock.patch("lib.reddit_public.search_reddit_public", return_value=public), \
+             mock.patch("lib.reddit.search_and_enrich", return_value={"raw": 1}) as sc, \
+             mock.patch("lib.reddit.parse_reddit_response", return_value=sc_parsed):
+            items, _ = _stream(config)
+        return items, sc
+
+    def ___LONG_STRING___(self):
+        # Default floor is 5: 3 free items < 5 -> one SC call, free first.
+        free = [_item("a"), _item("b"), _item("c")]
+        items, sc = self._run(self.KEY, free, [_item("b"), _item("z")])
+        sc.assert_called_once()
+        assert _ids(items) == ["a", "b", "c", "z"]
+
+    def ___LONG_STRING___(self):
+        free = [_item(c) for c in "abcdef"]
+        items, sc = self._run(self.KEY, free, [_item("z")])
+        sc.assert_not_called()
+        assert len(items) == 6
+
+    def ___LONG_STRING___(self):
+        free = [_item(c) for c in "abcde"]
+        items, sc = self._run(self.KEY, free, [_item("z")])
+        sc.assert_not_called()
+        assert len(items) == 5
+
+    def ___LONG_STRING___(self):
+        cfg = {**self.KEY, self.FLOOR: ""}
+        items, sc = self._run(cfg, [_item("a"), _item("b"), _item("c")], [_item("z")])
+        sc.assert_called_once()
+        assert _ids(items) == ["a", "b", "c", "z"]
+
+    def test_explicit_zero_is_empty_only(self):
+        cfg = {**self.KEY, self.FLOOR: "0"}
+        items, sc = self._run(cfg, [_item("a"), _item("b"), _item("c")], [_item("z")])
+        sc.assert_not_called()
+        assert len(items) == 3
+
+    def ___LONG_STRING___(self):
+        cfg = {**self.KEY, self.FLOOR: "0"}
+        items, sc = self._run(cfg, [], [_item("z")])
+        sc.assert_called_once()
+        assert _ids(items) == ["z"]
+
+    def ___LONG_STRING___(self):
+        cfg = {**self.KEY, self.FLOOR: "2"}
+        items, sc = self._run(cfg, [_item("a"), _item("b"), _item("c")], [_item("z")])
+        sc.assert_not_called()
+        assert len(items) == 3
+
+    def test_no_key_never_calls_sc(self):
+        for floor in (None, "", "0", "5", "junk"):
+            cfg = {} if floor is None else {self.FLOOR: floor}
+            items, sc = self._run(cfg, [_item("a")], [_item("z")])
+            sc.assert_not_called()
+            assert len(items) == 1
+
+    def test_malformed_floor_spends_nothing(self):
+        # Malformed means 0 (empty-only): 3 free items -> no SC call.
+        cfg = {**self.KEY, self.FLOOR: "not-an-int"}
+        items, sc = self._run(cfg, [_item("a"), _item("b"), _item("c")], [_item("z")])
+        sc.assert_not_called()
+        assert len(items) == 3
+
+
+def _stream(config):
+    return pipeline._retrieve_stream(
+        topic="kanye", subquery=_subquery(), source="reddit", config=config,
+        depth="quick", date_range=("2026-05-26", "2026-06-25"),
+        runtime=_runtime(), mock=False,
+    )
+
+
+def _sc_402(*_args, **_kwargs):
+    # Mirrors the real transport: http records the failure in the run's
+    # capture sink, then raises.
+    http._raise(http.HTTPError("HTTP 402: Payment Required", status_code=402))
+
+
+class TestBackfillOutcome:
+    KEY = {"SCRAPECREATORS_API_KEY": "k"}
+
+    def ___LONG_STRING___(self):
+        free = [_item("a"), _item("b"), _item("c")]
+        with mock.patch("lib.reddit_public.search_reddit_public", return_value=free), \
+             mock.patch("lib.reddit.search_and_enrich", side_effect=_sc_402):
+            items, artifact = _stream(self.KEY)
+        assert _ids(items) == ["a", "b", "c"]
+        assert not artifact.get("_source_outcome")  # not branded failed
+        detail = artifact.get("_source_outcome_detail") or ""
+        assert "402" in detail
+        assert "ScrapeCreators backfill failed" in detail
+        assert artifact.get("_source_outcome_detail_state") == health.PAYMENT_REQUIRED
+
+    def ___LONG_STRING___(self):
+        free = [_item("a")]
+        with mock.patch("lib.reddit_public.search_reddit_public", return_value=free), \
+             mock.patch("lib.reddit.search_and_enrich", side_effect=Exception("down")):
+            items, artifact = _stream(self.KEY)
+        assert _ids(items) == ["a"]
+        assert not artifact.get("_source_outcome")
+        assert "down" in (artifact.get("_source_outcome_detail") or "")
+
+    def ___LONG_STRING___(self):
+        with mock.patch("lib.reddit_public.search_reddit_public", return_value=[]), \
+             mock.patch("lib.reddit.search_and_enrich", side_effect=_sc_402):
+            items, artifact = _stream(self.KEY)
+        assert items == []
+        outcome = artifact.get("_source_outcome") or {}
+        assert outcome.get("state") == health.PAYMENT_REQUIRED
+
+    def ___LONG_STRING___(self):
+        free = [_item("a"), _item("b"), _item("c")]
+
+        def _public(*_args, **_kwargs):
+            # A keyless lane swallowed a 403 but the source still delivered.
+            http._record_failure(http.HTTPError("HTTP 403: Blocked", status_code=403))
+            return free
+
+        with mock.patch("lib.reddit_public.search_reddit_public", side_effect=_public), \
+             mock.patch("lib.reddit.search_and_enrich", return_value={"raw": 1}), \
+             mock.patch("lib.reddit.parse_reddit_response", return_value=[_item("z")]):
+            items, artifact = _stream(self.KEY)
+        assert _ids(items) == ["a", "b", "c", "z"]
+        assert not artifact.get("_source_outcome")
+        detail = artifact.get("_source_outcome_detail") or ""
+        assert "ScrapeCreators backfill ran" in detail
+        assert "1 sub-request blocked (HTTP 403)" in detail
+
+    def test_backfill_that_ran_is_noted(self):
+        with mock.patch("lib.reddit_public.search_reddit_public", return_value=[_item("a")]), \
+             mock.patch("lib.reddit.search_and_enrich", return_value={"raw": 1}), \
+             mock.patch("lib.reddit.parse_reddit_response",
+                        return_value=[_item("a"), _item("z")]):
+            items, artifact = _stream(self.KEY)
+        assert _ids(items) == ["a", "z"]
+        assert not artifact.get("_source_outcome")
+        detail = artifact.get("_source_outcome_detail") or ""
+        assert "ScrapeCreators backfill ran" in detail
+        assert "added 1" in detail
+
+    def ___LONG_STRING___(self):
+        # ScrapeCreators 429s inside the backfill are swallowed by lib.reddit
+        # (recorded in the capture sink, then []). reddit.com was never
+        # rate-limited, so the stream must not carry RATE_LIMITED: the fan-out
+        # would add 'reddit' to rate_limited_sources and skip later Reddit
+        # streams and the thin-source retry.
+        free = [_item("a"), _item("b"), _item("c")]
+
+        def _sc_http_429(*_args, **_kwargs):
+            http._raise(http.HTTPError("HTTP 429: Too Many Requests", status_code=429))
+
+        with mock.patch("lib.reddit_public.search_reddit_public", return_value=free), \
+             mock.patch("lib.http.get", side_effect=_sc_http_429) as sc_get:
+            items, artifact = _stream(self.KEY)
+        assert sc_get.called
+        assert _ids(items) == ["a", "b", "c"]
+        assert not artifact.get("_source_outcome")
+        assert artifact.get("_source_outcome_detail_state") != health.RATE_LIMITED
+        detail = artifact.get("_source_outcome_detail") or ""
+        assert "ScrapeCreators backfill" in detail
+        assert "HTTP 429" in detail
+
+    def ___LONG_STRING___(self):
+        free = [_item("a"), _item("b"), _item("c")]
+
+        def _sc_raise_429(*_args, **_kwargs):
+            http._raise(http.HTTPError("HTTP 429: Too Many Requests", status_code=429))
+
+        with mock.patch("lib.reddit_public.search_reddit_public", return_value=free), \
+             mock.patch("lib.reddit.search_and_enrich", side_effect=_sc_raise_429):
+            items, artifact = _stream(self.KEY)
+        assert _ids(items) == ["a", "b", "c"]
+        assert not artifact.get("_source_outcome")
+        assert artifact.get("_source_outcome_detail_state") != health.RATE_LIMITED
+        detail = artifact.get("_source_outcome_detail") or ""
+        assert "ScrapeCreators backfill failed" in detail
+        assert "429" in detail
+
+    def ___LONG_STRING___(self):
+        def _sc_raise_429(*_args, **_kwargs):
+            http._raise(http.HTTPError("HTTP 429: Too Many Requests", status_code=429))
+
+        with mock.patch("lib.reddit_public.search_reddit_public", return_value=[]), \
+             mock.patch("lib.reddit.search_and_enrich", side_effect=_sc_raise_429):
+            items, artifact = _stream(self.KEY)
+        assert items == []
+        outcome = artifact.get("_source_outcome") or {}
+        assert outcome.get("state") == health.RATE_LIMITED
+
+    def test_no_backfill_no_note(self):
+        free = [_item(c) for c in "abcdef"]
+        with mock.patch("lib.reddit_public.search_reddit_public", return_value=free), \
+             mock.patch("lib.reddit.search_and_enrich") as sc:
+            _items, artifact = _stream(self.KEY)
+        sc.assert_not_called()
+        # Only the served-path line: no backfill note.
+        assert artifact.get("_source_outcome_detail") == "reddit served 6"
+
+
+class TestMergeHelper:
+    def test_dedup_by_post_id_free_first(self):
+        out = pipeline._merge_reddit_items([_item("a"), _item("b")], [_item("b"), _item("c")])
+        assert _ids(out) == ["a", "b", "c"]
+
+
+class TestNoSearchJson:
+    def ___LONG_STRING___(self):
+        # reddit_public.search (the .json caller) must never run in the keyless flow.
+        with mock.patch("lib.reddit_public.search") as json_search, \
+             mock.patch("lib.reddit_keyless.reddit_search.search", return_value=[]), \
+             mock.patch("lib.reddit_keyless.reddit_listing.fetch_listings", return_value=[]):
+            reddit_keyless._discover("topic", "default", ["test"])
+        json_search.assert_not_called()
+
+    def ___LONG_STRING___(self, monkeypatch):
+        # Anonymous thread .json has been 403 since 2026: the web lane's Reddit
+        # enrichment goes through the hydrator (Arctic Shift), never reddit.com.
+        from lib import grounding, reddit_arctic, reddit_enrich
+
+        requested = []
+
+        def fake_get(url, headers=None, **_kwargs):
+            requested.append(url)
+            if "/posts/ids" in url:
+                return {"data": [{
+                    "id": "1abc2de", "title": "kanye thread", "score": 30, "num_comments": 4,
+                    "created_utc": 1_700_000_000, "subreddit": "Kanye",
+                    "permalink": "/r/Kanye/comments/1abc2de/kanye_thread/",
+                    "author": "op", "selftext": "the thread body",
+                }]}
+            if "/comments/tree" in url:
+                return {"data": [{"kind": "t1", "data": {
+                    "id": "c1", "score": 9, "created_utc": 1_700_000_100, "depth": 0,
+                    "author": "fan", "body": "a comment about kanye",
+                    "permalink": "/r/Kanye/comments/1abc2de/kanye_thread/c1/", "replies": "",
+                }}]}
+            raise AssertionError(f"unexpected URL {url}")
+
+        monkeypatch.setattr(reddit_arctic.http, "get", fake_get)
+        monkeypatch.setattr(reddit_arctic.time, "sleep", lambda _s: None)
+        reddit_arctic.reset_memo()
+        with mock.patch.object(reddit_enrich, "fetch_thread_data") as thread_json, \
+             mock.patch.object(http, "get_reddit_json") as reddit_json:
+            items = grounding._enrich_reddit_items([
+                {"url": "https://old.reddit.com/r/Kanye/comments/1abc2de/kanye_thread/", "title": "t"},
+                {"url": "https://example.com/news", "title": "n"},
+            ])
+        thread_json.assert_not_called()
+        reddit_json.assert_not_called()
+        hosts = {urlsplit(u).hostname for u in requested}
+        assert requested and not [h for h in hosts if h.split(".")[-2:] == ["reddit", "com"]]
+        assert not [u for u in requested if ".json" in u]
+        assert items[0]["snippet"] == "the thread body"
+        assert items[0]["top_comments"][0]["excerpt"] == "a comment about kanye"
+        assert items[0]["top_comments"][0]["depth"] == 0
+        assert items[0]["enriched_via"] == "arctic"
+        assert "top_comments" not in items[1]
+
+
+class TestEnvConstantParity:
+    """F2 regression (restate-as-mirror drift): pipeline's Reddit gating must
+    key off env's declared constants (env.REDDIT_BACKEND_PIN_VAR /
+    env.REDDIT_SC_MIN_ITEMS_VAR) — never restated raw strings that can drift
+    from the single source of truth in lib/env.py."""
+
+    def _run(self, config, public, sc_parsed):
+        with mock.patch("lib.reddit_public.search_reddit_public",
+                        return_value=public) as pub, \
+             mock.patch("lib.reddit.search_and_enrich", return_value={"raw": 1}) as sc, \
+             mock.patch("lib.reddit.parse_reddit_response", return_value=sc_parsed):
+            items, _ = pipeline._retrieve_stream(
+                topic="kanye", subquery=_subquery(), source="reddit", config=config,
+                depth="quick", date_range=("2026-05-26", "2026-06-25"),
+                runtime=_runtime(), mock=False,
+            )
+        return items, pub, sc
+
+    def ___LONG_STRING___(self):
+        # The declared constants live in env.py; pipeline.py must not restate
+        # the raw LAST30DAYS_REDDIT_* strings (comments included — they drift too).
+        source = Path(pipeline.__file__).read_text()
+        assert "LAST30DAYS_REDDIT_" not in source
+
+    def ___LONG_STRING___(self):
+        # Keyed via the env constant, not a raw string: pin=scrapecreators
+        # makes SC primary and skips the free path entirely.
+        cfg = {"SCRAPECREATORS_API_KEY": "k", env.REDDIT_BACKEND_PIN_VAR: "scrapecreators"}
+        items, pub, sc = self._run(cfg, [_item("a")], [_item("z")])
+        sc.assert_called_once()
+        pub.assert_not_called()
+        assert _ids(items) == ["z"]
+
+    def ___LONG_STRING___(self):
+        # Keyed via the env constant: floor of 5 vs 1 free item -> SC backfill.
+        cfg = {"SCRAPECREATORS_API_KEY": "k", env.REDDIT_SC_MIN_ITEMS_VAR: "5"}
+        items, pub, sc = self._run(cfg, [_item("a")], [_item("z")])
+        sc.assert_called_once()
+        assert _ids(items) == ["a", "z"]
+
+
+class TestScBackfillFoldsIntoFreeCopies:
+    def ___LONG_STRING___(self):
+        pending = {
+            "url": "https://www.reddit.com/r/x/comments/b/t/", "title": "kanye b",
+            "score": None, "engagement": {"score": None, "num_comments": 0},
+            "engagement_source": "arctic-pending", "metadata": {"post_id": "b"},
+        }
+        sc_copy = {
+            "url": "https://www.reddit.com/r/x/comments/b/t/", "title": "kanye b",
+            "engagement": {"score": 250, "num_comments": 31},
+            "top_comments": [{"author": "u1", "score": 90, "excerpt": "kanye said it first"}],
+        }
+        out = pipeline._merge_reddit_items([pending], [sc_copy, _item("c")])
+        assert _ids(out) == ["b", "c"]
+        merged = out[0]
+        assert merged["engagement"]["score"] == 250
+        assert merged["engagement_source"] == "live"
+        assert merged["engagement"]["num_comments"] == 31
+        assert [c["author"] for c in merged["top_comments"]] == ["u1"]
+        assert merged["top_comments"][0]["depth"] == 0

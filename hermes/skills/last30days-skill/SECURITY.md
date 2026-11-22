@@ -1,0 +1,102 @@
+# Security policy
+
+## Report a vulnerability
+
+Report security issues privately through a GitHub security advisory:
+
+**[Report a vulnerability](https://github.com/mvanhorn/last30days-skill/security/advisories/new)**
+
+Don't open a public issue, pull request, or discussion for a suspected vulnerability. The advisory stays private between you and the maintainers until a fix ships, and you can follow the discussion and any fix there.
+
+Include in your report:
+
+- The affected version (the `version` line in `skills/last30days/SKILL.md`, or the release tag) and the host you run the skill in, such as Claude Code, Codex, or the MCP server.
+- The component, with file paths where you can.
+- Steps to reproduce, or a proof of concept, and the impact you observed.
+- Whether the issue needs a non-default setting, such as a specific `.env` key, browser-cookie consent, or an opt-in source.
+
+### Scope
+
+In scope:
+
+- The skill instructions in `skills/last30days/` (`SKILL.md` and `references/`).
+- The research engine in `skills/last30days/scripts/`, including the vendored X client in `lib/vendor/bird-search/`.
+- The MCP server in `mcp/`, the plugin manifests, and the release workflows in `.github/`.
+
+Out of scope, so report it to the upstream project instead:
+
+- Vulnerabilities in third-party services the skill calls, such as Reddit, X, ScrapeCreators, or a web-search API.
+- The Printing Press CLIs that setup installs (`digg-pp-cli`, `arxiv-pp-cli`, `techmeme-pp-cli`, `yahoo-finance-pp-cli`, and `trustpilot-pp-cli`), `yt-dlp`, `gh`, and other external binaries.
+- Automated scanner ratings without a concrete finding. If a scanner flags something specific, report that finding with the evidence.
+
+## Supported versions
+
+Only the latest release receives security fixes. Fixes ship in a new release, and older versions don't get backports. To update, reinstall the skill or plugin from the latest release.
+
+## What the skill touches
+
+This section describes the skill's default behavior so you can judge its access before you report or install. [CONFIGURATION.md](CONFIGURATION.md) documents each setting.
+
+### Network
+
+- The engine has no telemetry, analytics, or update check.
+- Each source contacts only its own service. Reddit, Hacker News, Polymarket, and GitHub are on by default. Other sources turn on when you add their key, install their CLI, or opt in with `INCLUDE_SOURCES` or `--search`.
+- Your research topic goes to every source that runs, and to the web-search backend. Without a paid web-search key, the keyless fallback uses DuckDuckGo and then Startpage.
+- When your topic looks like a company or a person's name, the engine sends the topic text to Wikidata's public API (`www.wikidata.org`, no key) to find the company it names, its stock ticker, its website and the labels of the subsidiaries its record lists. This runs with no setting to turn on. Other topics aren't sent.
+- When that lookup finds a listed company and `yahoo-finance-pp-cli` is on your `PATH`, the engine runs that CLI to read daily share prices from Yahoo Finance. Yahoo Finance receives the ticker symbol and, when the engine has to confirm a symbol, the company name. For a US listing it also receives the S&P 500 index symbol. It never receives a key. It receives the topic text in one case: when the Wikidata lookup fails (an error, a timeout or a rate limit, not an answer that names no company), the engine sends the topic text itself to Yahoo Finance's symbol search as a fallback, and uses the result only when the first stock listed has the topic as its name and a US symbol. `EXCLUDE_SOURCES=yahoo_finance` turns that off too.
+- The hosting model's web search before a run can include a lookup of the topic's stock ticker, next to its lookups for the X handle and communities. That search goes to the host's own search tool, like its other searches. When the host passes the result with `--ticker`, the engine sends Yahoo Finance the ticker symbol and the company name the host passed, to check them against each other, and Wikidata is not asked for a listing. `EXCLUDE_SOURCES=yahoo_finance` stops the check, so neither reaches Yahoo Finance.
+- The patent lane runs on a run about a company, with no account, key or flag. It sends the company name, the names of its listed subsidiaries and the report's date window to USPTO Patent Public Search (`ppubs.uspto.gov`), and the reader links in the digest point at `image-ppubs.uspto.gov`. It is skipped on comparison, quick, `--hiring-signals` and mock runs. `EXCLUDE_SOURCES=patents` or `LAST30DAYS_NO_PATENT_DIGEST=1` turns the lane off, and nothing is then sent to USPTO. The MCP server sets the second on every run.
+- The jobs lane runs on any run about a company (the topic resolves to one, or the host passed `--official-site`, `--ticker` or `--company`). It has no key. It requests the careers page of the company's site (the official site when known, otherwise `<name>.com`, `.ai` and `.io`) reads the board that page links on Greenhouse, Ashby, Lever, Workable, SmartRecruiters or Workday, and otherwise asks the public job-board APIs of Greenhouse, Ashby and Lever for a board under the company's name or the name its careers page states. Those services receive a board slug, not a key. When the careers page runs on a hiring platform the lane reads (Oracle Recruiting Cloud, Jibe, Phenom, TalentBrew, Eightfold on any host, or a page linking a Workday board), the lane reads that platform's public listing endpoint on the company's own job host, with no key or account. A Kula board (`careers.kula.ai/<slug>`), linked from the careers page or, for Nothing, known to the lane, is read from its public listing page on `careers.kula.ai`, plus the pages of the roles the digest selects. For a Workday board, the lane reads the tenant's robots.txt (`*.myworkdayjobs.com/robots.txt`) to find the tenant's other career sites and reads the listing of each one that answers as a job listing. A few companies that run their own job site are read through their public listing API when the run knows the official site: `jobs.apple.com` (Apple), `www.amazon.jobs` (Amazon), `www.google.com/about/careers` (Google), `www-api.ibm.com` (IBM, the search API behind its careers search), and the Workday boards of Intel and Salesforce. They receive listing page numbers or offsets and, for the roles the digest selects, the role ids or role pages. When the careers site publishes a job sitemap in its robots.txt and has no readable listing (SAP, Uber, Walmart), the lane reads that sitemap and, when its URLs carry no title, up to 40 role pages for their titles. Robots.txt: by the owner's decision, the lane reads a company's job listing even where its robots.txt disallows that path. One such site is read today: Google's results pages (`/about/careers/applications/jobs/results`, 20 roles a page, at most 25 pages, two at a time). Disney, formerly skipped, is read through its Phenom site `join.disneycareers.com`, whose robots.txt allows the listing. Boeing's TalentBrew site disallows `/search-jobs/`; the lane reads Boeing's Workday board, which its careers page links first. Set `LAST30DAYS_JOBS_RESPECT_ROBOTS=1` (env or `.env`) to skip a registry or detected-platform listing endpoint the site's `User-agent: *` rules disallow; the lane then asks each listing host for its robots.txt once a run and falls to the job sitemap or the web tier. With the setting off, robots.txt is asked for only to find job sitemaps and a Workday tenant's career sites. The lane never works around a bot wall: no TLS or browser fingerprint spoofing, no challenge solving, no headless browser. Companies whose site prohibits automated collection or answers every automated request with a block page (Meta, Tesla) get no request from the lane, and the footer says why. When a company's site does not answer on its `www.` or bare host form, the careers-page and official-site lookups try the other form once. `EXCLUDE_SOURCES=jobs` turns the lane off.
+- The hosting model's web search before a run can include a lookup of the company's careers page or job-board URL. That search goes to the host's own search tool. When the host passes the result with `--jobs-board`, the engine reads only a URL on Greenhouse, Ashby, Lever, Workable, SmartRecruiters or Workday; that system's public API receives the board slug from the URL, and nothing else. A URL on any other host is ignored and never requested. `--company` takes a company name and, with it, the company's own website (`Name:site`), both from the host's search. The engine requests the careers page of that site (`/careers`, `/jobs`, and up to two job pages it links on the same site), as it does for `--official-site`. A name passed without a site is sent to Wikidata to find the site. The name goes to the same job-board lookups.
+- If you set `LAST30DAYS_API_BASE` and `LAST30DAYS_API_KEY`, the engine sends your topic to that endpoint instead of running the local sources.
+- `--publish-html` and `library feed --publish` upload the report to `api.ht-ml.app`. These flags never run unless you pass them.
+
+### Hosted reasoning models
+
+If a Gemini, OpenAI, xAI, or OpenRouter key is configured, the engine sends your topic plus the shortlisted titles, snippets, and comments to that provider to rerank and score results. It does this on every run, even when the host passes its own plan with `--plan`. The engine picks the first provider whose key it finds, in this order: Gemini, OpenAI, xAI, then OpenRouter.
+
+This includes keys you configured for another purpose, such as `XAI_API_KEY` for X search or `OPENROUTER_API_KEY` for Perplexity. To keep reranking local, leave all four key families out of every config layer: the process environment, `.env` files, the macOS Keychain, and `pass`. Evidence from your local corpus (`--corpus` or `LAST30DAYS_CORPUS_DIRS`) is always scored locally and never sent to a provider.
+
+### Credentials
+
+- The engine reads keys in this order: the process environment, a trusted project file (`.claude/last30days.env`), the global file (`~/.config/last30days/.env`), the macOS Keychain (`last30days-<KEY>`), and `pass` (`last30days/<KEY>`).
+- A project file loads only when `LAST30DAYS_TRUST_PROJECT_CONFIG` is set in your environment or in the global file. A repository can't opt itself in.
+- Setup writes keys with `0600` permissions and masks them in its output. The engine warns when a `.env` file is readable by other users.
+- First-run setup can create a free ScrapeCreators account through a GitHub device-code login on `api.scrapecreators.com`. It doesn't read your `gh` CLI token.
+
+### Browser cookies
+
+- Direct reads from your browser's cookie store are off by default and require your consent during setup. To withdraw consent, set `BROWSER_CONSENT=false` or `FROM_BROWSER=off`. Either setting also disables the `agentcookie` sidecar, even with `AGENTCOOKIE=on`. Credentials supplied directly by the user remain usable.
+- The engine reads only `auth_token` and `ct0` for `.x.com`, and `_session_id` for `.truthsocial.com`. It filters by domain and cookie name before it decrypts anything.
+- The Firefox and Chromium readers query a copy of the browser's whole cookie database, written to a temporary file with `0600` permissions and deleted afterward.
+- Cookie values stay in memory and pass to the X client through its environment. The engine doesn't save them to `.env` or any other file.
+- On eligible hosts (Linux, Mac mini, Darwin agentcookie sink, or any host with `AGENTCOOKIE=on`), the engine asks the sidecar for `.x.com` cookies only after `AGENTCOOKIE=on` or affirmative `BROWSER_CONSENT`. An installed binary alone grants no access. Explicit refusal still wins; set `AGENTCOOKIE=off` to disable only the sidecar.
+- The MCP server disables browser cookies unless you set `LAST30DAYS_MCP_ALLOW_BROWSER_COOKIES`.
+
+### Installs and external programs
+
+- First-run setup installs `yt-dlp` with Homebrew when it's missing on macOS. It also installs the Digg, arXiv, Techmeme, and Yahoo Finance CLIs with `npx -y @mvanhorn/printing-press-library@0.1.27`, by default into `~/.local/bin`. That package and the CLIs it installs come from outside this repository.
+- During research, the engine can run `node` (the vendored X client), `yt-dlp`, `gh`, the Printing Press CLIs, `brightdata`, `grok`, `xurl`, `pass`, and `pdftotext`, depending on which sources you turned on. On macOS it also runs `security` and `openssl` to decrypt Chromium cookies.
+
+### Local files
+
+MCP research defaults to `save=false`. It returns the report to the client and skips the report export, last-run and report caches, corpus text cache, and SQLite findings. Engine installation and source diagnostics can still use local caches.
+
+| Path | Contents | Created when |
+|---|---|---|
+| `LAST30DAYS_MEMORY_DIR` (default `~/Documents/Last30Days`) | Saved reports | Every run, unless the setting is empty |
+| `~/.config/last30days/.env` | Your settings and keys (`0600`) | Setup, or when you create it |
+| `~/.config/last30days/last-report.json`, `last-run.json` | The latest report, including evidence text | Every run |
+| `~/.config/last30days/corpus-cache.json` | Text extracted from your corpus files (`0600`) | Corpus runs |
+| `research.db` and its SQLite sidecars in the save directory, or in `~/.local/share/last30days/` when a run has no `--save-dir` | Research findings and the discovery topic queue (`0600` on POSIX) | Watchlist, runs with `--store` or `LAST30DAYS_STORE=1`, and every `--discover` run unless `LAST30DAYS_DISCOVERY_QUEUE=off` |
+| `~/.local/share/last30days/briefs/*.json` | Daily and weekly briefing data (`0600` on POSIX) | Briefing generation |
+| `~/.local/share/last30days/library.db`, `briefs/` | Search index of saved reports and briefs | Every Markdown report saved to the default directory, and library commands |
+| `.last30days-library.db` in a nondefault save directory | Search index of the reports saved there | Every Markdown report saved to that directory |
+
+Slash-command runs pass the resolved save directory to the engine with `--save-dir`, so their `research.db` usually sits next to your saved reports.
+
+The engine has no purge command. To remove local data, delete these files, including the databases in every save directory you've used.
+
+### Untrusted content
+
+Retrieved posts, comments, transcripts, and web pages are untrusted input. The engine marks them as data in its output, escapes Markdown and links, and wraps them in an untrusted-content fence in prompts sent to a reasoning model. The skill instructions tell the host model to treat them as evidence, never as instructions. If you find content that gets past these protections and steers the host model, report it as a vulnerability.

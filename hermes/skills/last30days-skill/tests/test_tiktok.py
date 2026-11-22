@@ -1,0 +1,364 @@
+import threading
+import unittest
+from urllib.parse import parse_qs, urlsplit
+from unittest.mock import MagicMock, patch
+
+from lib import tiktok
+from lib.tiktok import _parse_items
+
+
+class TestTikTokAuthorTypeSafety(unittest.TestCase):
+    def _make_raw(self, **overrides):
+        base = {
+            "aweme_id": "1",
+            "desc": "test video",
+            "share_url": "https://www.tiktok.com/@u/video/1",
+            "author": {"unique_id": "testuser"},
+            "statistics": {"play_count": 100, "digg_count": 50, "comment_count": 10, "share_count": 5},
+        }
+        base.update(overrides)
+        return base
+
+    def test_author_as_dict(self):
+        items = _parse_items([self._make_raw()], "test")
+        self.assertEqual("testuser", items[0]["author_name"])
+
+    def test_author_as_string(self):
+        items = _parse_items([self._make_raw(author="stringuser")], "test")
+        self.assertEqual("stringuser", items[0]["author_name"])
+
+    def test_author_missing(self):
+        raw = self._make_raw()
+        del raw["author"]
+        items = _parse_items([raw], "test")
+        self.assertEqual("", items[0]["author_name"])
+
+    def test_author_none(self):
+        items = _parse_items([self._make_raw(author=None)], "test")
+        self.assertEqual("", items[0]["author_name"])
+
+
+class TestTikTokStatsZeroPreserved(unittest.TestCase):
+    def test_zero_play_count(self):
+        raw = {
+            "aweme_id": "1",
+            "desc": "test",
+            "share_url": "https://www.tiktok.com/@u/video/1",
+            "author": {"unique_id": "u"},
+            "statistics": {"play_count": 0, "digg_count": 0, "comment_count": 0, "share_count": 0},
+        }
+        items = _parse_items([raw], "test")
+        self.assertEqual(0, items[0]["engagement"]["views"])
+        self.assertEqual(0, items[0]["engagement"]["likes"])
+        self.assertEqual(0, items[0]["engagement"]["comments"])
+        self.assertEqual(0, items[0]["engagement"]["shares"])
+
+    def test_stats_missing(self):
+        raw = {
+            "aweme_id": "1",
+            "desc": "test",
+            "share_url": "https://www.tiktok.com/@u/video/1",
+            "author": {"unique_id": "u"},
+        }
+        items = _parse_items([raw], "test")
+        self.assertEqual(0, items[0]["engagement"]["views"])
+
+    def test_stats_as_non_dict(self):
+        raw = {
+            "aweme_id": "1",
+            "desc": "test",
+            "share_url": "https://www.tiktok.com/@u/video/1",
+            "author": {"unique_id": "u"},
+            "statistics": "invalid",
+        }
+        items = _parse_items([raw], "test")
+        self.assertEqual(0, items[0]["engagement"]["views"])
+
+
+class TestExpandTikTokQueries(unittest.TestCase):
+    """Tests for expand_tiktok_queries() multi-query generation."""
+
+    def ___LONG_STRING___(self):
+        from lib.tiktok import expand_tiktok_queries
+        queries = expand_tiktok_queries("Kanye West", "default")
+        self.assertGreaterEqual(len(queries), 2)
+        # Breaking_news intent should include reaction/edit variant
+        variant_found = any(
+            "reaction" in q.lower() or "edit" in q.lower() or "trend" in q.lower()
+            for q in queries
+        )
+        self.assertTrue(variant_found, f"Expected reaction/edit/trend variant: {queries}")
+
+    def ___LONG_STRING___(self):
+        from lib.tiktok import expand_tiktok_queries
+        # "best laptop for coding" triggers the product intent (best .* for pattern)
+        queries = expand_tiktok_queries("best laptop for coding", "deep")
+        variant_found = any(
+            "review" in q.lower() or "haul" in q.lower() or "unboxing" in q.lower()
+            for q in queries
+        )
+        self.assertTrue(variant_found, f"Expected review/haul/unboxing variant: {queries}")
+
+    def test_quick_depth_returns_one_query(self):
+        from lib.tiktok import expand_tiktok_queries
+        queries = expand_tiktok_queries("Kanye West", "quick")
+        self.assertEqual(len(queries), 1)
+
+
+class TestTikTokCommentsGate(unittest.TestCase):
+    def test_gate_requires_key_and_token(self):
+        from lib import env
+        self.assertFalse(env.is_tiktok_comments_available({}))
+        self.assertFalse(env.is_tiktok_comments_available(
+            {"SCRAPECREATORS_API_KEY": "k"}
+        ))
+        self.assertFalse(env.is_tiktok_comments_available(
+            {"INCLUDE_SOURCES": "tiktok_comments"}
+        ))
+        self.assertTrue(env.is_tiktok_comments_available(
+            {"SCRAPECREATORS_API_KEY": "k", "INCLUDE_SOURCES": "tiktok,tiktok_comments"}
+        ))
+
+    def test_gate_case_matches_youtube_pattern(self):
+        from lib import env
+        # Matches the existing youtube_comments behaviour — plain substring match via _parse_include_sources.
+        self.assertTrue(env.is_tiktok_comments_available(
+            {"SCRAPECREATORS_API_KEY": "k", "INCLUDE_SOURCES": "TIKTOK,TIKTOK_COMMENTS"}
+        ))
+
+
+class TestTikTokEnrichWithComments(unittest.TestCase):
+    def test_empty_items_returns_empty(self):
+        from lib import tiktok
+        self.assertEqual([], tiktok.enrich_with_comments([], token="k"))
+
+    def test_missing_token_is_noop(self):
+        from lib import tiktok
+        items = [{"video_id": "1", "url": "https://www.tiktok.com/@u/video/1", "engagement": {"views": 100}}]
+        result = tiktok.enrich_with_comments(items, token="")
+        self.assertNotIn("top_comments", result[0])
+
+    def ___LONG_STRING___(self):
+        from unittest.mock import patch
+        from lib import tiktok
+
+        fake_sc_response = {
+            "comments": [
+                {"text": "meh", "user": {"nickname": "Bob"},
+                 "digg_count": 3, "create_time": ___ID___},
+                {"text": "loved it", "user": {"nickname": "Alice"},
+                 "digg_count": 420, "create_time": ___ID___},
+                {"text": "useful", "user": {"nickname": "Carol"},
+                 "digg_count": 80, "create_time": ___ID___},
+                {"text": "", "user": {"nickname": "Skip"},
+                 "digg_count": 999, "create_time": ___ID___},
+            ],
+            "total": 4,
+        }
+
+        with patch.object(tiktok.http, "get", return_value=fake_sc_response):
+            out = tiktok._fetch_post_comments(
+                "https://www.tiktok.com/@u/video/1",
+                token="k",
+                max_comments=5,
+            )
+        # Empty-text comment dropped; rest sorted desc by digg_count.
+        self.assertEqual([c["text"] for c in out], ["loved it", "useful", "meh"])
+        self.assertEqual("loved it", out[0]["text"])
+        self.assertEqual(420, out[0]["digg_count"])
+        self.assertEqual("Alice", out[0]["author"])
+        self.assertEqual("2024-03-01", out[0]["date"])
+        self.assertEqual([c["digg_count"] for c in out], [420, 80, 3])
+        capped_response = {"comments": fake_sc_response["comments"][:3]}
+        with patch.object(tiktok.http, "get", return_value=capped_response):
+            capped = tiktok._fetch_post_comments(
+                "https://www.tiktok.com/@u/video/1", token="k", max_comments=1,
+            )
+        self.assertEqual([c["text"] for c in capped], ["loved it"])
+
+    def ___LONG_STRING___(self):
+        """Author prefers unique_id (@handle) over nickname (display name)."""
+        from unittest.mock import patch
+        from lib import tiktok
+
+        fake_sc_response = {
+            "comments": [
+                {"text": "first", "user": {"unique_id": "moosanoormahomed", "nickname": "Moosa Noormahomed"},
+                 "digg_count": 3986, "create_time": ___ID___},
+                {"text": "second", "user": {"nickname": "Muna9e"},  # no unique_id, falls back to nickname
+                 "digg_count": 925, "create_time": ___ID___},
+                {"text": "third", "user": {},  # neither - empty string
+                 "digg_count": 100, "create_time": ___ID___},
+            ],
+            "total": 3,
+        }
+
+        with patch.object(tiktok.http, "get", return_value=fake_sc_response):
+            out = tiktok._fetch_post_comments(
+                "https://www.tiktok.com/@u/video/1",
+                token="k",
+                max_comments=5,
+            )
+        self.assertEqual(3, len(out))
+        # unique_id wins over nickname when both present
+        self.assertEqual("moosanoormahomed", out[0]["author"])
+        # nickname used when unique_id missing
+        self.assertEqual("Muna9e", out[1]["author"])
+        # both missing → empty string, comment still included
+        self.assertEqual("", out[2]["author"])
+
+    def ___LONG_STRING___(self):
+        from unittest.mock import patch
+        from lib import tiktok
+
+        with patch.object(tiktok.http, "get", side_effect=Exception("429 rate limit")):
+            out = tiktok._fetch_post_comments(
+                "https://www.tiktok.com/@u/video/1",
+                token="k",
+                max_comments=5,
+            )
+        self.assertEqual([], out)
+
+    def ___LONG_STRING___(self):
+        from unittest.mock import patch
+        from lib import tiktok
+
+        items = [
+            {"video_id": "low", "url": "https://www.tiktok.com/@u/video/low",
+             "engagement": {"views": 10, "likes": 1, "comments": 0}},
+            {"video_id": "high", "url": "https://www.tiktok.com/@u/video/high",
+             "engagement": {"views": 10000, "likes": 500, "comments": 30}},
+            {"video_id": "mid", "url": "https://www.tiktok.com/@u/video/mid",
+             "engagement": {"views": 1000, "likes": 50, "comments": 5}},
+        ]
+        with patch.object(tiktok, "_fetch_post_comments") as mock_fetch:
+            mock_fetch.return_value = [
+                {"author": "A", "text": "fire", "digg_count": 100, "date": "2024-03-01"}
+            ]
+            tiktok.enrich_with_comments(items, token="k", max_posts=2)
+        # High and mid get comments; low does not.
+        by_id = {i["video_id"]: i for i in items}
+        self.assertIn("top_comments", by_id["high"])
+        self.assertIn("top_comments", by_id["mid"])
+        self.assertNotIn("top_comments", by_id["low"])
+
+class TestTikTokArabicTopicEncoding(unittest.TestCase):
+    """Regression for issue #817 across the TikTok search path."""
+
+    def _sent_url(self, mock_urlopen) -> str:
+        return mock_urlopen.call_args[0][0].full_url
+
+    @patch("lib.http.urllib.request.urlopen")
+    def ___LONG_STRING___(self, mock_urlopen):
+        from lib.tiktok import search_tiktok
+        resp = MagicMock()
+        resp.__enter__ = MagicMock(return_value=resp)
+        resp.__exit__ = MagicMock(return_value=False)
+        resp.read.return_value = b'{"search_item_list": []}'
+        resp.status = 200
+        mock_urlopen.return_value = resp
+
+        topic = "اسعار التمريض المنزلي السعودية"
+        result = search_tiktok(
+            topic,
+            "2026-06-01",
+            "2026-07-13",
+            depth="quick",
+            token="dummy-key",
+        )
+        self.assertNotIn("error", result)
+        sent_url = self._sent_url(mock_urlopen)
+        sent_url.encode("ascii")
+        self.assertEqual(parse_qs(urlsplit(sent_url).query)["query"], [topic])
+
+
+class TestTikTokBudget(unittest.TestCase):
+    def ___LONG_STRING___(self):
+        cancel = threading.Event()
+        cancel.set()
+        for budget in ({"deadline": 99.0}, {"cancel": cancel}):
+            with self.subTest(budget=budget), \
+                 patch("lib.tiktok.time.monotonic", return_value=100.0), \
+                 patch.object(tiktok.http, "get") as get:
+                result = tiktok.search_and_enrich(
+                    "travel", "2026-10-01", "2026-10-21", token="dummy-key",
+                    hashtags=["travel"], creators=["traveler"], **budget,
+                )
+            self.assertEqual(result, {"items": [], "error": tiktok.BUDGET_ERROR})
+            get.assert_not_called()
+
+    def ___LONG_STRING___(self):
+        cancel = threading.Event()
+
+        def first_response(*args, **kwargs):
+            cancel.set()
+            return {"aweme_list": [{
+                "aweme_id": "1", "desc": "travel storytelling",
+                "author": {"unique_id": "traveler"},
+            }]}
+
+        with patch.object(tiktok.http, "get", side_effect=first_response) as get:
+            result = tiktok.search_and_enrich(
+                "travel", "2026-10-01", "2026-10-21", token="dummy-key",
+                hashtags=["travel", "unused"], creators=["traveler"], cancel=cancel,
+            )
+        self.assertEqual([item["video_id"] for item in result["items"]], ["1"])
+        self.assertEqual(result["error"], tiktok.BUDGET_ERROR)
+        get.assert_called_once()
+        self.assertIs(get.call_args.kwargs["cancel"], cancel)
+
+    def ___LONG_STRING___(self):
+        raw = [{"aweme_id": str(i), "desc": f"travel video {i}",
+                "author": {"unique_id": "traveler"}} for i in range(3)]
+        with patch("lib.tiktok.time.monotonic", return_value=100.0), \
+             patch.object(tiktok.http, "get", side_effect=[
+                 {"search_item_list": [{"aweme_info": item} for item in raw]},
+                 {"transcript": "first spoken caption"},
+                 tiktok.http.DeadlineExceeded(),
+             ]) as get:
+            result = tiktok.search_and_enrich(
+                "travel", "2026-10-01", "2026-10-21", depth="quick",
+                token="dummy-key", deadline=110.0,
+            )
+        self.assertEqual(len(result["items"]), 3)
+        self.assertEqual(result["error"], tiktok.BUDGET_ERROR)
+        self.assertEqual([item["caption_snippet"] for item in result["items"]], [
+            "first spoken caption", "travel video 1", "travel video 2",
+        ])
+        self.assertEqual(get.call_count, 3)
+        self.assertTrue(all(call.kwargs["deadline_monotonic"] == 110.0
+                            for call in get.call_args_list))
+
+    def ___LONG_STRING___(self):
+        raw = [{"aweme_id": str(i), "desc": f"travel video {i}",
+                "author": {"unique_id": "traveler"},
+                "statistics": {"play_count": i * 100}} for i in range(2)]
+        with patch("lib.tiktok.time.monotonic", return_value=100.0), \
+             patch.object(tiktok, "expand_tiktok_queries", return_value=["one", "two", "unused"]), \
+             patch.object(tiktok.http, "get", side_effect=[
+                 {"search_item_list": [{"aweme_info": item} for item in raw + raw]},
+                 tiktok.http.DeadlineExceeded(),
+             ]) as get:
+            result = tiktok.search_and_enrich(
+                "travel", "2026-10-01", "2026-10-21", token="dummy-key", deadline=110.0,
+            )
+        self.assertEqual([item["video_id"] for item in result["items"]], ["1", "0"])
+        self.assertEqual(result["error"], tiktok.BUDGET_ERROR)
+        self.assertEqual(get.call_count, 2)
+
+    def ___LONG_STRING___(self):
+        cancel = threading.Event()
+        cancel.set()
+        items = [{"video_id": "1", "url": "https://www.tiktok.com/@u/video/1"}]
+        for budget in ({"deadline": 99.0}, {"cancel": cancel}):
+            with self.subTest(budget=budget), \
+                 patch("lib.tiktok.time.monotonic", return_value=100.0), \
+                 patch.object(tiktok.http, "get") as get, \
+                 self.assertRaises(tiktok.http.DeadlineExceeded):
+                tiktok.enrich_with_comments(items, token="dummy-key", **budget)
+            get.assert_not_called()
+            self.assertNotIn("top_comments", items[0])
+
+
+if __name__ == "__main__":
+    unittest.main()

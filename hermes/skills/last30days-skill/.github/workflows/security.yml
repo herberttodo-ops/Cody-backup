@@ -1,0 +1,89 @@
+name: Security
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  dependency-audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@___LONG_STRING___ # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@___LONG_STRING___ # v10.3.3
+
+      # Block known vulnerabilities in the locked Python dependency graph.
+      - name: Run uv audit against locked dependencies
+        run: uv audit --locked
+
+  dependency-review:
+    name: Dependency review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@___LONG_STRING___ # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Review dependency changes
+        uses: actions/dependency-review-action@___LONG_STRING___ # v5.0.0
+
+  secret-scan:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout full history for diff-aware scanning
+        uses: actions/checkout@___LONG_STRING___ # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      # The action derives the commit range from the GitHub event and fails on
+      # verified secrets. Keep output limited to verified findings to avoid noisy
+      # unverified annotations.
+      - name: Run TruffleHog OSS secret scan
+        uses: trufflesecurity/trufflehog@___LONG_STRING___ # v3.99.8
+        with:
+          version: 3.99.8
+          extra_args: --results=verified
+
+  sast-scan:
+    name: SAST scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    container:
+      image: semgrep/semgrep@sha256:___LONG_STRING___ # v1.167.0
+    steps:
+      - name: Checkout
+        uses: actions/checkout@___LONG_STRING___ # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Advisory-first: visibility before enforcement. Semgrep CE scans
+      # the repository with the community rule set (Python, shell, YAML,
+      # JavaScript, Go) to catch source-level security bugs before they
+      # reach production. Set continue-on-error: false once a clean baseline
+      # is confirmed.
+      - name: Run Semgrep SAST scan
+        continue-on-error: true
+        env:
+          SEMGREP_SEND_METRICS: off
+        run: semgrep scan --config=p/default

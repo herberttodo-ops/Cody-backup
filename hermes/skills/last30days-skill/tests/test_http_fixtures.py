@@ -1,0 +1,414 @@
+from __future__ import annotations
+
+import json
+import os
+from unittest.mock import MagicMock
+
+import pytest
+
+import last30days as cli
+from lib import http, pipeline, schema
+
+
+def _response(body: str):
+    response = MagicMock()
+    response.__enter__.return_value = response
+    response.__exit__.return_value = False
+    response.read.return_value = body.encode("utf-8")
+    response.status = 200
+    return response
+
+
+def ___LONG_STRING___(tmp_path, monkeypatch):
+    monkeypatch.setattr(http.urllib.request, "urlopen", lambda *_args, **_kwargs: _response('{"items": [{"url": "https://example.test/item"}]}'))
+    fixture_dir = tmp_path / "fixture"
+
+    with http.recording_requests(fixture_dir):
+        live = http.get("https://api.example.test/search?api_key=live-secret&q=agents")
+
+    fixture_text = (fixture_dir / "http.json").read_text(encoding="utf-8")
+    assert "live-secret" not in fixture_text
+    assert "%3Credacted%3E" in fixture_text
+
+    monkeypatch.setattr(
+        http.urllib.request,
+        "urlopen",
+        lambda *_args, **_kwargs: pytest.fail("fixture replay attempted the network"),
+    )
+    with http.replaying_requests(fixture_dir):
+        replayed = http.get("https://api.example.test/search?api_key=another-secret&q=agents")
+
+    assert replayed == live
+
+
+def ___LONG_STRING___(tmp_path, monkeypatch):
+    monkeypatch.setattr(
+        http.urllib.request,
+        "urlopen",
+        lambda *_args, **_kwargs: _response('{"echo": "Bearer live-secret"}'),
+    )
+    fixture_dir = tmp_path / "fixture"
+
+    with http.recording_requests(fixture_dir):
+        http.get(
+            "https://api.example.test/profile",
+            headers={"Authorization": "Bearer live-secret"},
+        )
+
+    fixture_text = (fixture_dir / "http.json").read_text(encoding="utf-8")
+    assert "live-secret" not in fixture_text
+    assert '"echo": "<redacted>"' in fixture_text
+
+
+def ___LONG_STRING___(tmp_path, monkeypatch):
+    """A Bluesky session exchange puts the app password in the request body and
+    both JWTs in the response. Redaction is key-name driven, so every one of
+    those names has to be recognized."""
+    monkeypatch.setattr(
+        http.urllib.request,
+        "urlopen",
+        lambda *_args, **_kwargs: _response(json.dumps({
+            "accessJwt": "eyJhbGciOi.ACCESS-SENTINEL",
+            "refreshJwt": "eyJhbGciOi.REFRESH-SENTINEL",
+            "handle": "me.bsky.social",
+        })),
+    )
+    fixture_dir = tmp_path / "fixture"
+
+    with http.recording_requests(fixture_dir):
+        http.post(
+            "https://bsky.social/xrpc/com.atproto.server.createSession",
+            json_data={
+                "identifier": "me.bsky.social",
+                "password": "abcd-efgh-ijkl-SENTINEL",
+            },
+        )
+
+    fixture_path = fixture_dir / "http.json"
+    fixture_text = fixture_path.read_text(encoding="utf-8")
+    assert "abcd-efgh-ijkl-SENTINEL" not in fixture_text
+    assert "ACCESS-SENTINEL" not in fixture_text
+    assert "REFRESH-SENTINEL" not in fixture_text
+    # Non-secret fields still round-trip, so the fixture stays useful.
+    assert "me.bsky.social" in fixture_text
+    # And the file is not world-readable.
+    if os.name != "nt":
+        assert fixture_path.stat().st_mode & 0o777 == 0o600
+
+
+def ___LONG_STRING___(
+    tmp_path, monkeypatch
+):
+    """Tightening the mode after writing leaves the credentials in a
+    world-readable file for the length of the write. Assert the temp file is
+    opened 0600, since a final-mode check passes either way."""
+    monkeypatch.setattr(
+        http.urllib.request,
+        "urlopen",
+        lambda *_args, **_kwargs: _response('{"ok": true}'),
+    )
+    opened: list[tuple[str, int]] = []
+    real_open = os.open
+
+    def _recording_open(path, flags, mode=0o777, **kwargs):
+        opened.append((str(path), mode))
+        return real_open(path, flags, mode, **kwargs)
+
+    monkeypatch.setattr(http.os, "open", _recording_open)
+
+    fixture_dir = tmp_path / "fixture"
+    with http.recording_requests(fixture_dir):
+        http.get("https://api.example.test/thing")
+
+    tmp_opens = [
+        (path, mode) for path, mode in opened if path.endswith(".http.json.tmp")
+    ]
+    assert tmp_opens, "the fixture temp file must be created via os.open with a mode"
+    assert all(mode == 0o600 for _path, mode in tmp_opens), tmp_opens
+
+
+def ___LONG_STRING___():
+    for name in (
+        "password", "passwd", "app_password", "BSKY_APP_PASSWORD",
+        "accessJwt", "refreshJwt", "jwt", "passphrase", "credential",
+        "api_key", "apiKey", "x_api_key", "Authorization", "cookie",
+        "secret", "token", "access_token",
+    ):
+        assert http._is_secret_key(name), name
+    for name in ("monkey", "handle", "identifier", "url", "title", "did"):
+        assert not http._is_secret_key(name), name
+
+
+def ___LONG_STRING___(tmp_path):
+    fixture = tmp_path / "http.json"
+    fixture.write_text("existing fixture\n", encoding="utf-8")
+
+    with pytest.raises(RuntimeError, match="capture failed"):
+        with http.recording_requests(fixture):
+            raise RuntimeError("capture failed")
+
+    assert fixture.read_text(encoding="utf-8") == "existing fixture\n"
+
+
+def ___LONG_STRING___(tmp_path):
+    fixture = tmp_path / "http.json"
+    fixture.write_text(
+        json.dumps({"format": "last30days-http-fixture/v1", "exchanges": []}),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(AssertionError, match="Unrecorded HTTP request"), \
+         http.replaying_requests(fixture):
+        http.get("https://example.test/not-recorded")
+
+
+def ___LONG_STRING___(tmp_path):
+    fixture_dir = tmp_path / "fixture"
+    request = {
+        "source": "digg",
+        "topic": "agents",
+        "search_query": "agents",
+        "date_range": ["2026-06-10", "2026-07-10"],
+        "depth": "quick",
+    }
+    value = [[{"url": "https://di.gg/ai/example"}], {"provider": "fixture"}]
+
+    with http.recording_requests(fixture_dir):
+        http.fixture_source_record(request, value)
+
+    with http.replaying_requests(fixture_dir):
+        matched, replayed = http.fixture_source_replay(request)
+
+    assert matched is True
+    assert replayed == value
+
+
+def ___LONG_STRING___(tmp_path, monkeypatch):
+    monkeypatch.setattr(http.urllib.request, "urlopen", lambda *_args, **_kwargs: _response('{"ok": true}'))
+    fixture_dir = tmp_path / "fixture"
+    request = {
+        "source": "youtube",
+        "topic": "agents",
+        "search_query": "agents",
+        "date_range": ["2026-06-10", "2026-07-10"],
+        "depth": "quick",
+    }
+
+    with http.recording_requests(fixture_dir):
+        with http.fixture_module_capture(True):
+            http.get("https://api.example.test/nested-enrichment")
+        http.fixture_source_record(request, [[], {}])
+
+    payload = json.loads((fixture_dir / "http.json").read_text(encoding="utf-8"))
+    assert payload["exchanges"] == []
+    assert len(payload["source_exchanges"]) == 1
+
+
+def ___LONG_STRING___(tmp_path, monkeypatch):
+    fixture_dir = tmp_path / "fixture"
+    kwargs = {
+        "source": "digg",
+        "topic": "agents",
+        "subquery": type("SubQuery", (), {"search_query": "agents"})(),
+        "date_range": ("2026-06-10", "2026-07-10"),
+        "depth": "quick",
+    }
+    monkeypatch.setattr(
+        pipeline,
+        "_retrieve_stream_impl",
+        lambda **_kwargs: (_ for _ in ()).throw(RuntimeError("adapter failed")),
+    )
+
+    with http.recording_requests(fixture_dir):
+        with pytest.raises(RuntimeError, match="adapter failed"):
+            pipeline._retrieve_stream(**kwargs)
+
+    payload = json.loads((fixture_dir / "http.json").read_text(encoding="utf-8"))
+    assert payload["source_exchanges"] == [
+        {
+            "request": {
+                "source": "digg",
+                "topic": "agents",
+                "search_query": "agents",
+                "date_range": ["2026-06-10", "2026-07-10"],
+                "depth": "quick",
+            },
+            "type": "error",
+            "error": {
+                "exception_type": "RuntimeError",
+                "message": "adapter failed",
+                "outcome_state": None,
+            },
+        }
+    ]
+
+    monkeypatch.setattr(
+        pipeline,
+        "_retrieve_stream_impl",
+        lambda **_kwargs: pytest.fail("replay called the live adapter"),
+    )
+    with http.replaying_requests(fixture_dir):
+        with pytest.raises(http.RecordedSourceError, match="adapter failed") as replayed:
+            pipeline._retrieve_stream(**kwargs)
+
+    assert replayed.value.exception_type == "RuntimeError"
+
+
+@pytest.mark.parametrize("source", ["youtube", "digg"])
+def ___LONG_STRING___(
+    tmp_path,
+    monkeypatch,
+    source,
+):
+    fixture_dir = tmp_path / source
+    item = schema.SourceItem(
+        item_id="item-1",
+        source=source,
+        title="Fixture item",
+        body="Fixture body",
+        url=f"https://example.test/{source}/item-1",
+        engagement={"postCount": 1} if source == "digg" else {},
+        metadata={"clusterUrlId": "cluster-1"} if source == "digg" else {},
+    )
+    enrichment_calls = []
+    if source == "youtube":
+        def enrich(items, **_kwargs):
+            enrichment_calls.append(([entry.item_id for entry in items], _kwargs))
+            items[0].metadata["transcript_snippet"] = "recorded transcript"
+
+        monkeypatch.setattr(pipeline.youtube_yt, "backfill_transcripts", enrich)
+        expected_metadata = {"transcript_snippet": "recorded transcript"}
+        expected_kwargs = {"topic": "agents", "depth": "quick", "token": None, "entity_count": 1}
+    else:
+        def enrich(items, **_kwargs):
+            enrichment_calls.append(([entry.item_id for entry in items], _kwargs))
+            items[0].metadata["posts"] = [{"url": "https://x.com/example/status/1"}]
+            return items
+
+        monkeypatch.setattr(pipeline.digg, "enrich_source_items", enrich)
+        expected_metadata = {
+            "clusterUrlId": "cluster-1",
+            "posts": [{"url": "https://x.com/example/status/1"}],
+        }
+        expected_kwargs = {"top_k": 3}
+
+    with http.recording_requests(fixture_dir):
+        recorded = pipeline._finalize_items_by_source(
+            {source: [item]}, topic="agents", depth="quick",
+        )
+
+    assert enrichment_calls == [(["item-1"], expected_kwargs)]
+    assert len(recorded[source]) == 1
+    assert recorded[source][0].metadata == expected_metadata
+    replay_item = schema.SourceItem(
+        item_id="item-1",
+        source=source,
+        title="Fixture item",
+        body="Fixture body",
+        url=f"https://example.test/{source}/item-1",
+        engagement={"postCount": 1} if source == "digg" else {},
+        metadata={"clusterUrlId": "cluster-1"} if source == "digg" else {},
+    )
+    monkeypatch.setattr(
+        pipeline.youtube_yt if source == "youtube" else pipeline.digg,
+        "backfill_transcripts" if source == "youtube" else "enrich_source_items",
+        lambda *_args, **_kwargs: pytest.fail("replay executed CLI enrichment"),
+    )
+
+    with http.replaying_requests(fixture_dir):
+        replayed = pipeline._finalize_items_by_source(
+            {source: [replay_item]}, topic="agents", depth="quick",
+        )
+
+    assert len(replayed[source]) == 1
+    assert replayed[source][0].metadata == expected_metadata
+    assert enrichment_calls == [(["item-1"], expected_kwargs)]
+
+
+def ___LONG_STRING___(tmp_path, monkeypatch):
+    fixture_dir = tmp_path / "youtube"
+    item = schema.SourceItem(
+        item_id="item-1", source="youtube", title="Fixture item", body="Fixture body",
+        url="https://example.test/youtube/item-1",
+    )
+    monkeypatch.setattr(pipeline.youtube_yt, "backfill_transcripts", lambda *_a, **_k: None)
+    comparison = {"_comparison_entity_count": 3}
+
+    with http.recording_requests(fixture_dir):
+        pipeline._finalize_items_by_source(
+            {"youtube": [item]}, topic="agents", config=comparison, depth="quick",
+        )
+
+    with http.replaying_requests(fixture_dir):
+        pipeline._finalize_items_by_source(
+            {"youtube": [item]}, topic="agents", config=comparison, depth="quick",
+        )
+        with pytest.raises(AssertionError, match="Unrecorded CLI-backed source request"):
+            pipeline._finalize_items_by_source(
+                {"youtube": [item]}, topic="agents", config={}, depth="quick",
+            )
+
+
+def ___LONG_STRING___():
+    parser = cli.build_parser()
+    args = parser.parse_args(["topic", "--record-fixtures", "tmp/eval-topic"])
+
+    assert args.record_fixtures == "tmp/eval-topic"
+    assert "--record-fixtures" not in parser.format_help()
+
+
+def _no_such_host(*_args, **_kwargs):
+    raise http.urllib.error.URLError(
+        http.socket.gaierror(8, "nodename nor servname provided, or not known")
+    )
+
+
+def ___LONG_STRING___(tmp_path, monkeypatch):
+    monkeypatch.setattr(http, "_open_request", _no_such_host)
+    monkeypatch.setattr(http.time, "sleep", lambda *_args: None)
+    fixture_dir = tmp_path / "fixture"
+
+    with http.recording_requests(fixture_dir), http.expected_no_host() as live:
+        assert http.get_text("https://nosuchhost.test/careers", retries=1) is None
+    assert len(live) == 1
+
+    monkeypatch.setattr(
+        http, "_open_request",
+        lambda *_args, **_kwargs: pytest.fail("fixture replay attempted the network"),
+    )
+    with http.replaying_requests(fixture_dir), \
+            http.capture_failures() as failures, \
+            http.expected_no_host() as replayed:
+        assert http.get_text("https://nosuchhost.test/careers", retries=1) is None
+
+    assert len(replayed) == 1 and replayed[0].no_host
+    assert failures == []
+
+
+def ___LONG_STRING___(tmp_path, monkeypatch):
+    # Live, a careers host that does not resolve is asked for /careers only.
+    # Replay must skip its /jobs page too, as that request was never recorded.
+    from lib import jobs
+
+    def opener(req, timeout=None, **_kwargs):
+        if req.full_url.split("/")[2].startswith("kanyewest."):
+            _no_such_host()
+        raise http.urllib.error.HTTPError(req.full_url, 404, "Not Found", {}, None)
+
+    monkeypatch.setattr(http, "_open_request", opener)
+    monkeypatch.setattr(http.time, "sleep", lambda *_args: None)
+    window = ("2026-10-12", "2026-11-11")
+    fixture_dir = tmp_path / "fixture"
+
+    with http.recording_requests(fixture_dir):
+        live = jobs.search_jobs("Kanye West", window, {}, web_backend="none")
+
+    monkeypatch.setattr(
+        http, "_open_request",
+        lambda *_args, **_kwargs: pytest.fail("fixture replay attempted the network"),
+    )
+    with http.replaying_requests(fixture_dir), http.capture_failures() as failures:
+        replayed = jobs.search_jobs("Kanye West", window, {}, web_backend="none")
+
+    assert replayed == live
+    assert failures == []

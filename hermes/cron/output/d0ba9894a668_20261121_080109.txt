@@ -1,0 +1,55 @@
+Cronjob Response: optirfp-linkedin-daily
+(job_id: d0ba9894a668)
+-------------
+
+Headline: Is your RFP response actually answering them?
+Topic: winning
+Content library: 43 headlines, 12 templates
+Generated at: 2026-11-21T08:00:46.628248
+Sat Nov 21 08:00:46 AM EST 2026: Starting OptiRFP daily post v2.0 (expanded content)...
+Sat Nov 21 08:00:46 AM EST 2026: Generated headline: Is your RFP response actually answering them?
+Sat Nov 21 08:00:46 AM EST 2026: Topic: winning
+Sat Nov 21 08:00:46 AM EST 2026: Using expanded content library v2.0
+Sat Nov 21 08:00:46 AM EST 2026: Generating image with compositor...
+Sat Nov 21 08:01:02 AM EST 2026: Image generated: /home/herby/.hermes/generated_images/optirfp_winning____ID___.png
+Sat Nov 21 08:01:02 AM EST 2026: Uploading to Drive...
+/home/herby/.hermes/hermes-agent/venv/lib/python3.11/site-packages/google/api_core/_python_version_support.py:273: FutureWarning: You are using a Python version (3.11.16) which Google will stop supporting in new releases of google.api_core once it reaches its end of life (2027-10-24). Please upgrade to the latest Python version, or at least Python 3.12, to continue receiving updates for google.api_core past that date.
+  warnings.warn(message, FutureWarning)
+Sat Nov 21 08:01:06 AM EST 2026: Drive URL: https://drive.google.com/uc?export=view&id=1AtFbDQ8Hp0i7D3-I2EjoakolE6vgAdhi
+Sat Nov 21 08:01:06 AM EST 2026: Posting to LinkedIn...
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"6b019613846b0ee9070b4b56\",\"allowedActions\":[\"publishPostNow\",\"updatePost\",\"movePostToDraft\",\"publishPostNext\",\"updatePostSchedule\",\"updatePostTags\",\"addPostNote\",\"duplicatePost\",\"deletePost\",\"updateShopGridLink\",\"createPostRecurrence\"],\"status\":\"scheduled\",\"text\":\"Is your RFP response actually answering them?\\n\\nMost RFP responses bury the value under features.\\n\\nFlip it. Lead with outcomes. Lead with proof. Lead with the transformation they actually care about.\\n\\nThe 'so what' is what wins.\\n\\n#RFPWriting #BusinessDevelopment #SalesProcess #ProposalTips #B2B\",\"channelId\":\"6a7f74bcb2d9d577437af9a4\",\"channelService\":\"linkedin\",\"dueAt\":\"2026-11-21T13:41:00.000Z\",\"sentAt\":null,\"schedulingType\":\"automatic\",\"shareMode\":\"addToQueue\",\"sharedNow\":false,\"isCustomScheduled\":false,\"createdAt\":\"2026-11-21T13:01:07.879Z\",\"updatedAt\":\"2026-11-21T13:01:07.921Z\",\"tags\":[],\"assets\":[{\"__typename\":\"ImageAsset\",\"id\":null,\"type\":\"image\",\"mimeType\":\"image/png\",\"source\":\"https://drive.google.com/uc?export=view&id=1AtFbDQ8Hp0i7D3-I2EjoakolE6vgAdhi\",\"thumbnail\":\"https://drive.google.com/uc?export=view&id=1AtFbDQ8Hp0i7D3-I2EjoakolE6vgAdhi\",\"image\":{\"width\":2048,\"height\":2048,\"altText\":\"Is your RFP response actually answering them?\\n\\nMost RFP responses bury the value under features.\\n\\nFl\",\"isAnimated\":false,\"animatedThumbnail\":null,\"userTags\":null}}],\"error\":null,\"metadata\":{\"__typename\":\"LinkedInPostMetadata\",\"type\":\"post\",\"annotations\":[{\"type\":\"hashtag\",\"content\":\"#RFPWriting\",\"indices\":[229,240],\"text\":\"#RFPWriting\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=RFPWriting\"},{\"type\":\"hashtag\",\"content\":\"#BusinessDevelopment\",\"indices\":[241,261],\"text\":\"#BusinessDevelopment\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=BusinessDevelopment\"},{\"type\":\"hashtag\",\"content\":\"#SalesProcess\",\"indices\":[262,275],\"text\":\"#SalesProcess\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=SalesProcess\"},{\"type\":\"hashtag\",\"content\":\"#ProposalTips\",\"indices\":[276,289],\"text\":\"#ProposalTips\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=ProposalTips\"},{\"type\":\"hashtag\",\"content\":\"#B2B\",\"indices\":[290,294],\"text\":\"#B2B\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=B2B\"}],\"firstComment\":null,\"linkAttachment\":null}}"
+      },
+      {
+        "type": "text",
+        "text": "{\"rateLimit\":[{\"remaining\":148,\"resetSeconds\":730},{\"remaining\":574,\"resetSeconds\":46622},{\"remaining\":1527,\"resetSeconds\":1898818}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+Sat Nov 21 08:01:08 AM EST 2026: Posting to Facebook...
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"6b019614846b0ee9070b4bcf\",\"allowedActions\":[\"publishPostNow\",\"updatePost\",\"movePostToDraft\",\"publishPostNext\",\"updatePostSchedule\",\"updatePostTags\",\"addPostNote\",\"duplicatePost\",\"deletePost\",\"updateShopGridLink\",\"createPostRecurrence\"],\"status\":\"scheduled\",\"text\":\"Is your RFP response actually answering them?\\n\\nMost RFP responses bury the value under features.\\n\\nFlip it. Lead with outcomes. Lead with proof. Lead with the transformation they actually care about.\\n\\nThe 'so what' is what wins.\\n\\n#RFPWriting #BusinessDevelopment #SalesProcess #ProposalTips #B2B\",\"channelId\":\"6a7f7476b2d9d577437af67f\",\"channelService\":\"facebook\",\"dueAt\":\"2026-11-22T03:32:00.000Z\",\"sentAt\":null,\"schedulingType\":\"automatic\",\"shareMode\":\"addToQueue\",\"sharedNow\":false,\"isCustomScheduled\":false,\"createdAt\":\"2026-11-21T13:01:08.388Z\",\"updatedAt\":\"2026-11-21T13:01:08.410Z\",\"tags\":[],\"assets\":[{\"__typename\":\"ImageAsset\",\"id\":null,\"type\":\"image\",\"mimeType\":\"image/png\",\"source\":\"https://drive.google.com/uc?export=view&id=1AtFbDQ8Hp0i7D3-I2EjoakolE6vgAdhi\",\"thumbnail\":\"https://drive.google.com/uc?export=view&id=1AtFbDQ8Hp0i7D3-I2EjoakolE6vgAdhi\",\"image\":{\"width\":2048,\"height\":2048,\"altText\":\"Is your RFP response actually answering them?\\n\\nMost RFP responses bury the value under features.\\n\\nFl\",\"isAnimated\":false,\"animatedThumbnail\":null,\"userTags\":null}}],\"error\":null,\"metadata\":{\"__typename\":\"FacebookPostMetadata\",\"type\":\"post\",\"annotations\":[{\"type\":\"hashtag\",\"content\":\"#RFPWriting\",\"indices\":[229,240],\"text\":\"#RFPWriting\",\"url\":\"https://www.facebook.com/hashtag/RFPWriting\"},{\"type\":\"hashtag\",\"content\":\"#BusinessDevelopment\",\"indices\":[241,261],\"text\":\"#BusinessDevelopment\",\"url\":\"https://www.facebook.com/hashtag/BusinessDevelopment\"},{\"type\":\"hashtag\",\"content\":\"#SalesProcess\",\"indices\":[262,275],\"text\":\"#SalesProcess\",\"url\":\"https://www.facebook.com/hashtag/SalesProcess\"},{\"type\":\"hashtag\",\"content\":\"#ProposalTips\",\"indices\":[276,289],\"text\":\"#ProposalTips\",\"url\":\"https://www.facebook.com/hashtag/ProposalTips\"},{\"type\":\"hashtag\",\"content\":\"#B2B\",\"indices\":[290,294],\"text\":\"#B2B\",\"url\":\"https://www.facebook.com/hashtag/B2B\"}],\"title\":null,\"firstComment\":null,\"linkAttachment\":null}}"
+      },
+      {
+        "type": "text",
+        "text": "{\"rateLimit\":[{\"remaining\":147,\"resetSeconds\":729},{\"remaining\":573,\"resetSeconds\":46621},{\"remaining\":1526,\"resetSeconds\":1898816}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+Sat Nov 21 08:01:08 AM EST 2026: DONE - Posted with expanded content variety
+
+To stop or manage this job, send me a new message (e.g. "stop reminder optirfp-linkedin-daily").

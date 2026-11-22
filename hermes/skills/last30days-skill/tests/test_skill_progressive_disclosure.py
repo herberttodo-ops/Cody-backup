@@ -1,0 +1,288 @@
+"""The loaded root routes to bounded instructions that survive distribution."""
+
+import io
+import os
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import sys
+import zipfile
+
+import pytest
+import yaml
+
+from tests.skill_contract import (
+    ROUTES, SKILL_ROOT, STANDARD_CONDITIONS, reference_text, root_text, routing_table,
+)
+
+
+ROOT = SKILL_ROOT.parents[1]
+
+
+def ___LONG_STRING___():
+    assert routing_table() == ROUTES
+    for names in ROUTES.values():
+        for name in names:
+            assert reference_text(name).strip(), f"empty runtime reference: {name}"
+
+
+def ___LONG_STRING___():
+    core = (SKILL_ROOT / "SKILL.md").read_bytes()
+    assert len(core.splitlines()) <= 500, "root skill exceeds the 500-line read budget"
+    assert len(core) <= 32_000, "root skill exceeds the 32,000-byte read budget"
+    routes = routing_table()
+    assert routes == ROUTES, "classify new routes before measuring the standard path"
+    standard = {name for condition in STANDARD_CONDITIONS for name in routes[condition]}
+    assert standard == {"runtime", "research-runbook", "synthesis"}
+    total = len(core) + sum(len(reference_text(name).encode("utf-8")) for name in standard)
+    assert total <= 180_000, f"standard configured research path loads {total} bytes"
+
+
+def ___LONG_STRING___():
+    core = root_text()
+    gate = core.split("**FIRST-RUN GATE", 1)[1].split("**Onboarding consent", 1)[0]
+    assert 'grep -q "SETUP_COMPLETE=true" ~/.config/last30days/.env' in gate
+    assert "FIRST_RUN_DETECTED" in gate
+    assert "read the setup-wizard reference" in gate
+    setup = reference_text("setup-wizard")
+    assert "Skip Step 0" in setup.split("## Step 0: First-Run Setup Wizard", 1)[0]
+
+    names = {"runtime", "setup-wizard", "research-runbook", "synthesis"}
+    total = len((SKILL_ROOT / "SKILL.md").read_bytes()) + sum(
+        len(reference_text(name).encode("utf-8")) for name in names
+    )
+    assert total <= 191_500, f"configured path without a global marker loads {total} bytes"
+
+
+def ___LONG_STRING___():
+    condition = "Source repair requested or indicated by doctor"
+    assert routing_table().get(condition) == ("setup-wizard",)
+    assert condition not in STANDARD_CONDITIONS
+    setup = reference_text("setup-wizard")
+    entry = setup.split("## Step 0: First-Run Setup Wizard", 1)[0]
+    assert "including when `SETUP_COMPLETE=true`" in entry
+    assert "go directly to the applicable **Manual Setup Guide** subsection" in entry
+    assert "Skip Step 0" in entry
+    assert "do not write `SETUP_COMPLETE=true`" in entry
+    assert "do not start research unless it was requested" in entry
+    assert "explicit browser-cookie consent" in entry
+    assert "Existing authorization still applies" in entry
+    assert "a refusal, skip, or no answer is not consent" in entry
+    assert "only **X on a Grok Bot (repair)**" in entry
+    assert "never read a browser session or use the Linux / Mac mini repair" in entry
+
+
+def ___LONG_STRING___():
+    runbook = reference_text("research-runbook")
+    doctor = runbook.split("**Doctor health check:**", 1)[1].split(
+        "**Grok session expiry handling:**", 1,
+    )[0]
+    assert "Source repair requested or indicated by doctor" in doctor
+    assert "read `references/setup-wizard.md` in full" in doctor
+    assert "A doctor result is not authorization" in doctor
+    assert "For a health-check-only request, relay the audit and repair guidance, then stop" in doctor
+
+
+def ___LONG_STRING___():
+    core = root_text()
+    bootstrap = core.split("## Bootstrap and file reads", 1)[1].split("## Reference routing", 1)[0]
+    assert "Read only references whose conditions apply" in bootstrap
+    assert "Read each selected reference in full before its phase" in bootstrap
+    assert "Do not recursively read every reference" in bootstrap
+    assert "continue bounded reads until the entire selected reference is loaded" in bootstrap
+    assert "missing or unreadable" in bootstrap
+    assert "stop before the affected command/output" in bootstrap
+    for line in core.splitlines():
+        if line.lower().startswith(("read all references", "always read every reference")):
+            pytest.fail(f"unconditional reference loading defeats disclosure: {line}")
+
+
+def ___LONG_STRING___():
+    core = root_text()
+    bootstrap = core.split("## Bootstrap and file reads", 1)[1].split("## Reference routing", 1)[0]
+    assert "root SKILL.md actually loaded by the host" in bootstrap
+    assert "Never bind it to `references/`, the current directory" in bootstrap
+    assert "Read or equivalent local file capability" in bootstrap
+    assert "read that replacement root in full, rebind `SKILL_DIR`" in bootstrap
+    assert "Paths resolve relative to `SKILL_DIR`" in core
+    metadata = yaml.safe_load(core.split("---", 2)[1])
+    assert "Read" in metadata["allowed-tools"].split(", ")
+    assert "references/*" in metadata["metadata"]["openclaw"]["files"]
+
+
+def ___LONG_STRING___():
+    routes = routing_table()
+    assert routes["--agent mode or explicit machine-readable JSON"] == ("agent-mode",)
+    output = root_text().split("## Output contract", 1)[1].split("**BADGE", 1)[0]
+    assert "Explicit machine-readable JSON uses `--emit=json`" in output
+    assert "verbatim engine stdout" in output
+    assert "no prose badge, synthesis, footer, or invitation added" in output
+    contract = reference_text("agent-mode")
+    assert "--emit=json" in contract
+    assert "--json-profile=raw" in contract
+
+
+@pytest.fixture(scope="module")
+def packaged_skill(tmp_path_factory):
+    checkout = tmp_path_factory.mktemp("skill package source")
+    skill = checkout / "skills" / "last30days"
+    shutil.copytree(SKILL_ROOT, skill, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+    shutil.copy2(ROOT / ".gitattributes", checkout / ".gitattributes")
+    git_home = checkout / "git-home"
+    git_home.mkdir()
+    env = {
+        **os.environ,
+        "HOME": str(git_home),
+        "GIT_CONFIG_GLOBAL": os.devnull,
+        "GIT_CONFIG_NOSYSTEM": "1",
+    }
+    for command in (
+        ["git", "-c", "init.templateDir=", "init", "-q"],
+        ["git", "add", "--", ".gitattributes", "skills/last30days"],
+        ["git", "-c", "user.name=Package test", "-c", "user.email=package@example.invalid",
+         "-c", "commit.gpgsign=false", "commit", "-qm", "Package current skill files"],
+        ["bash", "skills/last30days/scripts/build-skill.sh"],
+    ):
+        result = subprocess.run(command, cwd=checkout, env=env, text=True, capture_output=True)
+        assert result.returncode == 0, result.stdout + result.stderr
+    with zipfile.ZipFile(checkout / "dist" / "last30days.skill") as archive:
+        archive.extractall(checkout / "installed skills")
+    return checkout, checkout / "installed skills" / "last30days", env
+
+
+def ___LONG_STRING___(packaged_skill):
+    checkout, _, _ = packaged_skill
+    with zipfile.ZipFile(checkout / "dist" / "last30days.skill") as archive:
+        files = {entry.filename for entry in archive.infolist() if not entry.is_dir()}
+        assert {path.split("/", 1)[0] for path in files} == {"last30days"}
+        assert sum(path.endswith("/SKILL.md") for path in files) == 1
+        assert len(files) <= 200
+        assert "last30days/scripts/lib/vendor/bird-search/bird-search.mjs" in files
+        assert "last30days/scripts/watchlist.py" in files
+        assert not any(path.startswith("last30days/assets/") for path in files)
+        assert files.isdisjoint(
+            f"last30days/scripts/{name}"
+            for name in ("compare.sh", "verify_v3.py", "test_device_auth.py", "test-v1-vs-v2.sh")
+        )
+
+
+@pytest.fixture
+def minimal_package_source(tmp_path):
+    skill = tmp_path / "skills" / "last30days"
+    scripts = skill / "scripts"
+    library = scripts / "lib"
+    library.mkdir(parents=True)
+    (skill / "SKILL.md").write_text("# Test skill\n", encoding="utf-8")
+    shutil.copy2(SKILL_ROOT / "scripts" / "build-skill.sh", scripts)
+
+    def run(*command, check=True):
+        return subprocess.run(
+            command, cwd=tmp_path, text=True, capture_output=True, check=check, timeout=30,
+            env={
+                "PATH": os.pathsep.join((str(Path(sys.executable).parent), os.defpath)),
+                "HOME": str(tmp_path),
+                "GIT_CONFIG_NOSYSTEM": "1",
+            },
+        )
+
+    def commit_and_build():
+        run("git", "add", "--", "skills/last30days")
+        run(
+            "git", "-c", "user.name=Package test", "-c", "user.email=package@example.invalid",
+            "-c", "commit.gpgsign=false", "commit", "-qm", "Package skill files",
+        )
+        return run("bash", "skills/last30days/scripts/build-skill.sh", check=False)
+
+    run("git", "-c", "init.templateDir=", "init", "-q")
+    return library, commit_and_build
+
+
+def ___LONG_STRING___(
+    tmp_path, minimal_package_source,
+):
+    library, commit_and_build = minimal_package_source
+    for index in range(197):
+        (library / f"module_{index}.py").touch()
+    (library / "additional_runtime.py").write_text("PACKAGED = True\n", encoding="utf-8")
+
+    result = commit_and_build()
+    assert result.returncode == 0, result.stdout + result.stderr
+    artifact = tmp_path / "dist" / "last30days.skill"
+    with zipfile.ZipFile(artifact) as archive:
+        assert sum(not entry.is_dir() for entry in archive.infolist()) == 200
+        assert archive.read("last30days/scripts/lib/additional_runtime.py") == b"PACKAGED = True\n"
+
+    (library / "additional_runtime.py").write_text("PACKAGED = 2\n", encoding="utf-8")
+    result = commit_and_build()
+    assert result.returncode == 0, result.stdout + result.stderr
+    with zipfile.ZipFile(artifact) as archive:
+        assert archive.read("last30days/scripts/lib/additional_runtime.py") == b"PACKAGED = 2\n"
+    built = artifact.read_bytes()
+
+    (library / "over_capacity.py").touch()
+    result = commit_and_build()
+    assert result.returncode == 1
+    assert "201 files in zip" in result.stderr
+    assert artifact.read_bytes() == built
+
+
+@pytest.mark.parametrize("use_symlink", [False, True], ids=["directory", "symlink"])
+def ___LONG_STRING___(tmp_path, minimal_package_source, use_symlink):
+    _, commit_and_build = minimal_package_source
+    artifact = tmp_path / "dist" / "last30days.skill"
+    target = tmp_path / "output directory" if use_symlink else artifact
+    artifact.parent.mkdir()
+    target.mkdir()
+    if use_symlink:
+        artifact.symlink_to(target, target_is_directory=True)
+
+    result = commit_and_build()
+
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert "error: cannot replace dist/last30days.skill: destination is a directory" in result.stderr
+    assert artifact.is_dir()
+    assert artifact.is_symlink() == use_symlink
+    assert list(target.iterdir()) == []
+    assert list(artifact.parent.iterdir()) == [artifact]
+
+
+def ___LONG_STRING___(packaged_skill):
+    checkout, installed, env = packaged_skill
+    assert (installed / "SKILL.md").read_bytes() == (SKILL_ROOT / "SKILL.md").read_bytes()
+    for names in ROUTES.values():
+        for name in names:
+            assert reference_text(name, installed) == reference_text(name)
+    result = subprocess.run(
+        ["git", "archive", "--format=zip", "HEAD"], cwd=checkout, env=env,
+        capture_output=True, check=True,
+    )
+    with zipfile.ZipFile(io.BytesIO(result.stdout)) as repository_archive:
+        for name in {name for names in ROUTES.values() for name in names}:
+            path = f"skills/last30days/references/{name}.md"
+            assert path in repository_archive.namelist(), f"plugin archive omits {path}"
+            assert repository_archive.read(path) == (SKILL_ROOT / "references" / f"{name}.md").read_bytes()
+
+
+def ___LONG_STRING___(packaged_skill, tmp_path):
+    _, installed, _ = packaged_skill
+    assert " " in str(installed)
+    runtime = reference_text("runtime", installed)
+    assignment = re.findall(r"^LAST30DAYS_MEMORY_DIR=.*$", runtime, re.M)
+    assert len(assignment) == 1
+    result = subprocess.run(
+        ["bash", "-ec", assignment[0] + '\nprintf "%s" "$LAST30DAYS_MEMORY_DIR"'],
+        cwd=tmp_path,
+        env={
+            "PATH": os.defpath,
+            "HOME": str(tmp_path / "home"),
+            "SKILL_DIR": str(installed),
+            "LAST30DAYS_PYTHON": sys.executable,
+            "LAST30DAYS_CONFIG_DIR": str(tmp_path / "config"),
+            "LAST30DAYS_CACHE_DIR": str(tmp_path / "cache"),
+            "LAST30DAYS_MEMORY_DIR": str(tmp_path / "saved research"),
+        },
+        text=True, capture_output=True, timeout=15,
+    )
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == str(tmp_path / "saved research")

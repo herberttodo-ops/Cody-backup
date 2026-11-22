@@ -1,0 +1,41 @@
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "gpt-5.2",
+      "object": "model",
+      "created": ___ID___,
+      "owned_by": "openai"
+    },
+    {
+      "id": "gpt-5.1",
+      "object": "model",
+      "created": ___ID___,
+      "owned_by": "openai"
+    },
+    {
+      "id": "gpt-5",
+      "object": "model",
+      "created": ___ID___,
+      "owned_by": "openai"
+    },
+    {
+      "id": "gpt-5-mini",
+      "object": "model",
+      "created": ___ID___,
+      "owned_by": "openai"
+    },
+    {
+      "id": "gpt-4o",
+      "object": "model",
+      "created": ___ID___,
+      "owned_by": "openai"
+    },
+    {
+      "id": "gpt-4-turbo",
+      "object": "model",
+      "created": ___ID___,
+      "owned_by": "openai"
+    }
+  ]
+}

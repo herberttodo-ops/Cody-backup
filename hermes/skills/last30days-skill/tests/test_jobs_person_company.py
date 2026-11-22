@@ -1,0 +1,470 @@
+"""Jobs for a person who leads a company, and for a topic with no board.
+
+Evidence, two live runs on 2026-11-10: "Jensen Huang" with
+``--ticker NVDA:Nvidia`` printed "Jobs: 0 results", and "Kanye West" printed
+"Jobs unreachable: URL Error: [Errno 8] nodename nor servname provided".
+"""
+
+import socket
+import urllib.error
+from unittest.mock import MagicMock, patch
+
+import last30days as cli
+from lib import http, jobs, pipeline, schema, yahoo_finance
+
+WINDOW = ("2026-10-12", "2026-11-11")
+
+# nvidia.com/careers on 2026-11-10: a landing page that names no hiring
+# system and links to the job search on a host of its own.
+LANDING = """
+<a href="https://www.nvidia.com/en-eu/about-nvidia/careers/">Europe</a>
+<a href="https://www.nvidia.com/en-us/about-nvidia/careers/life-at-nvidia/">Life at NVIDIA</a>
+<a href="https://jobs.nvidia.com/careers">Open Positions</a>
+<h2>Join our team</h2>
+"""
+# jobs.nvidia.com/careers names the Workday board in its sign-in link.
+JOB_SEARCH = '<a href="https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite/login">Sign in</a>'
+
+
+def _workday_rows(count=6):
+    return [
+        {
+            "id": f"JR{index}", "title": f"Engineer {index}", "provider": "workday",
+            "url": f"https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite/job/JR{index}",
+            "description": "", "date": None, "department": f"Team {index}", "location": "Santa Clara",
+        }
+        for index in range(count)
+    ]
+
+
+def _pages(pages):
+    fetched = []
+
+    def get_text(url, **_kwargs):
+        fetched.append(url)
+        return pages.get(url)
+
+    return fetched, get_text
+
+
+def _board(token, *, deadline):
+    assert token == "nvidia.wd5/NVIDIAExternalCareerSite"
+    return _workday_rows(), {"board_total": 6, "board_capped": False, "board_cut_short": False}
+
+
+# --- Defect 3: the board one link past the official careers page ---
+
+
+def ___LONG_STRING___():
+    fetched, get_text = _pages({
+        "https://www.nvidia.com/careers": LANDING,
+        "https://jobs.nvidia.com/careers": JOB_SEARCH,
+    })
+    with patch("lib.jobs.http.get_text", side_effect=get_text), \
+            patch.object(jobs, "search_workday_board", side_effect=_board), \
+            patch.object(jobs, "fetch_workday_details", return_value=(0, 0)), \
+            patch("lib.jobs.http.get", side_effect=AssertionError("no slug is guessed")):
+        items, artifact = jobs.search_jobs(
+            "Nvidia", WINDOW, {}, web_backend="none", site="https://www.nvidia.com/",
+        )
+    # The board's tenant robots.txt is asked for the tenant's other career sites.
+    assert fetched == [
+        "https://www.nvidia.com/careers", "https://jobs.nvidia.com/careers",
+        "https://nvidia.wd5.myworkdayjobs.com/robots.txt",
+    ]
+    assert len(items) == 6
+    assert artifact["tier"] == "ats"
+    assert artifact["provider"] == "workday"
+    assert artifact["found_via"] == "site"
+    assert artifact["owned"] is True
+    assert artifact["digest"]["roles"]
+
+
+def ___LONG_STRING___():
+    landing = '<a href="https://jobs.other.example/careers">Open Positions</a><h2>Join our team</h2>'
+    fetched, get_text = _pages({"https://www.nvidia.com/careers": landing})
+    with patch("lib.jobs.http.get_text", side_effect=get_text), \
+            patch("lib.jobs.http.get", side_effect=http.HTTPError("missing", status_code=404)):
+        items, artifact = jobs.search_jobs(
+            "Nvidia", WINDOW, {}, web_backend="none", site="https://www.nvidia.com/",
+        )
+    assert "https://jobs.other.example/careers" not in fetched
+    assert items == []
+    assert artifact["tier"] == "web"
+
+
+def ___LONG_STRING___():
+    # No official site is known: nvidia.com is a guess from the name, and a
+    # Workday board states no company name, so nothing says whose board it is.
+    fetched, get_text = _pages({
+        "https://nvidia.com/careers": LANDING.replace("www.nvidia.com", "nvidia.com"),
+        "https://jobs.nvidia.com/careers": JOB_SEARCH,
+    })
+    with patch("lib.jobs.http.get_text", side_effect=get_text), \
+            patch.object(jobs, "search_workday_board", side_effect=_board):
+        items, artifact = jobs.search_jobs("Nvidia", WINDOW, {}, web_backend="none")
+    assert len(items) == 6
+    assert artifact["found_via"] == "guess"
+    assert artifact["owned"] is False
+    assert "digest" not in artifact
+
+
+# --- Defect 3: the host's company when Wikidata names none ---
+
+
+def _run_jobs_lane(company, search):
+    subquery = schema.SubQuery(
+        label="primary", search_query="Jensen Huang", ranking_query="Jensen Huang", sources=["jobs"],
+    )
+    with patch.object(jobs, "search_jobs", side_effect=search) as mock:
+        result = pipeline._retrieve_stream_impl(
+            topic="Jensen Huang", subquery=subquery, source="jobs", config={"_company": company},
+            depth="default", date_range=WINDOW, runtime=None, mock=False,
+            web_backend="auto", raw_topic="Jensen Huang",
+        )
+    return result, [call.args[0] for call in mock.call_args_list], mock
+
+
+def ___LONG_STRING___():
+    board = {"tier": "ats", "provider": "workday", "open_roles": 6}
+
+    def search(name, *_args, **_kwargs):
+        return (_workday_rows(), board) if name == "Nvidia" else ([], {"tier": "web"})
+
+    (items, artifact), names, mock = _run_jobs_lane({"host_company": "Nvidia"}, search)
+    assert names == ["Jensen Huang", "Nvidia"]
+    assert len(items) == 6 and artifact is board
+    # No official site comes with the host's name, and no web search is spent.
+    assert mock.call_args.kwargs.get("site", "") == ""
+    assert mock.call_args.kwargs["web_backend"] == "none"
+
+
+def ___LONG_STRING___():
+    # "Waymo" with --ticker GOOGL:Alphabet: Waymo's board, not its parent's.
+    own = {"tier": "ats", "provider": "greenhouse", "open_roles": 3}
+    (_items, artifact), names, _mock = _run_jobs_lane(
+        {"host_company": "Alphabet"}, lambda name, *_a, **_k: ([{"id": "1"}], own),
+    )
+    assert names == ["Jensen Huang"]
+    assert artifact is own
+
+
+def ___LONG_STRING___():
+    topic_result = ([], {"tier": "web", "resultCount": 0})
+    result, names, _mock = _run_jobs_lane(
+        {"host_company": "Nvidia"},
+        lambda name, *_a, **_k: topic_result if name == "Jensen Huang" else ([], {"tier": "web"}),
+    )
+    assert names == ["Jensen Huang", "Nvidia"]
+    assert result == topic_result
+
+
+def test_wikidata_company_is_searched_alone():
+    _result, names, _mock = _run_jobs_lane(
+        {"company": "Nvidia", "company_site": "https://www.nvidia.com/", "host_company": "Other"},
+        lambda name, *_a, **_k: ([], {"tier": "web"}),
+    )
+    assert names == ["Nvidia"]
+
+
+def ___LONG_STRING___():
+    one = yahoo_finance.parse_host_tickers("NVDA:Nvidia")
+    assert cli._company_for_jobs({}, one, "Jensen Huang") == {"host_companies": ["Nvidia"]}
+    resolved = {"company": "Nvidia", "company_site": "https://www.nvidia.com/"}
+    assert cli._company_for_jobs(resolved, one, "Jensen Huang") == resolved
+    # The topic is the company: its own name is already what is searched.
+    assert cli._company_for_jobs({}, one, "Nvidia") == {}
+    # An unusable pair names no company.
+    assert cli._company_for_jobs({}, yahoo_finance.parse_host_tickers("NVDA"), "Jensen Huang") == {}
+    assert cli._company_for_jobs({}, None, "Jensen Huang") == {}
+
+
+# --- Defect 3: the digest of the led company's board survives ranking ---
+
+
+def _job_candidate(index):
+    item = schema.SourceItem(
+        item_id=f"JR{index}", source="jobs", title=f"Engineer {index}", body="",
+        url=f"https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite/job/JR{index}",
+    )
+    return schema.Candidate(
+        candidate_id=f"c{index}", item_id=item.item_id, source="jobs", title=item.title,
+        url=item.url, snippet="", subquery_labels=["primary"], native_ranks={},
+        local_relevance=0.1, freshness=50, engagement=None, source_quality=0.5,
+        rrf_score=0.1, sources=["jobs"], source_items=[item],
+    )
+
+
+def ___LONG_STRING___():
+    # The live run after the board was found: ranking dropped all 40 pooled
+    # Nvidia postings for not naming "Jensen Huang", which emptied the digest.
+    candidates = [_job_candidate(index) for index in range(3)]
+    board = {"company": "Nvidia", "owned": True, "tier": "ats"}
+    assert pipeline._rejected_job_keys(candidates, [], board, "Jensen Huang") == []
+
+
+def ___LONG_STRING___():
+    candidates = [_job_candidate(index) for index in range(3)]
+    board = {"company": "Nvidia", "owned": True, "tier": "ats"}
+    rejected = pipeline._rejected_job_keys(candidates, candidates[:1], board, "Nvidia")
+    assert len(rejected) == 2
+    # A board that is not known to be the company's keeps its rejections too.
+    unowned = {"company": "Nvidia", "owned": False, "tier": "ats"}
+    assert len(pipeline._rejected_job_keys(candidates, [], unowned, "Jensen Huang")) == 3
+    assert len(pipeline._rejected_job_keys(candidates, [], None, "Jensen Huang")) == 3
+
+
+# --- Defect 4: a careers host that does not exist is "no board", not an outage ---
+
+
+def _dns_failure(*_args, **_kwargs):
+    raise urllib.error.URLError(
+        socket.gaierror(8, "nodename nor servname provided, or not known")
+    )
+
+
+def _refused(*_args, **_kwargs):
+    raise urllib.error.URLError(ConnectionRefusedError(61, "Connection refused"))
+
+
+def _open_by_host(careers_open):
+    """Guessed careers hosts fail with ``careers_open``; every ATS API says 404."""
+    def opener(req, timeout=None, **_kwargs):
+        host = req.full_url.split("/")[2]
+        if host in {"kanyewest.com", "kanyewest.ai", "kanyewest.io"}:
+            return careers_open()
+        raise urllib.error.HTTPError(req.full_url, 404, "Not Found", {}, None)
+    return opener
+
+
+def _search_capturing(opener, company="Kanye West"):
+    with patch.object(http, "_open_request", side_effect=opener), \
+            patch.object(http.time, "sleep"), \
+            http.capture_failures() as failures:
+        result = jobs.search_jobs(company, WINDOW, {}, web_backend="none")
+    return result, failures
+
+
+def ___LONG_STRING___():
+    (items, artifact), failures = _search_capturing(_open_by_host(_dns_failure))
+    assert items == []
+    assert artifact["tier"] == "web"
+    assert failures == []
+
+
+def ___LONG_STRING___():
+    (items, _artifact), failures = _search_capturing(_open_by_host(_refused))
+    assert items == []
+    assert failures == []
+
+
+def ___LONG_STRING___():
+    asked = []
+
+    def opener(req, timeout=None, **_kwargs):
+        asked.append(req.full_url)
+        return _open_by_host(_dns_failure)(req, timeout)
+
+    _search_capturing(opener)
+    assert not [url for url in asked if url.endswith("/jobs") and "kanyewest" in url]
+
+
+def ___LONG_STRING___():
+    # "Sundar Pichai" on 2026-11-10: sundarpichai.com and sundarpichai.ai never
+    # answered, and the run printed "Jobs timeout: URL Error: timed out". A
+    # domain guessed from a name that does not answer is no site of the
+    # topic's, not an outage of the lane. See tests/test_jobs_reliability.py.
+    def timed_out():
+        raise urllib.error.URLError(TimeoutError("timed out"))
+
+    (items, artifact), failures = _search_capturing(_open_by_host(timed_out))
+    assert items == []
+    assert failures == []
+    assert "_source_outcome" not in artifact
+
+
+def ___LONG_STRING___():
+    def opener(req, timeout=None, **_kwargs):
+        host = req.full_url.split("/")[2]
+        if host == "boards-api.greenhouse.io":
+            return _dns_failure()
+        raise urllib.error.HTTPError(req.full_url, 404, "Not Found", {}, None)
+
+    with patch.object(http, "_open_request", side_effect=opener), \
+            patch.object(http.time, "sleep"), \
+            http.capture_failures() as failures:
+        try:
+            jobs.search_jobs("Kanye West", WINDOW, {}, web_backend="none")
+            raised = None
+        except http.HTTPError as exc:
+            raised = exc
+    assert raised is not None and raised.outcome_state == http.health.UNREACHABLE
+    assert [f for f in failures if f.no_host]
+
+
+def ___LONG_STRING___():
+    with patch.object(http, "_open_request", side_effect=_dns_failure), \
+            patch.object(http.time, "sleep"), \
+            http.capture_failures() as failures:
+        assert http.get_text("https://api.example.com/x", retries=1) is None
+    assert len(failures) == 1 and failures[0].no_host
+
+
+# --- A known official site that does not answer is an outage, not "no board" ---
+
+OFFICIAL = "https://www.acmecorp.com/"
+
+
+def _search_official(opener):
+    with patch.object(http, "_open_request", side_effect=opener), \
+            patch.object(http.time, "sleep"), \
+            http.capture_failures() as failures:
+        result = jobs.search_jobs(
+            "Acme", WINDOW, {}, web_backend="none", site=OFFICIAL,
+        )
+    return result, failures
+
+
+def _official_host_fails(careers_open):
+    def opener(req, timeout=None, **_kwargs):
+        if req.full_url.split("/")[2] == "www.acmecorp.com":
+            return careers_open()
+        raise urllib.error.HTTPError(req.full_url, 404, "Not Found", {}, None)
+    return opener
+
+
+def ___LONG_STRING___():
+    (items, _artifact), failures = _search_official(_official_host_fails(_dns_failure))
+    assert items == []
+    assert failures and all(
+        f.no_host and f.outcome_state == http.health.UNREACHABLE for f in failures
+    )
+
+
+def ___LONG_STRING___():
+    _result, failures = _search_official(_official_host_fails(_refused))
+    assert failures and all(f.no_host for f in failures)
+
+
+def ___LONG_STRING___():
+    landing = '<a href="https://jobs.acmecorp.com/careers">Open Positions</a><h2>Join our team</h2>'
+
+    def opener(req, timeout=None, **_kwargs):
+        host = req.full_url.split("/")[2]
+        if host == "www.acmecorp.com":
+            response = MagicMock()
+            response.__enter__.return_value = response
+            response.__exit__.return_value = False
+            response.read.return_value = landing.encode("utf-8")
+            response.status = 200
+            response.headers = {}
+            return response
+        if host == "jobs.acmecorp.com":
+            return _dns_failure()
+        raise urllib.error.HTTPError(req.full_url, 404, "Not Found", {}, None)
+
+    _result, failures = _search_official(opener)
+    assert [f for f in failures if f.no_host]
+
+
+# --- A known site that drops the connection on one host form ---------------------
+
+
+def _dropped(*_args, **_kwargs):
+    from http.client import RemoteDisconnected
+
+    raise RemoteDisconnected("Remote end closed connection without response")
+
+
+def _html(text):
+    response = MagicMock()
+    response.__enter__.return_value = response
+    response.__exit__.return_value = False
+    response.read.return_value = text.encode("utf-8")
+    response.status = 200
+    response.headers = {}
+    return response
+
+
+def _by_host(asked, answers):
+    """Answer each request from ``answers`` keyed by host, else 404."""
+    def opener(req, timeout=None, **_kwargs):
+        asked.append(req.full_url)
+        host = req.full_url.split("/")[2]
+        if host in answers:
+            return answers[host](req.full_url)
+        raise urllib.error.HTTPError(req.full_url, 404, "Not Found", {}, None)
+    return opener
+
+
+def _unreachable(failures):
+    return [f for f in failures if f.outcome_state == http.health.UNREACHABLE]
+
+
+def ___LONG_STRING___():
+    asked = []
+    landing = "<h2>Join our team</h2>"
+    opener = _by_host(asked, {
+        "acmecorp.com": _dropped,
+        "www.acmecorp.com": lambda url: _html(landing) if url.endswith("/careers") else _dropped(),
+    })
+    with patch.object(http, "_open_request", side_effect=opener), \
+            patch.object(http.time, "sleep"), \
+            http.capture_failures() as failures:
+        jobs.search_jobs("Acme", WINDOW, {}, web_backend="none", site="https://acmecorp.com/")
+    assert asked[:2] == ["https://acmecorp.com/careers", "https://www.acmecorp.com/careers"]
+    assert _unreachable(failures) == []
+
+
+def ___LONG_STRING___():
+    asked = []
+    opener = _by_host(asked, {"acmecorp.com": _dropped, "www.acmecorp.com": _dropped})
+    with patch.object(http, "_open_request", side_effect=opener), \
+            patch.object(http.time, "sleep"), \
+            http.capture_failures() as failures:
+        jobs.search_jobs("Acme", WINDOW, {}, web_backend="none", site="https://acmecorp.com/")
+    assert [url for url in asked if url.split("/")[2] in ("acmecorp.com", "www.acmecorp.com")] == [
+        "https://acmecorp.com/careers", "https://www.acmecorp.com/careers",
+    ]
+    assert len(_unreachable(failures)) == 1
+
+
+def ___LONG_STRING___():
+    asked = []
+
+    def www(url):
+        if url.endswith("/jobs"):
+            return _html("<h2>Join our team</h2>")
+        raise urllib.error.HTTPError(url, 404, "Not Found", {}, None)
+
+    opener = _by_host(asked, {"acmecorp.com": _dropped, "www.acmecorp.com": www})
+    with patch.object(http, "_open_request", side_effect=opener), \
+            patch.object(http.time, "sleep"):
+        jobs.search_jobs("Acme", WINDOW, {}, web_backend="none", site="https://acmecorp.com/")
+    assert asked[:3] == [
+        "https://acmecorp.com/careers", "https://www.acmecorp.com/careers",
+        "https://www.acmecorp.com/jobs",
+    ]
+
+
+def ___LONG_STRING___():
+    asked = []
+    _search_capturing(_by_host(asked, {}), company="Tesla")
+    assert asked and not [url for url in asked if url.split("/")[2] in ("tesla.com", "www.tesla.com")]
+
+
+def ___LONG_STRING___():
+    asked = []
+    opener = _by_host(asked, {"kanyewest.com": _dropped})
+    _search_capturing(opener)
+    assert not [url for url in asked if "www.kanyewest" in url]
+
+
+def ___LONG_STRING___():
+    asked = []
+    opener = _by_host(asked, {})
+    with patch.object(http, "_open_request", side_effect=opener), \
+            patch.object(http.time, "sleep"):
+        jobs.search_jobs("Acme", WINDOW, {}, web_backend="none", site="https://acmecorp.com/")
+    assert "https://acmecorp.com/careers" in asked
+    assert not [url for url in asked if "www.acmecorp.com" in url]

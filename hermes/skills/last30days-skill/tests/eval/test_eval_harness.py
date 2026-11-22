@@ -1,0 +1,350 @@
+from __future__ import annotations
+
+import json
+from copy import deepcopy
+from unittest import mock
+
+from . import harness
+
+
+def ___LONG_STRING___():
+    fixtures = harness.load_fixtures()
+    archetypes = {fixture.manifest["archetype"] for fixture in fixtures}
+
+    assert 6 <= len(fixtures) <= 9
+    assert {
+        "tech-product",
+        "person",
+        "comparison",
+        "breaking-event",
+        "niche",
+        "non-english-cjk",
+    } <= archetypes
+
+
+def ___LONG_STRING___():
+    results = harness.evaluate_all()
+    print(harness.format_score_table(results))
+
+    failures = harness.baseline_failures(harness.aggregate_scores(results))
+    failures += harness.per_fixture_failures(results)
+    assert not failures, "\n".join(failures)
+
+
+def ___LONG_STRING___():
+    results = harness.evaluate_all()
+    # Simulate a total clustering failure on one clustered fixture: the
+    # average stays above the aggregate floor but the per-fixture floor fires.
+    broken = None
+    for result in results:
+        if result.fixture.manifest.get("expects_clusters"):
+            result.scores["cluster_coherence"] = 0.0
+            broken = result.fixture.name
+            break
+    assert broken is not None
+    aggregate_ok = not harness.baseline_failures(harness.aggregate_scores(results))
+    per_fixture = harness.per_fixture_failures(results)
+    assert any(f.startswith(f"{broken}/cluster_coherence") for f in per_fixture)
+    # Document why the per-fixture layer exists: with 7 fixtures the aggregate
+    # can absorb one zero.
+    if aggregate_ok:
+        assert per_fixture
+
+
+def test_entity_overlap_predicate_pinned():
+    # The coherence metric shares extract_text_entities/entity_overlap with
+    # production clustering. Pin the predicate on fixed inputs so a
+    # too-permissive drift is caught independently of the (circular) metric.
+    from lib import entity_extract
+
+    same = entity_extract.entity_overlap(
+        entity_extract.extract_text_entities("OpenAI ships GPT-6 to enterprise customers"),
+        entity_extract.extract_text_entities("Enterprise customers get GPT-6 from OpenAI"),
+    )
+    unrelated = entity_extract.entity_overlap(
+        entity_extract.extract_text_entities("OpenAI ships GPT-6 to enterprise customers"),
+        entity_extract.extract_text_entities("Best sourdough starter recipes for beginners"),
+    )
+    assert same >= harness.ENTITY_OVERLAP_FLOOR, f"related pair fell below floor: {same}"
+    assert unrelated < harness.ENTITY_OVERLAP_FLOOR, (
+        f"unrelated pair passed the overlap floor ({unrelated}); the shared "
+        "predicate got too permissive and the coherence metric is now blind"
+    )
+
+
+def ___LONG_STRING___(tmp_path):
+    fixture_path = tmp_path / "cli-sources"
+    fixture_path.mkdir()
+    (fixture_path / "http.json").write_text(
+        json.dumps(
+            {
+                "format": "last30days-http-fixture/v1",
+                "exchanges": [],
+                "source_exchanges": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+    fixture = harness.EvalFixture(
+        name="cli-sources",
+        path=fixture_path,
+        manifest={
+            "topic": "fixture topic",
+            "as_of_date": "2026-07-10",
+            "fixture_sources": ["digg", "arxiv", "techmeme", "trustpilot"],
+            "plan": {},
+        },
+        input_urls=frozenset(),
+    )
+
+    def observe_availability(**_kwargs):
+        return harness.pipeline.available_sources({}, fixture.manifest["fixture_sources"])
+
+    with mock.patch.object(harness.pipeline, "run", side_effect=observe_availability), \
+         mock.patch.object(harness.pipeline, "which", return_value=None):
+        available = harness._run_once(fixture)
+
+    assert available == fixture.manifest["fixture_sources"]
+
+
+def ___LONG_STRING___():
+    fixture = harness.load_fixtures()[0]
+    result = harness.evaluate_fixture(fixture)
+    regressed = deepcopy(result.report)
+    primary = regressed.ranked_candidates[0].source_items[0]
+    primary.published_at = "2025-01-01"
+
+    scores = harness.score_report(regressed, fixture, deterministic=True)
+    failures = harness.baseline_failures(scores)
+
+    assert scores["recency_compliance"] < 1.0
+    assert any(failure.startswith("recency_compliance:") for failure in failures)
+
+
+def ___LONG_STRING___():
+    fixtures = {f.name: f for f in harness.load_fixtures()}
+    clustered = fixtures["breaking-event"]
+    assert clustered.manifest["expects_clusters"] is True
+    report = harness._run_once(clustered)
+    # Simulate cluster formation regressing to singletons.
+    report.clusters = []
+    assert harness._cluster_coherence(report, clustered) == 0.0
+
+
+def ___LONG_STRING___():
+    fixtures = {f.name: f for f in harness.load_fixtures()}
+    sparse = fixtures["niche"]
+    assert sparse.manifest.get("expects_clusters") is False
+    report = harness._run_once(sparse)
+    report.clusters = []
+    assert harness._cluster_coherence(report, sparse) == 1.0
+
+
+def ___LONG_STRING___():
+    import sys
+    sys.path.insert(0, "skills/last30days/scripts")
+    from lib import pipeline, schema
+
+    fresh = schema.SourceItem(
+        item_id="yt-1",
+        source="youtube",
+        title="Fresh title from current normalization",
+        body="fresh body",
+        url="https://youtube.com/watch?v=1",
+        published_at="2026-07-01",
+        snippet="fresh snippet",
+        engagement={"views": 10},
+        metadata={"channel": "fresh-channel"},
+    )
+    replayed = [{
+        "item_id": "yt-1",
+        "title": "STALE fixture title",
+        "snippet": "STALE snippet",
+        "metadata": {"transcript_snippet": "recorded transcript"},
+    }]
+    merged = pipeline._merge_replayed_enrichment([fresh], replayed)
+    assert merged[0].title == "Fresh title from current normalization"
+    assert merged[0].snippet == "fresh snippet"
+    assert merged[0].metadata["transcript_snippet"] == "recorded transcript"
+    assert merged[0].metadata["channel"] == "fresh-channel"
+
+
+def test_star_enrichment_apply_map_offline():
+    import sys
+    sys.path.insert(0, "skills/last30days/scripts")
+    from lib import github, schema
+
+    candidate = schema.Candidate(
+        candidate_id="c-gh",
+        item_id="gh-1",
+        source="github",
+        title="repo mvanhorn/last30days-skill discussion",
+        url="https://github.com/mvanhorn/last30days-skill",
+        snippet="s",
+        subquery_labels=["primary"],
+        native_ranks={"primary:github": 1},
+        local_relevance=0.9,
+        freshness=90,
+        engagement=10,
+        source_quality=0.5,
+        rrf_score=0.1,
+        final_score=90,
+        cluster_id="cl",
+        source_items=[],
+        metadata={},
+    )
+    enriched = github.apply_star_map(
+        [candidate], {"mvanhorn/last30days-skill": 51436}
+    )
+    assert enriched == 1
+    assert candidate.metadata["github_stars"]["mvanhorn/last30days-skill"] == 51436
+
+
+def ___LONG_STRING___(tmp_path):
+    source = next(f for f in harness.load_fixtures() if f.name == "breaking-event")
+    payload = json.loads((source.path / "http.json").read_text(encoding="utf-8"))
+    story_id = "breaking-event-hn-1"
+    algolia_children = [
+        {"id": 41000101, "author": "posted_first", "text": "<p>First reply.</p>", "points": None},
+        {"id": 41000102, "author": "posted_second", "text": "<p>Second reply.</p>", "points": None},
+        {"id": 41000103, "author": "posted_third", "text": "<p>Third reply.</p>", "points": None},
+    ]
+    kids = [41000103, 41000101, 41000102]
+    patched = {"algolia": False, "firebase": False}
+    for exchange in payload["exchanges"]:
+        url = exchange["request"]["url"]
+        if url == f"https://hn.algolia.com/api/v1/items/{story_id}":
+            exchange["response"]["value"]["children"] = algolia_children
+            patched["algolia"] = True
+        elif url == f"https://hacker-news.firebaseio.com/v0/item/{story_id}.json":
+            exchange["response"]["value"]["kids"] = kids
+            patched["firebase"] = True
+    assert patched == {"algolia": True, "firebase": True}
+    fixture_path = tmp_path / source.name
+    fixture_path.mkdir()
+    (fixture_path / "http.json").write_text(json.dumps(payload), encoding="utf-8")
+    fixture = harness.EvalFixture(
+        name=source.name,
+        path=fixture_path,
+        manifest=deepcopy(source.manifest),
+        input_urls=source.input_urls,
+    )
+
+    report = harness._run_once(fixture)
+
+    story = next(
+        item for item in report.items_by_source["hackernews"]
+        if item.item_id == story_id
+    )
+    assert [c["author"] for c in story.metadata["top_comments"]] == [
+        "posted_third",
+        "posted_first",
+        "posted_second",
+    ]
+
+
+def ___LONG_STRING___():
+    [fixture] = [f for f in harness.load_fixtures() if f.name == "digg-confirmation"]
+    report = harness.evaluate_fixture(fixture).report
+    by_url = {candidate.url: candidate for candidate in report.ranked_candidates}
+
+    def story_of(url):
+        return (by_url[url].metadata.get("digg_story") or {}).get("url")
+
+    # Sources of a fetched story, in URL forms that differ from Digg's.
+    assert story_of("https://x.com/i/status/___ID___") == "https://digg.com/ai/ljvbajl5"
+    assert story_of(
+        "https://x.com/Fixture_PHPDev/status/___ID___?s=20"
+    ) == "https://digg.com/ai/1i79b1xh"
+    assert story_of(
+        "https://www.news.example.test/digg-confirmation/openai-lean-proofs/?utm_source=hn"
+    ) == "https://digg.com/ai/ljvbajl5"
+    # Same author topic, same site, or same subject, but not a story source.
+    for url in (
+        "https://x.com/fixture_onlooker/status/___ID___",
+        "https://x.com/fixture_pricing/status/___ID___",
+        "https://news.example.test/digg-confirmation/openai-lean-explainer",
+        "https://benchmarks.example.test/digg-confirmation/openai-terra",
+    ):
+        assert story_of(url) is None, url
+    # Each confirmed post outranks its unconfirmed twin, which has the same
+    # engagement and date.
+    assert (
+        by_url["https://x.com/i/status/___ID___"].final_score
+        > by_url["https://x.com/fixture_onlooker/status/___ID___"].final_score
+    )
+    proofs_story = next(
+        item for item in report.items_by_source["digg"] if item.item_id == "ljvbajl5"
+    )
+    assert len(proofs_story.metadata["posts"]) == 5
+
+
+def ___LONG_STRING___():
+    [fixture] = [f for f in harness.load_fixtures() if f.name == "digg-confirmation"]
+    report = harness.evaluate_fixture(fixture).report
+    digg_ids = {item.item_id for item in report.items_by_source["digg"]}
+    by_url = {candidate.url: candidate for candidate in report.ranked_candidates}
+
+    # A 652-score sports story that never mentions OpenAI.
+    assert "q4rk8tzn" not in digg_ids
+    assert "https://digg.com/sports/q4rk8tzn" not in by_url
+
+    # The report's Digg items are re-sorted at the end of the run, so the
+    # order Digg's stream went into ranking is read from each story's rank
+    # in that stream. The story recorded last is also the oldest, so local
+    # ranking alone would put it last. It has the highest Digg Score of the
+    # stories whose title names OpenAI, and the other big ones follow by score.
+    stream = sorted(
+        (candidate for candidate in report.ranked_candidates if candidate.source == "digg"),
+        key=lambda candidate: candidate.native_ranks["primary:digg"],
+    )
+    assert [candidate.item_id for candidate in stream[:6]] == [
+        "b9ds3fua",  # 1502
+        "ljvbajl5",  # 1286
+        "1i79b1xh",  # 473
+        "x7hzsqzf",  # 239
+        "en0dbdyl",  # 226
+        "wo3n9meb",  # 180
+    ]
+    assert stream[0].native_ranks["primary:digg"] == 1
+    # Kept, but behind them: it names OpenAI in the title with a Digg Score
+    # of 38 and 3 sources.
+    assert [candidate.item_id for candidate in stream[6:]] == ["mtdi1c95"]
+
+    # A 310-score story that names OpenAI only in its summary. A summary-only
+    # mention is dropped, however big the story is.
+    assert "h2vy6wpc" not in digg_ids
+    assert "https://digg.com/ai/h2vy6wpc" not in by_url
+    # Its recorded sources include a Hacker News link and an X post that are
+    # in this report. Its sources are not read, so those two results carry
+    # no Digg story.
+    for url in (
+        "https://benchmarks.example.test/digg-confirmation/openai-terra",
+        "https://x.com/fixture_pricing/status/___ID___",
+    ):
+        assert by_url[url].metadata.get("digg_story") is None, url
+
+
+def ___LONG_STRING___():
+    [fixture] = [f for f in harness.load_fixtures() if f.name == "entity-markets"]
+    report = harness.evaluate_fixture(fixture).report
+    markets = sorted(
+        report.items_by_source["polymarket"],
+        key=lambda item: item.metadata["selection_score"],
+        reverse=True,
+    )
+
+    # "Pro Football: 2027 Champion" never names the 49ers in its title; the
+    # 49ers are one of its 32 outcomes, and the favorite.
+    champion = markets[0]
+    assert champion.title == "Pro Football: 2027 Champion"
+    matched = champion.metadata["matched_market"]
+    assert matched["label"] == "San Francisco 49ers"
+    assert (matched["rank"], matched["race_size"]) == (1, 32)
+    assert champion.metadata["headline"]["question"] == (
+        "Will the San Francisco 49ers win the 2027 NFL league championship?"
+    )
+    # Every market shown names the 49ers in its own question or label.
+    for item in markets:
+        text = f"{item.metadata['matched_market']['question']} {item.metadata['matched_market']['label']}"
+        assert "49ers" in text, item.title

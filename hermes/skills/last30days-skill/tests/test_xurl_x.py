@@ -1,0 +1,684 @@
+"""Tests for xurl_x module."""
+
+import json
+import tempfile
+import unittest
+from pathlib import Path
+from unittest import mock
+
+from lib import xurl_x
+
+# ___LONG_STRING___
+# Helpers
+# ___LONG_STRING___
+
+
+def _make_api_response(tweets=None, users=None):
+    """Build a minimal X API v2 search/recent response."""
+    tweets = tweets or []
+    users = users or []
+    resp = {"data": tweets}
+    if users:
+        resp["includes"] = {"users": users}
+    return resp
+
+# ___LONG_STRING___
+# is_available
+# ___LONG_STRING___
+
+
+class TestIsAvailable(unittest.TestCase):
+    def setUp(self):
+        # is_available() memoizes per process; isolate every test.
+        xurl_x.clear_availability_cache()
+        self.addCleanup(xurl_x.clear_availability_cache)
+
+    def ___LONG_STRING___(self):
+        completed = mock.Mock(
+            returncode=0,
+            stdout="oauth1: ✗\nbearer: ✓\n",
+        )
+        with mock.patch("subprocess.run", return_value=completed) as run_mock:
+            self.assertTrue(xurl_x.is_available())
+        call_args = run_mock.call_args[0][0]
+        self.assertEqual(call_args[:3], ["xurl", "auth", "status"])
+
+    def test_returns_false_when_oauth1_only(self):
+        # OAuth1 alone cannot satisfy search_x's --auth app requirement.
+        completed = mock.Mock(
+            returncode=0,
+            stdout="oauth1: ✓\nbearer: ✗\n",
+        )
+        with mock.patch("subprocess.run", return_value=completed):
+            self.assertFalse(xurl_x.is_available())
+
+    def ___LONG_STRING___(self):
+        completed = mock.Mock(returncode=1, stdout="")
+        with mock.patch("subprocess.run", return_value=completed):
+            self.assertFalse(xurl_x.is_available())
+
+    def test_returns_false_when_not_installed(self):
+        with mock.patch("subprocess.run", side_effect=FileNotFoundError):
+            self.assertFalse(xurl_x.is_available())
+
+    def test_returns_false_on_permission_error(self):
+        # WSL hits this when a Windows-mounted PATH entry points at an
+        # exec-blocked shim (e.g. WindowsApps), which raises PermissionError
+        # before any other PATH candidate is tried.
+        with mock.patch("subprocess.run", side_effect=PermissionError(13, "Permission denied", "xurl")):
+            self.assertFalse(xurl_x.is_available())
+
+    def test_returns_false_on_timeout(self):
+        import subprocess
+        with mock.patch("subprocess.run", side_effect=subprocess.TimeoutExpired("xurl", 10)):
+            self.assertFalse(xurl_x.is_available())
+
+    def ___LONG_STRING___(self):
+        # returncode=0 but status output has no bearer: ✓
+        completed = mock.Mock(returncode=0, stdout="oauth1: ✗\nbearer: ✗\n")
+        with mock.patch("subprocess.run", return_value=completed):
+            self.assertFalse(xurl_x.is_available())
+
+# ___LONG_STRING___
+# stored_auth_status / has_stored_auth (local-only doctor-path evidence)
+# ___LONG_STRING___
+
+
+class _UnreadableStore:
+    """Path stub: exists but every read raises (permission-denied store)."""
+
+    def is_file(self):
+        return True
+
+    def read_text(self, *args, **kwargs):
+        raise PermissionError(13, "Permission denied")
+
+    def __str__(self):
+        return "/home/user/.xurl"
+
+
+class TestStoredAuth(unittest.TestCase):
+    """F1/F10: the doctor path keys on xurl's on-disk token store (~/.xurl)
+    instead of the live `xurl whoami` network call. These tests forbid
+    subprocess entirely — local evidence must never spawn anything."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.store = Path(self._tmp.name) / ".xurl"
+        boom = mock.patch(
+            "subprocess.run",
+            side_effect=AssertionError("local auth evidence must not spawn a subprocess"),
+        )
+        boom.start()
+        self.addCleanup(boom.stop)
+
+    def _status(self, path=None):
+        with mock.patch("lib.xurl_x.token_store_path", return_value=path or self.store):
+            return xurl_x.stored_auth_status()
+
+    def test_yaml_store_with_access_token_is_ok(self):
+        self.store.write_text(
+            "apps:\n  app:\n    oauth2_tokens:\n      me:\n        oauth2:\n"
+            "          access_token: dummy-not-real\n",
+            encoding="utf-8",
+        )
+        status, detail = self._status()
+        self.assertEqual(xurl_x.AUTH_OK, status)
+        self.assertIn(str(self.store), detail)
+
+    def ___LONG_STRING___(self):
+        # Current xurl (>=1.1) stores credentials at ~/.xurl/auth.yml inside
+        # the ~/.xurl directory. Regression for #978: this was misread as
+        # "no token store" because the directory itself fails is_file().
+        self.store.mkdir(exist_ok=True)
+        auth_yml = self.store / "auth.yml"
+        auth_yml.write_text(
+            "apps:\n  app:\n    oauth2_tokens:\n      me:\n        oauth2:\n"
+            "          access_token: dummy-not-real\n",
+            encoding="utf-8",
+        )
+        status, detail = self._status()
+        self.assertEqual(xurl_x.AUTH_OK, status)
+        self.assertIn("auth.yml", detail)
+
+    def ___LONG_STRING___(self):
+        self.store.mkdir(exist_ok=True)
+        (self.store / "auth.yml").write_text("", encoding="utf-8")
+        status, _ = self._status()
+        self.assertEqual(xurl_x.AUTH_MISSING, status)
+
+    def ___LONG_STRING___(self):
+        self.store.mkdir(exist_ok=True)
+        status, detail = self._status()
+        self.assertEqual(xurl_x.AUTH_MISSING, status)
+        self.assertIn("no token store", detail)
+
+    def test_legacy_flat_file_layout_is_ok(self):
+        # When token_store_path() returns the canonical ~/.xurl/auth.yml but
+        # the legacy flat ~/.xurl file is what exists, still report OK.
+        self.store.write_text(
+            json.dumps({"bearer_token": {"bearer": "dummy-not-real"}}),
+            encoding="utf-8",
+        )
+        status, detail = self._status()
+        self.assertEqual(xurl_x.AUTH_OK, status)
+        self.assertIn(str(self.store), detail)
+
+    def ___LONG_STRING___(self):
+        self.store.mkdir(exist_ok=True)
+        (self.store / "auth.yml").write_text(
+            "access_token: dummy-not-real\n", encoding="utf-8"
+        )
+        class _BrokenFile:
+            def __init__(self, path):
+                self._path = path
+
+            def is_file(self):
+                return True
+
+            def read_text(self, *args, **kwargs):
+                raise PermissionError(13, "Permission denied")
+
+            def __str__(self):
+                return str(self._path)
+
+        status, detail = self._status(
+            path=_BrokenFile(self.store / "auth.yml")
+        )
+        self.assertEqual(xurl_x.AUTH_ERROR, status)
+        self.assertIn("PermissionError", detail)
+
+    def ___LONG_STRING___(self):
+        # Regression: a store that exists but cannot be read must report the
+        # typed AUTH_ERROR, not AUTH_MISSING. stat() on a chmod-000 file still
+        # succeeds on POSIX; read_text() is what raises PermissionError.
+        import os
+
+        if hasattr(os, "geteuid") and os.geteuid() == 0:
+            self.skipTest("root bypasses permission checks")
+        self.store.mkdir(exist_ok=True)
+        auth_yml = self.store / "auth.yml"
+        auth_yml.write_text("access_token: dummy-not-real\n", encoding="utf-8")
+        auth_yml.chmod(0)
+        try:
+            status, detail = self._status()
+            self.assertEqual(xurl_x.AUTH_ERROR, status)
+            self.assertIn("PermissionError", detail)
+        finally:
+            auth_yml.chmod(0o600)
+
+    def ___LONG_STRING___(self):
+        # Regression: a store inside a non-searchable directory must report
+        # AUTH_ERROR, not AUTH_MISSING. stat() on the candidate inside a
+        # chmod-000 parent raises PermissionError, which must not be swallowed
+        # into "no token store" the way pathlib's is_file() would.
+        import os
+
+        if hasattr(os, "geteuid") and os.geteuid() == 0:
+            self.skipTest("root bypasses permission checks")
+        self.store.mkdir(exist_ok=True)
+        (self.store / "auth.yml").write_text(
+            "access_token: dummy-not-real\n", encoding="utf-8"
+        )
+        self.store.chmod(0)
+        try:
+            status, detail = self._status()
+            self.assertEqual(xurl_x.AUTH_ERROR, status)
+            self.assertIn("PermissionError", detail)
+        finally:
+            self.store.chmod(0o700)
+
+    def ___LONG_STRING___(self):
+        # Regression: distinct from the parent-chmod case above, which denies
+        # traversal INTO the store (raising on the per-candidate _is_file scan).
+        # Chmod-000 on the store's own PARENT directory instead blocks stat()
+        # on the store path itself, raising during the _is_dir(base) call that
+        # builds the candidate list -- a separate except-OSError branch that
+        # the parent-chmod case never reaches.
+        import os
+
+        if hasattr(os, "geteuid") and os.geteuid() == 0:
+            self.skipTest("root bypasses permission checks")
+        self.store.mkdir(exist_ok=True)
+        (self.store / "auth.yml").write_text(
+            "access_token: dummy-not-real\n", encoding="utf-8"
+        )
+        grandparent = self.store.parent
+        grandparent.chmod(0)
+        try:
+            status, detail = self._status()
+            self.assertEqual(xurl_x.AUTH_ERROR, status)
+            self.assertIn("PermissionError", detail)
+        finally:
+            grandparent.chmod(0o700)
+
+    def ___LONG_STRING___(self):
+        self.store.mkdir(exist_ok=True)
+        (self.store / "auth.yml").write_text(
+            "access_token: dummy-not-real\n", encoding="utf-8"
+        )
+        with mock.patch("lib.xurl_x.token_store_path", return_value=self.store), \
+             mock.patch("lib.xurl_x.shutil.which", return_value="/usr/local/bin/xurl"):
+            self.assertTrue(xurl_x.has_stored_auth())
+
+    def ___LONG_STRING___(self):
+        self.store.mkdir(exist_ok=True)
+        (self.store / "auth.yml").write_text(
+            "access_token: dummy-not-real\n", encoding="utf-8"
+        )
+        with mock.patch(
+            "subprocess.run",
+            side_effect=AssertionError("local auth evidence must not spawn a subprocess"),
+        ):
+            status, _ = self._status()
+        self.assertEqual(xurl_x.AUTH_OK, status)
+
+    def ___LONG_STRING___(self):
+        # token_store_path() returns the canonical ~/.xurl/auth.yml, but only
+        # the legacy flat ~/.xurl file exists. The parent-walk must find it.
+        self.store.write_text(
+            json.dumps({"bearer_token": {"bearer": "dummy-not-real"}}),
+            encoding="utf-8",
+        )
+        canonical = self.store / "auth.yml"
+        with mock.patch("lib.xurl_x.token_store_path", return_value=canonical):
+            status, detail = xurl_x.stored_auth_status()
+        self.assertEqual(xurl_x.AUTH_OK, status)
+        self.assertIn(str(self.store), detail)
+
+    def ___LONG_STRING___(self):
+        # A stale legacy flat ~/.xurl must never shadow the live auth.yml.
+        self.store.mkdir(exist_ok=True)
+        (self.store / "auth.yml").write_text(
+            "oauth2_tokens:\n  me:\n    oauth2:\n      access_token: live\n",
+            encoding="utf-8",
+        )
+        canonical = self.store / "auth.yml"
+        with mock.patch("lib.xurl_x.token_store_path", return_value=canonical):
+            status, detail = xurl_x.stored_auth_status()
+        self.assertEqual(xurl_x.AUTH_OK, status)
+        self.assertIn("auth.yml", detail)
+
+    def ___LONG_STRING___(self):
+        self.store.write_text(
+            json.dumps({"bearer_token": {"bearer": "dummy-not-real"}}),
+            encoding="utf-8",
+        )
+        status, _ = self._status()
+        self.assertEqual(xurl_x.AUTH_OK, status)
+
+    def test_absent_store_is_missing(self):
+        status, detail = self._status()
+        self.assertEqual(xurl_x.AUTH_MISSING, status)
+        self.assertIn("no token store", detail)
+
+    def test_empty_store_is_missing(self):
+        self.store.write_text("", encoding="utf-8")
+        status, _ = self._status()
+        self.assertEqual(xurl_x.AUTH_MISSING, status)
+
+    def ___LONG_STRING___(self):
+        self.store.write_text("apps: {}\ndefault_app: app\n", encoding="utf-8")
+        status, detail = self._status()
+        self.assertEqual(xurl_x.AUTH_MISSING, status)
+        self.assertIn("no stored credentials", detail)
+
+    def ___LONG_STRING___(self):
+        status, detail = self._status(path=_UnreadableStore())
+        self.assertEqual(xurl_x.AUTH_ERROR, status)
+        self.assertIn("unreadable", detail)
+        self.assertIn("PermissionError", detail)
+
+    def ___LONG_STRING___(self):
+        self.store.write_text("access_token: dummy-not-real\n", encoding="utf-8")
+        with mock.patch("lib.xurl_x.token_store_path", return_value=self.store), \
+             mock.patch("lib.xurl_x.shutil.which", return_value="/usr/local/bin/xurl"):
+            self.assertTrue(xurl_x.has_stored_auth())
+
+    def ___LONG_STRING___(self):
+        self.store.write_text("access_token: dummy-not-real\n", encoding="utf-8")
+        with mock.patch("lib.xurl_x.token_store_path", return_value=self.store), \
+             mock.patch("lib.xurl_x.shutil.which", return_value=None):
+            self.assertFalse(xurl_x.has_stored_auth())
+
+    def ___LONG_STRING___(self):
+        # has_stored_auth answers availability only; the typed ERROR surface
+        # lives in backends._probe_xurl (see test_backend_descriptors).
+        with mock.patch("lib.xurl_x.token_store_path", return_value=_UnreadableStore()), \
+             mock.patch("lib.xurl_x.shutil.which", return_value="/usr/local/bin/xurl"):
+            self.assertFalse(xurl_x.has_stored_auth())
+
+    def ___LONG_STRING___(self):
+        self.assertEqual(Path.home() / ".xurl" / "auth.yml", xurl_x.token_store_path())
+
+# ___LONG_STRING___
+# search_x
+# ___LONG_STRING___
+
+
+class TestSearchX(unittest.TestCase):
+    def test_returns_parsed_json_on_success(self):
+        payload = {"data": [{"id": "1", "text": "hello world", "author_id": "u1"}]}
+        completed = mock.Mock(returncode=0, stdout=json.dumps(payload))
+        with mock.patch("subprocess.run", return_value=completed):
+            result = xurl_x.search_x("hello world")
+        self.assertEqual(result["data"][0]["id"], "1")
+
+    def ___LONG_STRING___(self):
+        # xurl's stderr may echo the request or the bearer; only an
+        # engine-authored fixed string (with a classifier marker) survives.
+        completed = mock.Mock(
+            returncode=1, stdout="",
+            stderr="rate limit exceeded for dummy-x-bearer-secret-000",
+        )
+        with mock.patch("subprocess.run", return_value=completed):
+            result = xurl_x.search_x("test")
+        self.assertEqual(xurl_x.ERR_RATE_LIMITED, result["error"])
+        self.assertIn("rate limit", result["error"])
+        self.assertNotIn("dummy-x-bearer-secret-000", result["error"])
+
+    def ___LONG_STRING___(self):
+        completed = mock.Mock(returncode=0, stdout="NOT JSON dummy-x-bearer-secret-000")
+        with mock.patch("subprocess.run", return_value=completed):
+            result = xurl_x.search_x("test")
+        self.assertEqual(xurl_x.ERR_INVALID_JSON, result["error"])
+        self.assertIn("invalid JSON", result["error"])
+        self.assertNotIn("dummy-x-bearer-secret-000", result["error"])
+
+    def test_returns_error_when_not_installed(self):
+        with mock.patch("subprocess.run", side_effect=FileNotFoundError):
+            result = xurl_x.search_x("test")
+        self.assertIn("error", result)
+        self.assertIn("not found", result["error"])
+
+    def test_returns_error_on_timeout(self):
+        import subprocess
+        with mock.patch("subprocess.run", side_effect=subprocess.TimeoutExpired("xurl", 30)):
+            result = xurl_x.search_x("test")
+        self.assertIn("error", result)
+        self.assertIn("timed out", result["error"])
+
+    def test_search_uses_app_only_auth(self):
+        # Regression: default (OAuth1) auth 401s on any query needing
+        # percent-encoding (xurl >=1.1 signing bug); search must pin app-only.
+        completed = mock.Mock(returncode=0, stdout=json.dumps({}))
+        with mock.patch("subprocess.run", return_value=completed) as run_mock:
+            xurl_x.search_x("claude code")
+        call_args = run_mock.call_args[0][0]
+        self.assertIn("--auth", call_args)
+        self.assertEqual(call_args[call_args.index("--auth") + 1], "app")
+
+    def test_max_results_clamped_to_100(self):
+        # DEPTH_CONFIG["deep"] = 60, should stay at 60 (within 10-100 range)
+        completed = mock.Mock(returncode=0, stdout=json.dumps({}))
+        with mock.patch("subprocess.run", return_value=completed) as run_mock:
+            xurl_x.search_x("test", depth="deep")
+        call_args = run_mock.call_args[0][0]
+        n_idx = call_args.index("-n")
+        self.assertLessEqual(int(call_args[n_idx + 1]), 100)
+
+    def test_max_results_at_least_10(self):
+        completed = mock.Mock(returncode=0, stdout=json.dumps({}))
+        with mock.patch("subprocess.run", return_value=completed) as run_mock:
+            xurl_x.search_x("test", depth="quick")
+        call_args = run_mock.call_args[0][0]
+        n_idx = call_args.index("-n")
+        self.assertGreaterEqual(int(call_args[n_idx + 1]), 10)
+
+    def ___LONG_STRING___(self):
+        completed = mock.Mock(returncode=0, stdout=json.dumps({}))
+        with mock.patch("subprocess.run", return_value=completed) as run_mock:
+            xurl_x.search_x("test", depth="nonexistent")
+        call_args = run_mock.call_args[0][0]
+        n_idx = call_args.index("-n")
+        self.assertEqual(int(call_args[n_idx + 1]), xurl_x.DEPTH_CONFIG["default"])
+
+
+class TestSearchXQuerySanitization(unittest.TestCase):
+    """X's v2 grammar 400s on a bare lowercase and/or and treats colon
+    tokens, leading "-", parentheses and quotes as operators. The pipeline
+    hands search_x the raw user topic, so search_x must sanitize it while
+    keeping space-joined keyword semantics (not one exact phrase)."""
+
+    def _argv_query(self, topic):
+        completed = mock.Mock(returncode=0, stdout=json.dumps({}))
+        with mock.patch("subprocess.run", return_value=completed) as run_mock:
+            xurl_x.search_x(topic)
+        argv = run_mock.call_args[0][0]
+        self.assertEqual(argv[:2], ["xurl", "search"])
+        return argv[2]
+
+    def test_bare_lowercase_and_is_dropped(self):
+        query = self._argv_query(
+            "AI code review and security review tools for Claude Code and Codex"
+        )
+        self.assertEqual(
+            query, "AI code review security review tools for Claude Code Codex"
+        )
+
+    def test_or_and_in_any_case_are_dropped(self):
+        self.assertEqual(self._argv_query("cats or dogs OR birds AND fish"), "cats dogs birds fish")
+
+    def test_keyword_semantics_not_exact_phrase(self):
+        query = self._argv_query("claude code")
+        self.assertEqual(query, "claude code")
+        self.assertNotIn('"', query)
+        self.assertNotIn("-is:retweet", query)
+
+    def ___LONG_STRING___(self):
+        self.assertEqual(self._argv_query("Python: what's new"), "Python what's new")
+
+    def ___LONG_STRING___(self):
+        self.assertEqual(self._argv_query("C++: memory safety"), "C++ memory safety")
+
+    def ___LONG_STRING___(self):
+        query = self._argv_query("Python: from:attacker since:2020-01-01 -spam and review")
+        self.assertEqual(query, "Python review")
+
+    def test_colon_operator_tokens_are_dropped(self):
+        self.assertEqual(self._argv_query("from:x claude since:2020-01-01 code"), "claude code")
+
+    def test_leading_negation_is_dropped(self):
+        query = self._argv_query("-foo claude -bar")
+        self.assertEqual(query, "claude")
+        self.assertFalse(query.startswith("-"))
+
+    def ___LONG_STRING___(self):
+        self.assertEqual(self._argv_query('(claude "code) [agents] {x}'), "claude code agents x")
+
+    def test_query_is_capped(self):
+        query = self._argv_query(" ".join(["word"] * 300))
+        self.assertLessEqual(len(query), xurl_x.x_api.MAX_QUERY_CHARS)
+        self.assertTrue(query.startswith("word word"))
+
+    def ___LONG_STRING___(self):
+        with mock.patch(
+            "subprocess.run",
+            side_effect=AssertionError("an empty query must not reach xurl"),
+        ):
+            result = xurl_x.search_x("and OR from:x -foo ()")
+        self.assertEqual(result, {"error": xurl_x.ERR_EMPTY_QUERY})
+
+
+class TestClassifyInvalidRequest(unittest.TestCase):
+    _BODY = (
+        '{"errors":[{"parameters":{"query":["AI and dummy-x-bearer-secret-000"]},'
+        '"message":"Ambiguous use of and as a keyword. Use a space to logically '
+        'join two clauses, or \\"and\\" to find occurrences of and in text"}],'
+        '"title":"Invalid Request","detail":"One or more parameters to your '
+        'request was invalid.","type":"https://api.twitter.com/2/problems/invalid-request"}'
+    )
+
+    def test_invalid_request_problem_type(self):
+        self.assertEqual(
+            xurl_x._classify_cli_failure("type: .../2/problems/invalid-request"),
+            xurl_x.ERR_INVALID_REQUEST,
+        )
+
+    def test_invalid_request_title(self):
+        self.assertEqual(
+            xurl_x._classify_cli_failure("Error: Invalid Request"),
+            xurl_x.ERR_INVALID_REQUEST,
+        )
+
+    def ___LONG_STRING___(self):
+        completed = mock.Mock(returncode=1, stdout="", stderr=self._BODY)
+        with mock.patch("subprocess.run", return_value=completed):
+            result = xurl_x.search_x("AI code review")
+        self.assertEqual(result, {"error": xurl_x.ERR_INVALID_REQUEST})
+        self.assertNotIn("dummy-x-bearer-secret-000", result["error"])
+        self.assertNotIn("Ambiguous", result["error"])
+
+    def test_auth_and_rate_limit_still_win(self):
+        self.assertEqual(
+            xurl_x._classify_cli_failure("HTTP 401 Unauthorized invalid-request"),
+            xurl_x.ERR_UNAUTHORIZED,
+        )
+        self.assertEqual(
+            xurl_x._classify_cli_failure("rate limit exceeded"),
+            xurl_x.ERR_RATE_LIMITED,
+        )
+
+    def test_unrelated_failure_stays_generic(self):
+        self.assertEqual(xurl_x._classify_cli_failure("boom"), xurl_x.ERR_FAILED)
+
+
+# ___LONG_STRING___
+# parse_x_response
+# ___LONG_STRING___
+
+
+class TestParseXResponse(unittest.TestCase):
+    def _tweet(self, id_, text, author_id, created_at=None, metrics=None):
+        t = {"id": id_, "text": text, "author_id": author_id}
+        if created_at:
+            t["created_at"] = created_at
+        if metrics:
+            t["public_metrics"] = metrics
+        return t
+
+    def _user(self, id_, username):
+        return {"id": id_, "username": username}
+
+    def test_empty_response_returns_empty_list(self):
+        self.assertEqual(xurl_x.parse_x_response({}), [])
+
+    def test_error_response_returns_empty_list(self):
+        self.assertEqual(xurl_x.parse_x_response({"error": "oops"}), [])
+
+    def test_parses_basic_tweet(self):
+        resp = _make_api_response(
+            tweets=[self._tweet("111", "Hello AI", "u1")],
+            users=[self._user("u1", "alice")],
+        )
+        items = xurl_x.parse_x_response(resp)
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0]["text"], "Hello AI")
+        self.assertEqual(items[0]["author_handle"], "alice")
+        self.assertIn("alice", items[0]["url"])
+        self.assertIn("111", items[0]["url"])
+
+    def test_parses_date_from_iso(self):
+        resp = _make_api_response(
+            tweets=[self._tweet("1", "text", "u1", created_at="2024-06-15T12:00:00Z")],
+        )
+        items = xurl_x.parse_x_response(resp)
+        self.assertEqual(items[0]["date"], "2024-06-15")
+
+    def test_date_none_when_missing(self):
+        resp = _make_api_response(tweets=[self._tweet("1", "text", "u1")])
+        items = xurl_x.parse_x_response(resp)
+        self.assertIsNone(items[0]["date"])
+
+    def test_parses_engagement_metrics(self):
+        metrics = {
+            "like_count": 42,
+            "retweet_count": 10,
+            "reply_count": 5,
+            "quote_count": 2,
+        }
+        resp = _make_api_response(
+            tweets=[self._tweet("1", "text", "u1", metrics=metrics)],
+        )
+        items = xurl_x.parse_x_response(resp)
+        self.assertEqual(items[0]["engagement"]["likes"], 42)
+        self.assertEqual(items[0]["engagement"]["reposts"], 10)
+        self.assertEqual(items[0]["engagement"]["replies"], 5)
+        self.assertEqual(items[0]["engagement"]["quotes"], 2)
+
+    def test_engagement_none_when_no_metrics(self):
+        resp = _make_api_response(tweets=[self._tweet("1", "text", "u1")])
+        items = xurl_x.parse_x_response(resp)
+        self.assertIsNone(items[0]["engagement"])
+
+    def test_text_truncated_to_500_chars(self):
+        long_text = "x" * 600
+        resp = _make_api_response(tweets=[self._tweet("1", long_text, "u1")])
+        items = xurl_x.parse_x_response(resp)
+        self.assertLessEqual(len(items[0]["text"]), 500)
+
+    def test_id_prefixed_with_xurl(self):
+        resp = _make_api_response(tweets=[self._tweet("1", "text", "u1")])
+        items = xurl_x.parse_x_response(resp)
+        self.assertTrue(items[0]["id"].startswith("XURL"))
+
+    def ___LONG_STRING___(self):
+        resp = _make_api_response(
+            tweets=[self._tweet("1", "Claude Code is great for AI coding", "u1")],
+        )
+        items = xurl_x.parse_x_response(resp, topic="Claude Code")
+        self.assertGreater(items[0]["relevance"], 0.5)
+
+    def test_relevance_neutral_when_no_topic(self):
+        resp = _make_api_response(tweets=[self._tweet("1", "some text", "u1")])
+        items = xurl_x.parse_x_response(resp)
+        self.assertEqual(items[0]["relevance"], 0.5)
+
+    def ___LONG_STRING___(self):
+        # author_id not in includes.users → username="" but the post is
+        # kept with the id-only citation form (shared x_api parser).
+        resp = _make_api_response(tweets=[self._tweet("999", "text", "unknown_uid")])
+        items = xurl_x.parse_x_response(resp)
+        self.assertEqual(items[0]["url"], "https://x.com/i/status/999")
+        self.assertEqual(items[0]["author_handle"], "")
+        self.assertEqual(items[0]["post_id"], "999")
+
+    def test_multiple_tweets_parsed(self):
+        tweets = [self._tweet(str(i), f"tweet {i}", "u1") for i in range(5)]
+        resp = _make_api_response(tweets=tweets, users=[self._user("u1", "bob")])
+        items = xurl_x.parse_x_response(resp)
+        self.assertEqual(len(items), 5)
+
+    def test_empty_data_list(self):
+        resp = _make_api_response(tweets=[])
+        self.assertEqual(xurl_x.parse_x_response(resp), [])
+
+    def test_why_relevant_is_empty_string(self):
+        # xurl doesn't provide LLM-generated why_relevant (unlike xai_x)
+        resp = _make_api_response(tweets=[self._tweet("1", "text", "u1")])
+        items = xurl_x.parse_x_response(resp)
+        self.assertEqual(items[0]["why_relevant"], "")
+
+# ___LONG_STRING___
+# DEPTH_CONFIG
+# ___LONG_STRING___
+
+
+class TestDepthConfig(unittest.TestCase):
+    def test_all_standard_depths_present(self):
+        for depth in ("quick", "default", "deep"):
+            self.assertIn(depth, xurl_x.DEPTH_CONFIG)
+
+    def test_depth_config_is_shared_with_x_api(self):
+        from lib import x_api
+        self.assertIs(x_api.DEPTH_CONFIG, xurl_x.DEPTH_CONFIG)
+
+    def test_deep_greater_than_quick(self):
+        self.assertGreater(
+            xurl_x.DEPTH_CONFIG["deep"],
+            xurl_x.DEPTH_CONFIG["quick"],
+        )
+
+if __name__ == "__main__":
+    unittest.main()
