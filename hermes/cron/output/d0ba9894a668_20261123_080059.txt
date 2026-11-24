@@ -1,0 +1,55 @@
+Cronjob Response: optirfp-linkedin-daily
+(job_id: d0ba9894a668)
+-------------
+
+Headline: Pattern matching: they see bad RFPs daily
+Topic: winning
+Content library: 43 headlines, 12 templates
+Generated at: 2026-11-23T08:00:37.138710
+Mon Nov 23 08:00:37 AM EST 2026: Starting OptiRFP daily post v2.0 (expanded content)...
+Mon Nov 23 08:00:37 AM EST 2026: Generated headline: Pattern matching: they see bad RFPs daily
+Mon Nov 23 08:00:37 AM EST 2026: Topic: winning
+Mon Nov 23 08:00:37 AM EST 2026: Using expanded content library v2.0
+Mon Nov 23 08:00:37 AM EST 2026: Generating image with compositor...
+Mon Nov 23 08:00:50 AM EST 2026: Image generated: /home/herby/.hermes/generated_images/optirfp_winning____ID___.png
+Mon Nov 23 08:00:50 AM EST 2026: Uploading to Drive...
+/home/herby/.hermes/hermes-agent/venv/lib/python3.11/site-packages/google/api_core/_python_version_support.py:273: FutureWarning: You are using a Python version (3.11.16) which Google will stop supporting in new releases of google.api_core once it reaches its end of life (2027-10-24). Please upgrade to the latest Python version, or at least Python 3.12, to continue receiving updates for google.api_core past that date.
+  warnings.warn(message, FutureWarning)
+Mon Nov 23 08:00:57 AM EST 2026: Drive URL: https://drive.google.com/uc?export=view&id=19mJ0Yu35OTuYypiZXBBTujU1FcOHnXbf
+Mon Nov 23 08:00:57 AM EST 2026: Posting to LinkedIn...
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"6b04390a433e6368c8a94c5f\",\"allowedActions\":[\"publishPostNow\",\"updatePost\",\"movePostToDraft\",\"publishPostNext\",\"updatePostSchedule\",\"updatePostTags\",\"addPostNote\",\"duplicatePost\",\"deletePost\",\"updateShopGridLink\",\"createPostRecurrence\"],\"status\":\"scheduled\",\"text\":\"Pattern matching: they see bad RFPs daily\\n\\nAI-generated responses all sound the same. Confident, polished, and hollow.\\n\\nEvaluators feel it. They can't quite say why, but they know.\\n\\nHuman insight beats algorithmic fluency every time.\\n\\n#RFPResponse #SalesTips #WinningProposals #B2BSales #GovCon\",\"channelId\":\"6a7f74bcb2d9d577437af9a4\",\"channelService\":\"linkedin\",\"dueAt\":\"2026-11-24T02:41:00.000Z\",\"sentAt\":null,\"schedulingType\":\"automatic\",\"shareMode\":\"addToQueue\",\"sharedNow\":false,\"isCustomScheduled\":false,\"createdAt\":\"2026-11-23T13:00:58.903Z\",\"updatedAt\":\"2026-11-23T13:00:58.934Z\",\"tags\":[],\"assets\":[{\"__typename\":\"ImageAsset\",\"id\":null,\"type\":\"image\",\"mimeType\":\"image/png\",\"source\":\"https://drive.google.com/uc?export=view&id=19mJ0Yu35OTuYypiZXBBTujU1FcOHnXbf\",\"thumbnail\":\"https://drive.google.com/uc?export=view&id=19mJ0Yu35OTuYypiZXBBTujU1FcOHnXbf\",\"image\":{\"width\":2560,\"height\":1440,\"altText\":\"Pattern matching: they see bad RFPs daily\\n\\nAI-generated responses all sound the same. Confident, pol\",\"isAnimated\":false,\"animatedThumbnail\":null,\"userTags\":null}}],\"error\":null,\"metadata\":{\"__typename\":\"LinkedInPostMetadata\",\"type\":\"post\",\"annotations\":[{\"type\":\"hashtag\",\"content\":\"#RFPResponse\",\"indices\":[235,247],\"text\":\"#RFPResponse\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=RFPResponse\"},{\"type\":\"hashtag\",\"content\":\"#SalesTips\",\"indices\":[248,258],\"text\":\"#SalesTips\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=SalesTips\"},{\"type\":\"hashtag\",\"content\":\"#WinningProposals\",\"indices\":[259,276],\"text\":\"#WinningProposals\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=WinningProposals\"},{\"type\":\"hashtag\",\"content\":\"#B2BSales\",\"indices\":[277,286],\"text\":\"#B2BSales\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=B2BSales\"},{\"type\":\"hashtag\",\"content\":\"#GovCon\",\"indices\":[287,294],\"text\":\"#GovCon\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=GovCon\"}],\"firstComment\":null,\"linkAttachment\":null}}"
+      },
+      {
+        "type": "text",
+        "text": "{\"rateLimit\":[{\"remaining\":148,\"resetSeconds\":752},{\"remaining\":577,\"resetSeconds\":46640},{\"remaining\":1433,\"resetSeconds\":1726026}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+Mon Nov 23 08:00:59 AM EST 2026: Posting to Facebook...
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"6b04390b66ef504f455400a5\",\"allowedActions\":[\"publishPostNow\",\"updatePost\",\"movePostToDraft\",\"publishPostNext\",\"updatePostSchedule\",\"updatePostTags\",\"addPostNote\",\"duplicatePost\",\"deletePost\",\"updateShopGridLink\",\"createPostRecurrence\"],\"status\":\"scheduled\",\"text\":\"Pattern matching: they see bad RFPs daily\\n\\nAI-generated responses all sound the same. Confident, polished, and hollow.\\n\\nEvaluators feel it. They can't quite say why, but they know.\\n\\nHuman insight beats algorithmic fluency every time.\\n\\n#RFPResponse #SalesTips #WinningProposals #B2BSales #GovCon\",\"channelId\":\"6a7f7476b2d9d577437af67f\",\"channelService\":\"facebook\",\"dueAt\":\"2026-11-24T12:03:00.000Z\",\"sentAt\":null,\"schedulingType\":\"automatic\",\"shareMode\":\"addToQueue\",\"sharedNow\":false,\"isCustomScheduled\":false,\"createdAt\":\"2026-11-23T13:00:59.430Z\",\"updatedAt\":\"2026-11-23T13:00:59.466Z\",\"tags\":[],\"assets\":[{\"__typename\":\"ImageAsset\",\"id\":null,\"type\":\"image\",\"mimeType\":\"image/png\",\"source\":\"https://drive.google.com/uc?export=view&id=19mJ0Yu35OTuYypiZXBBTujU1FcOHnXbf\",\"thumbnail\":\"https://drive.google.com/uc?export=view&id=19mJ0Yu35OTuYypiZXBBTujU1FcOHnXbf\",\"image\":{\"width\":2560,\"height\":1440,\"altText\":\"Pattern matching: they see bad RFPs daily\\n\\nAI-generated responses all sound the same. Confident, pol\",\"isAnimated\":false,\"animatedThumbnail\":null,\"userTags\":null}}],\"error\":null,\"metadata\":{\"__typename\":\"FacebookPostMetadata\",\"type\":\"post\",\"annotations\":[{\"type\":\"hashtag\",\"content\":\"#RFPResponse\",\"indices\":[235,247],\"text\":\"#RFPResponse\",\"url\":\"https://www.facebook.com/hashtag/RFPResponse\"},{\"type\":\"hashtag\",\"content\":\"#SalesTips\",\"indices\":[248,258],\"text\":\"#SalesTips\",\"url\":\"https://www.facebook.com/hashtag/SalesTips\"},{\"type\":\"hashtag\",\"content\":\"#WinningProposals\",\"indices\":[259,276],\"text\":\"#WinningProposals\",\"url\":\"https://www.facebook.com/hashtag/WinningProposals\"},{\"type\":\"hashtag\",\"content\":\"#B2BSales\",\"indices\":[277,286],\"text\":\"#B2BSales\",\"url\":\"https://www.facebook.com/hashtag/B2BSales\"},{\"type\":\"hashtag\",\"content\":\"#GovCon\",\"indices\":[287,294],\"text\":\"#GovCon\",\"url\":\"https://www.facebook.com/hashtag/GovCon\"}],\"title\":null,\"firstComment\":null,\"linkAttachment\":null}}"
+      },
+      {
+        "type": "text",
+        "text": "{\"rateLimit\":[{\"remaining\":147,\"resetSeconds\":751},{\"remaining\":576,\"resetSeconds\":46638},{\"remaining\":1432,\"resetSeconds\":1726025}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+Mon Nov 23 08:00:59 AM EST 2026: DONE - Posted with expanded content variety
+
+To stop or manage this job, send me a new message (e.g. "stop reminder optirfp-linkedin-daily").

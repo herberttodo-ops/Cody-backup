@@ -425,14 +425,14 @@
     "created_by": "agent",
     "last_patched_at": "2026-10-17T02:12:40.432433+00:00",
     "last_reused_patch_generation": 3,
-    "last_used_at": "2026-10-17T02:12:50.793978+00:00",
-    "last_viewed_at": "2026-10-17T02:12:50.568652+00:00",
+    "last_used_at": "2026-11-23T16:15:41.997229+00:00",
+    "last_viewed_at": "2026-11-23T16:15:41.773913+00:00",
     "patch_count": 3,
     "patch_generation": 3,
     "pinned": false,
     "state": "stale",
-    "use_count": 12,
-    "view_count": 12
+    "use_count": 13,
+    "view_count": 13
   },
   "cost-optimization": {
     "archived_at": null,
@@ -1175,13 +1175,15 @@
     "created_at": "2026-09-01T18:32:24.261874+00:00",
     "created_by": "agent",
     "last_patched_at": "2026-09-12T19:28:43.559124+00:00",
-    "last_used_at": "2026-09-13T13:43:54.667387+00:00",
-    "last_viewed_at": "2026-09-13T13:43:54.414521+00:00",
+    "last_reused_patch_generation": 0,
+    "last_used_at": "2026-11-23T16:15:12.892496+00:00",
+    "last_viewed_at": "2026-11-23T16:15:12.566316+00:00",
     "patch_count": 11,
+    "patch_generation": 0,
     "pinned": false,
     "state": "stale",
-    "use_count": 21,
-    "view_count": 21
+    "use_count": 22,
+    "view_count": 22
   },
   "opencode": {
     "archived_at": "2026-11-10T23:11:38.751841+00:00",
@@ -1565,14 +1567,14 @@
     "created_by": null,
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-11-22T23:24:15.285522+00:00",
-    "last_viewed_at": "2026-11-22T23:24:15.221822+00:00",
+    "last_used_at": "2026-11-23T21:00:47.552610+00:00",
+    "last_viewed_at": "2026-11-23T16:16:01.052695+00:00",
     "patch_count": 0,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 56,
-    "view_count": 8
+    "use_count": 63,
+    "view_count": 12
   },
   "tales-untold-video-creator": {
     "archived_at": null,
@@ -1671,16 +1673,16 @@
     "archived_at": null,
     "created_at": "2026-09-16T11:33:36.119965+00:00",
     "created_by": "agent",
-    "last_patched_at": "2026-11-22T23:26:30.499974+00:00",
-    "last_reused_patch_generation": 18,
-    "last_used_at": "2026-11-22T23:24:24.495707+00:00",
-    "last_viewed_at": "2026-11-22T23:24:24.160867+00:00",
-    "patch_count": 20,
-    "patch_generation": 20,
+    "last_patched_at": "2026-11-23T15:46:34.830035+00:00",
+    "last_reused_patch_generation": 21,
+    "last_used_at": "2026-11-23T16:16:01.161083+00:00",
+    "last_viewed_at": "2026-11-23T16:16:00.944058+00:00",
+    "patch_count": 21,
+    "patch_generation": 21,
     "pinned": false,
     "state": "active",
-    "use_count": 80,
-    "view_count": 80
+    "use_count": 83,
+    "view_count": 83
   },
   "wan-short-drama-studio": {
     "archived_at": null,
@@ -1804,6 +1806,21 @@
     "state": "archived",
     "use_count": 1,
     "view_count": 1
+  },
+  "youtube-channel-management": {
+    "archived_at": null,
+    "created_at": "2026-11-23T16:22:57.382247+00:00",
+    "created_by": "agent",
+    "last_patched_at": "2026-11-23T16:24:01.387433+00:00",
+    "last_reused_patch_generation": 0,
+    "last_used_at": null,
+    "last_viewed_at": null,
+    "patch_count": 1,
+    "patch_generation": 1,
+    "pinned": false,
+    "state": "active",
+    "use_count": 0,
+    "view_count": 0
   },
   "youtube-channel-strategy": {
     "archived_at": null,
