@@ -1,0 +1,55 @@
+Cronjob Response: optirfp-linkedin-daily
+(job_id: d0ba9894a668)
+-------------
+
+Headline: Familiarity breeds confidence
+Topic: mirror-language
+Content library: 43 headlines, 12 templates
+Generated at: 2026-11-24T08:00:05.439049
+Tue Nov 24 08:00:05 AM EST 2026: Starting OptiRFP daily post v2.0 (expanded content)...
+Tue Nov 24 08:00:05 AM EST 2026: Generated headline: Familiarity breeds confidence
+Tue Nov 24 08:00:05 AM EST 2026: Topic: mirror-language
+Tue Nov 24 08:00:05 AM EST 2026: Using expanded content library v2.0
+Tue Nov 24 08:00:05 AM EST 2026: Generating image with compositor...
+Tue Nov 24 08:00:18 AM EST 2026: Image generated: /home/herby/.hermes/generated_images/optirfp_mirror-language____ID___.png
+Tue Nov 24 08:00:18 AM EST 2026: Uploading to Drive...
+/home/herby/.hermes/hermes-agent/venv/lib/python3.11/site-packages/google/api_core/_python_version_support.py:273: FutureWarning: You are using a Python version (3.11.16) which Google will stop supporting in new releases of google.api_core once it reaches its end of life (2027-10-24). Please upgrade to the latest Python version, or at least Python 3.12, to continue receiving updates for google.api_core past that date.
+  warnings.warn(message, FutureWarning)
+Tue Nov 24 08:00:22 AM EST 2026: Drive URL: https://drive.google.com/uc?export=view&id=1TQh9P7ccHYZ-8zGE6DZCVk_K2BtYFwxm
+Tue Nov 24 08:00:22 AM EST 2026: Posting to LinkedIn...
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"6b058a68c28ada28578adad0\",\"allowedActions\":[\"publishPostNow\",\"updatePost\",\"movePostToDraft\",\"publishPostNext\",\"updatePostSchedule\",\"updatePostTags\",\"addPostNote\",\"duplicatePost\",\"deletePost\",\"updateShopGridLink\",\"createPostRecurrence\"],\"status\":\"scheduled\",\"text\":\"Familiarity breeds confidence\\n\\nYour evaluator has 20 proposals and 2 hours.\\n\\nThey're not reading. They're scanning. They're pattern-matching. They're deciding.\\n\\nMake the decision easy. Put the win where they'll see it first.\\n\\n#RFPResponse #GovTech #B2B #SalesStrategy #ProposalTips\",\"channelId\":\"6a7f74bcb2d9d577437af9a4\",\"channelService\":\"linkedin\",\"dueAt\":\"2026-11-25T02:10:00.000Z\",\"sentAt\":null,\"schedulingType\":\"automatic\",\"shareMode\":\"addToQueue\",\"sharedNow\":false,\"isCustomScheduled\":false,\"createdAt\":\"2026-11-24T13:00:23.423Z\",\"updatedAt\":\"2026-11-24T13:00:24.927Z\",\"tags\":[],\"assets\":[{\"__typename\":\"ImageAsset\",\"id\":null,\"type\":\"image\",\"mimeType\":\"image/png\",\"source\":\"https://drive.google.com/uc?export=view&id=1TQh9P7ccHYZ-8zGE6DZCVk_K2BtYFwxm\",\"thumbnail\":\"https://drive.google.com/uc?export=view&id=1TQh9P7ccHYZ-8zGE6DZCVk_K2BtYFwxm\",\"image\":{\"width\":2560,\"height\":1440,\"altText\":\"Familiarity breeds confidence\\n\\nYour evaluator has 20 proposals and 2 hours.\\n\\nThey're not reading. Th\",\"isAnimated\":false,\"animatedThumbnail\":null,\"userTags\":null}}],\"error\":null,\"metadata\":{\"__typename\":\"LinkedInPostMetadata\",\"type\":\"post\",\"annotations\":[{\"type\":\"hashtag\",\"content\":\"#RFPResponse\",\"indices\":[226,238],\"text\":\"#RFPResponse\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=RFPResponse\"},{\"type\":\"hashtag\",\"content\":\"#GovTech\",\"indices\":[239,247],\"text\":\"#GovTech\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=GovTech\"},{\"type\":\"hashtag\",\"content\":\"#B2B\",\"indices\":[248,252],\"text\":\"#B2B\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=B2B\"},{\"type\":\"hashtag\",\"content\":\"#SalesStrategy\",\"indices\":[253,267],\"text\":\"#SalesStrategy\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=SalesStrategy\"},{\"type\":\"hashtag\",\"content\":\"#ProposalTips\",\"indices\":[268,281],\"text\":\"#ProposalTips\",\"url\":\"https://www.linkedin.com/feed/hashtag/?keywords=ProposalTips\"}],\"firstComment\":null,\"linkAttachment\":null}}"
+      },
+      {
+        "type": "text",
+        "text": "{\"rateLimit\":[{\"remaining\":149,\"resetSeconds\":900},{\"remaining\":580,\"resetSeconds\":48482},{\"remaining\":1389,\"resetSeconds\":1639662}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+Tue Nov 24 08:00:25 AM EST 2026: Posting to Facebook...
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"6b058a6949097c7ae50819b5\",\"allowedActions\":[\"publishPostNow\",\"updatePost\",\"movePostToDraft\",\"publishPostNext\",\"updatePostSchedule\",\"updatePostTags\",\"addPostNote\",\"duplicatePost\",\"deletePost\",\"updateShopGridLink\",\"createPostRecurrence\"],\"status\":\"scheduled\",\"text\":\"Familiarity breeds confidence\\n\\nYour evaluator has 20 proposals and 2 hours.\\n\\nThey're not reading. They're scanning. They're pattern-matching. They're deciding.\\n\\nMake the decision easy. Put the win where they'll see it first.\\n\\n#RFPResponse #GovTech #B2B #SalesStrategy #ProposalTips\",\"channelId\":\"6a7f7476b2d9d577437af67f\",\"channelService\":\"facebook\",\"dueAt\":\"2026-11-24T13:19:00.000Z\",\"sentAt\":null,\"schedulingType\":\"automatic\",\"shareMode\":\"addToQueue\",\"sharedNow\":false,\"isCustomScheduled\":false,\"createdAt\":\"2026-11-24T13:00:25.548Z\",\"updatedAt\":\"2026-11-24T13:00:25.596Z\",\"tags\":[],\"assets\":[{\"__typename\":\"ImageAsset\",\"id\":null,\"type\":\"image\",\"mimeType\":\"image/png\",\"source\":\"https://drive.google.com/uc?export=view&id=1TQh9P7ccHYZ-8zGE6DZCVk_K2BtYFwxm\",\"thumbnail\":\"https://drive.google.com/uc?export=view&id=1TQh9P7ccHYZ-8zGE6DZCVk_K2BtYFwxm\",\"image\":{\"width\":2560,\"height\":1440,\"altText\":\"Familiarity breeds confidence\\n\\nYour evaluator has 20 proposals and 2 hours.\\n\\nThey're not reading. Th\",\"isAnimated\":false,\"animatedThumbnail\":null,\"userTags\":null}}],\"error\":null,\"metadata\":{\"__typename\":\"FacebookPostMetadata\",\"type\":\"post\",\"annotations\":[{\"type\":\"hashtag\",\"content\":\"#RFPResponse\",\"indices\":[226,238],\"text\":\"#RFPResponse\",\"url\":\"https://www.facebook.com/hashtag/RFPResponse\"},{\"type\":\"hashtag\",\"content\":\"#GovTech\",\"indices\":[239,247],\"text\":\"#GovTech\",\"url\":\"https://www.facebook.com/hashtag/GovTech\"},{\"type\":\"hashtag\",\"content\":\"#B2B\",\"indices\":[248,252],\"text\":\"#B2B\",\"url\":\"https://www.facebook.com/hashtag/B2B\"},{\"type\":\"hashtag\",\"content\":\"#SalesStrategy\",\"indices\":[253,267],\"text\":\"#SalesStrategy\",\"url\":\"https://www.facebook.com/hashtag/SalesStrategy\"},{\"type\":\"hashtag\",\"content\":\"#ProposalTips\",\"indices\":[268,281],\"text\":\"#ProposalTips\",\"url\":\"https://www.facebook.com/hashtag/ProposalTips\"}],\"title\":null,\"firstComment\":null,\"linkAttachment\":null}}"
+      },
+      {
+        "type": "text",
+        "text": "{\"rateLimit\":[{\"remaining\":148,\"resetSeconds\":898},{\"remaining\":579,\"resetSeconds\":48479},{\"remaining\":1388,\"resetSeconds\":1639659}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}
+Tue Nov 24 08:00:25 AM EST 2026: DONE - Posted with expanded content variety
+
+To stop or manage this job, send me a new message (e.g. "stop reminder optirfp-linkedin-daily").
