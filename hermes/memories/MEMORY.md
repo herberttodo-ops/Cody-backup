@@ -2,8 +2,6 @@ Andrew (name: Herby): visually meticulous, spots brand/graphics artifacts immedi
 §
 OBSIDIAN: Vault at ~/Documents/Obsidian Vault (Index, OptiRFP, TLC Rescue, Rival Productions, Brand Guidelines, daily notes). Use obsidian skill.
 §
-Skills USER-OWNED, need `hermes curator adopt`. Buffer caps scheduled posts at 10 total account-wide; refill crons must check remaining budget. Andrew wants zero-manual-step autonomy but prefers waiting for natural resolution (posts publishing, credits refreshing) over upgrading plans/bumping existing posts when blocked.
-§
 Andrew: explicit instructions (e.g. "publish to YouTube now") must be done exactly; if blocked, say so BEFORE reporting success; scheduled/private is not "published". Expects verification before assumptions
 §
 LotSignal social: dealers (Owner/GM). LinkedIn 10am, IG 12:30pm, FB 2pm ET. Rotation Mon stat, Tue insight, Wed tip, Thu stat, Fri insight, Sat tip, Sun rest.
@@ -15,3 +13,5 @@ TALES UNTOLD: before ANY Tales task load skill tales-untold-operations + vault A
 Tales analytics: Andrew wants live data before any 'working' claim. Public: yt-dlp. Private: OAuth token or Composio YOUTUBE_QUERY_ANALYTICS (--account youtube_trader-relink). No CTR/impressions. Open to creepypasta/non-folklore stories.
 §
 POYO Wan 3.0 Prime: IDs wan3.0-prime-{text,image,reference}-to-video. Client tales-untold/poyo_wan_client.py. 1000 credits=$5. Filter blocks broken-anatomy prompts; use keyframe+static i2v. Review videos go to Drive folder 'Wan Tests - The Chicken Legs'.
+§
+Skill install from GitHub: when `hermes skills install owner/repo/path` fails, prefer git clone + manual copy to ~/.hermes/skills/. BUT check for existing installations first (hermes skills list, ls ~/.hermes/skills/) to avoid version conflicts. Look for version strings in SKILL.md to determine which is newer.
